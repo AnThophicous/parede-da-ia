@@ -1,0 +1,62 @@
+{
+  "name": "parede-da-ia",
+  "version": "0.1.0",
+  "description": "Rootkit de inspeção web + motor de direção de arte para agentes de IA. Playwright + FFmpeg.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Brenno Leon (https://github.com/AnThophicous)",
+  "homepage": "https://anthophicous.github.io/parede-da-ia/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnThophicous/parede-da-ia.git",
+    "directory": "toolkit"
+  },
+  "keywords": [
+    "ai-agents",
+    "claude-code",
+    "playwright",
+    "ffmpeg",
+    "frontend-design",
+    "web-scraping",
+    "design-engineering",
+    "mcp"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "bin": {
+    "parede": "bin/parede.js",
+    "parede-mcp": "bin/parede-mcp.js",
+    "web-url-fetch": "bin/web-url-fetch.js",
+    "web-wait-page-load": "bin/web-wait-page-load.js",
+    "web-wait": "bin/web-wait.js",
+    "web-control": "bin/web-control.js",
+    "web-record-frames": "bin/web-record-frames.js",
+    "web-screenshot": "bin/web-screenshot.js",
+    "web-scrap": "bin/web-scrap.js",
+    "web-close": "bin/web-close.js",
+    "web-serve": "bin/web-serve.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "browsers": "playwright install chromium",
+    "doctor": "node bin/parede.js doctor",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.64.0"
+  },
+  "optionalDependencies": {
+    "ffmpeg-static": "5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "5.9.3"
+  }
+}
