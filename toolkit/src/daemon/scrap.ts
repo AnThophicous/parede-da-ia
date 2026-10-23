@@ -196,7 +196,9 @@ export async function scrap(m: BrowserManager, maxElements: number) {
   }
   for (const family of googleFamilies) touch(family).sources.add('Google Fonts');
 
-  const usedShare = new Map(dom.typography.used.map((u) => [u.family, u.share]));
+  // O uso vem por família+peso: soma os pesos para obter a participação da família.
+  const usedShare = new Map<string, number>();
+  for (const u of dom.typography.used) usedShare.set(u.family, Math.round(((usedShare.get(u.family) ?? 0) + u.share) * 10) / 10);
   const fonts = {
     providers: [...providers],
     families: [...families.entries()].map(([family, v]) => ({

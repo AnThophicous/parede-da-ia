@@ -560,7 +560,7 @@ export function scanPage(opts: ScanOptions) {
     },
     contrast: { checked: contrastChecked, failures: contrastIssues.length, issues: contrastIssues },
     typography: {
-      used: top(fontsUsed, 10).map((f) => ({ family: f.value.split('|')[0], weight: f.value.split('|')[1], share: f.share })),
+      used: top(fontsUsed, 24).map((f) => ({ family: f.value.split('|')[0], weight: f.value.split('|')[1], share: f.share })),
       scale: typeScale,
       fontFaces,
       loadedFaces: loadedFaces.slice(0, 60),
