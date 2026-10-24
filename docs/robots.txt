@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://anthophicous.github.io/parede-da-ia/sitemap.xml
