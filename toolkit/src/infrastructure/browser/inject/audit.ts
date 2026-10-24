@@ -62,7 +62,12 @@ export function auditChecks(o: AuditChecksInput) {
     for (const el of Array.from(doc.querySelectorAll('body *')).slice(0, 4000)) {
       const own = Array.from(el.childNodes).some((n) => n.nodeType === 3 && (n.textContent ?? '').trim().length > 3);
       if (!own || !visible(el)) continue;
-      const size = parseFloat(getComputedStyle(el).fontSize);
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      // Texto em SVG: o font-size está em unidades do viewBox; o tamanho real é × a escala na tela.
+      if (el instanceof SVGGraphicsElement) {
+        const m = el.getScreenCTM();
+        if (m) size = Math.round(size * Math.hypot(m.a, m.b) * 10) / 10;
+      }
       if (size < o.mobileTextMin) smallText.push(`${label(el)} (${size}px)`);
     }
   }

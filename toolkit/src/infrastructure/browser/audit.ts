@@ -20,6 +20,9 @@ const settle = () => sleep(650);
 export async function runAudit(m: BrowserManager, p: AuditParams): Promise<AuditReport> {
   const page = m.requirePage();
   const original = page.viewportSize();
+  // Vitals da carga lidos antes de qualquer troca de viewport: o resize gera layout shift e
+  // long tasks (ResizeObserver, canvases) que não são da página carregando e inflariam o CLS.
+  const perf = await perfSnapshot(m);
   const issues: AuditIssue[] = [];
   const push = (issue: Omit<AuditIssue, 'targets'> & { targets?: string[] }) => issues.push({ targets: [], ...issue });
   const viewports: ViewportAudit[] = [];
@@ -70,8 +73,11 @@ export async function runAudit(m: BrowserManager, p: AuditParams): Promise<Audit
   if (unsure.length) push({ id: 'contrast-unsure', category: 'acessibilidade', severity: 'info', viewport: 'desktop', message: `${unsure.length} texto(s) sobre imagem/vídeo/WebGL para conferir visualmente`, targets: unsure.slice(0, 6).map((i) => i.selector) });
 
   // Foco visível: Tab real, compara o elemento focado com ele mesmo sem foco.
+  // Transições desligadas durante a sonda: com `transition-all`, ler o estilo no instante em que
+  // a transição começa devolve o valor de partida e acusaria falta de foco (falso positivo).
   const missingFocus: string[] = [];
   let focused = 0;
+  const noTransitions = await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; }' }).catch(() => null);
   await page.mouse.click(2, 2).catch(() => undefined);
   for (let i = 0; i < p.focusSteps; i++) {
     await page.keyboard.press('Tab');
@@ -93,6 +99,7 @@ export async function runAudit(m: BrowserManager, p: AuditParams): Promise<Audit
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');
   }
+  await noTransitions?.evaluate((el) => (el as Element).remove()).catch(() => undefined);
   if (focused === 0) push({ id: 'no-focusable', category: 'acessibilidade', severity: 'aviso', viewport: 'desktop', message: 'Tab não alcançou nenhum elemento (foco preso ou sem interativos)' });
   if (missingFocus.length) push({ id: 'focus-visible', category: 'acessibilidade', severity: 'erro', viewport: 'desktop', message: `${missingFocus.length} elemento(s) sem indicador de foco visível`, targets: [...new Set(missingFocus)] });
 
@@ -103,8 +110,7 @@ export async function runAudit(m: BrowserManager, p: AuditParams): Promise<Audit
     push({ id: 'reduced-motion', category: 'movimento', severity: 'aviso', viewport: 'todos', message: `há movimento (${motion.libraries.join(', ') || `${motion.running.total} animações`}) mas nenhuma regra prefers-reduced-motion foi encontrada` });
   }
 
-  // Performance: Web Vitals + orçamento de peso.
-  const perf = await perfSnapshot(m);
+  // Performance: Web Vitals (lidos no início) + orçamento de peso.
   const totalBytes = m.network.reduce((n, e) => n + (e.bytes ?? 0), 0);
   const jsBytes = m.network.filter((e) => e.type === 'script').reduce((n, e) => n + (e.bytes ?? 0), 0);
   const fontFiles = m.network.filter((e) => e.type === 'font').length;
