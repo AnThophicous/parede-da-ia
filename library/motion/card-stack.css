@@ -1,0 +1,39 @@
+/* ==========================================================================
+   parede-da-ia · card stack (seção que vira card e se afasta revelando a próxima)
+   Visto no portfólio "sarah.": o canvas claro encolhe, arredonda e escurece ao rolar.
+   Puro CSS com scroll-driven animations; navegadores sem suporte ficam estáticos (ok).
+
+   <section class="stack-card">…</section>
+   <section class="stack-next">…</section>
+   ========================================================================== */
+
+.stack-card {
+  position: sticky;
+  top: 0;
+  transform-origin: 50% 0%;
+  will-change: transform;
+}
+
+@supports (animation-timeline: view()) {
+  .stack-card {
+    animation: stack-away linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 100%;
+  }
+  @keyframes stack-away {
+    to {
+      transform: scale(0.88) translateY(-4%);
+      border-radius: 32px;
+      filter: brightness(0.55) saturate(0.9);
+    }
+  }
+}
+
+.stack-next {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-card { animation: none; position: relative; }
+}

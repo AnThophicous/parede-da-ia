@@ -1,0 +1,138 @@
+/* ==========================================================================
+   parede-da-ia · biblioteca de blurs
+   12 tipos de gradiente (taxonomia popularizada pelo Awwwards), agnósticos de paleta.
+   Uso:  <div class="blur blur--irregular" style="--c1:#050816;--c2:#1b2a63;--c3:#ff6a1a;--c4:#ffb36b"></div>
+   Cores interpoladas em OKLab/OKLCH para evitar o "cinza lamacento" entre complementares.
+   ========================================================================== */
+
+.blur {
+  --c1: #050816; /* fundo / sombra */
+  --c2: #1b2a63; /* meio frio */
+  --c3: #ff6a1a; /* acento quente */
+  --c4: #ffb36b; /* luz */
+  --soft: 28px;  /* raio do desfoque */
+  --grain: 0.09; /* opacidade do grão */
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--c1);
+}
+.blur::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  filter: blur(var(--soft));
+  background: var(--paint);
+}
+/* grão: esconde banding e dá materialidade */
+.blur::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 1. Irregular — manchas orgânicas assimétricas */
+.blur--irregular {
+  --paint:
+    radial-gradient(38% 46% at 28% 58% in oklab, var(--c3), transparent 70%),
+    radial-gradient(30% 40% at 72% 30% in oklab, var(--c4), transparent 72%),
+    radial-gradient(45% 50% at 64% 78% in oklab, var(--c2), transparent 70%),
+    radial-gradient(60% 60% at 40% 20% in oklab, var(--c2), transparent 75%);
+}
+
+/* 2. Radial Ramp — anéis concêntricos a partir de um foco */
+.blur--radial-ramp {
+  --soft: 6px;
+  --paint: radial-gradient(circle at 50% 108% in oklab, var(--c1) 0%, var(--c2) 18%, var(--c3) 42%, var(--c4) 62%, var(--c2) 88%);
+}
+
+/* 3. Blurred — duas cores fundidas com um brilho */
+.blur--blurred {
+  --soft: 40px;
+  --paint:
+    radial-gradient(30% 30% at 82% 18% in oklab, color-mix(in oklab, var(--c4) 70%, white), transparent 70%),
+    linear-gradient(135deg in oklch, var(--c3) 0%, var(--c2) 100%);
+}
+
+/* 4. Edgy — manchas com bordas mais nítidas e contraste */
+.blur--edgy {
+  --soft: 8px;
+  --paint:
+    radial-gradient(35% 32% at 62% 46% in oklab, var(--c4) 0 55%, transparent 60%),
+    radial-gradient(42% 40% at 34% 40% in oklab, var(--c3) 0 50%, transparent 58%),
+    conic-gradient(from 210deg at 50% 50% in oklch, var(--c2), var(--c1), var(--c2));
+}
+
+/* 5. Landscape — faixas horizontais tipo horizonte */
+.blur--landscape {
+  --soft: 10px;
+  --paint: linear-gradient(180deg in oklab, var(--c4) 0%, var(--c3) 32%, var(--c4) 44%, var(--c2) 60%, var(--c1) 100%);
+}
+
+/* 6. Multicolor — diagonal com ilhas de luz */
+.blur--multicolor {
+  --paint:
+    radial-gradient(40% 40% at 20% 30% in oklab, var(--c4), transparent 70%),
+    radial-gradient(45% 45% at 85% 20% in oklab, var(--c2), transparent 70%),
+    linear-gradient(160deg in oklch, var(--c3) 10%, var(--c2) 60%, var(--c1) 100%);
+}
+
+/* 7. Retro — diagonal de espectro com paradas firmes */
+.blur--retro {
+  --soft: 4px;
+  --paint: linear-gradient(120deg in oklch longer hue, var(--c4) 0%, var(--c3) 35%, var(--c2) 70%, var(--c4) 100%);
+}
+
+/* 8. Duotone — duas cores, transição longa */
+.blur--duotone {
+  --soft: 0px;
+  --paint: linear-gradient(135deg in oklch, var(--c4) 0%, var(--c3) 100%);
+}
+
+/* 9. Tricolor — três manchas que se encontram */
+.blur--tricolor {
+  --paint:
+    radial-gradient(55% 55% at 25% 30% in oklab, var(--c2), transparent 70%),
+    radial-gradient(55% 55% at 75% 30% in oklab, var(--c3), transparent 70%),
+    radial-gradient(60% 55% at 50% 85% in oklab, var(--c4), transparent 70%);
+}
+
+/* 10. Volume Mesh — esfera iluminada (volume) */
+.blur--volume-mesh {
+  --soft: 2px;
+  --paint: radial-gradient(circle at 32% 30% in oklab, color-mix(in oklab, var(--c4) 60%, white) 0%, var(--c3) 32%, var(--c2) 68%, var(--c1) 100%);
+}
+
+/* 11. Banding — degraus visíveis (estética de gráfica/8-bit) */
+.blur--banding {
+  --soft: 0px;
+  --grain: 0;
+  --paint: linear-gradient(180deg,
+    var(--c4) 0 12.5%, color-mix(in oklab, var(--c4), var(--c3) 33%) 12.5% 25%,
+    color-mix(in oklab, var(--c4), var(--c3) 66%) 25% 37.5%, var(--c3) 37.5% 50%,
+    color-mix(in oklab, var(--c3), var(--c2) 33%) 50% 62.5%, color-mix(in oklab, var(--c3), var(--c2) 66%) 62.5% 75%,
+    var(--c2) 75% 87.5%, var(--c1) 87.5% 100%);
+}
+
+/* 12. Gradient / Image — imagem tingida pelo campo (defina --image) */
+.blur--image {
+  --soft: 0px;
+  --paint: linear-gradient(140deg in oklch, color-mix(in oklab, var(--c3) 75%, transparent), color-mix(in oklab, var(--c2) 75%, transparent)), var(--image, none) center / cover;
+}
+.blur--image::before { background-blend-mode: color, normal; }
+
+/* Campo animado leve (sem WebGL): desloca as manchas devagar */
+.blur--drift::before { animation: blur-drift 18s ease-in-out infinite alternate; }
+@keyframes blur-drift {
+  50% { transform: translate3d(4%, -3%, 0) rotate(6deg) scale(1.05); }
+  100% { transform: translate3d(-3%, 4%, 0) rotate(-4deg) scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blur--drift::before { animation: none; }
+}

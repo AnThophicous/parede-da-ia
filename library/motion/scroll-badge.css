@@ -1,0 +1,40 @@
+/* ==========================================================================
+   parede-da-ia · selo circular "role ·" (gradiente-atmosferico / editorial)
+   Texto em círculo girando devagar; acelera com o scroll se --scroll-velocity for atualizada.
+
+   <div class="scroll-badge" aria-hidden="true">
+     <svg viewBox="0 0 120 120"><defs><path id="badge-circle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
+       <text><textPath href="#badge-circle">role · role · role · role ·</textPath></text></svg>
+     <span class="scroll-badge__core"></span>
+   </div>
+   ========================================================================== */
+
+.scroll-badge {
+  --size: 96px;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  color: currentColor;
+}
+.scroll-badge svg {
+  width: 100%;
+  height: 100%;
+  animation: badge-spin 14s linear infinite;
+}
+.scroll-badge text {
+  fill: currentColor;
+  font: 500 10.5px/1 ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.scroll-badge__core {
+  position: absolute;
+  inset: 38%;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+@keyframes badge-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-badge svg { animation: none; }
+}

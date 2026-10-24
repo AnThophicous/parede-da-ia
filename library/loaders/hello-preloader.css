@@ -1,0 +1,45 @@
+/* ==========================================================================
+   parede-da-ia · pre-loader "olá" com blob desfocado (gradiente-atmosferico)
+   Homenagem ao padrão "hello <cidade>": saudação curta sobre um campo de cor respirando.
+   Regra: ≤ 1,8s; some sozinho mesmo sem JS (animação de saída com atraso).
+
+   <div class="hello" aria-hidden="true"><div class="hello__blob"></div><p class="hello__word">olá, <em>agente</em></p></div>
+   ========================================================================== */
+
+.hello {
+  --hello-bg: #050816;
+  --hello-a: #ff6a1a;
+  --hello-b: #3a5bff;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--hello-bg);
+  animation: hello-out 0.9s cubic-bezier(0.76, 0, 0.24, 1) 1.5s forwards;
+}
+.hello__blob {
+  position: absolute;
+  width: min(60vw, 640px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40% in oklab, var(--hello-a), transparent 60%), radial-gradient(circle at 65% 65% in oklab, var(--hello-b), transparent 62%);
+  filter: blur(60px);
+  opacity: 0.75;
+  animation: hello-breathe 3s ease-in-out infinite alternate;
+}
+.hello__word {
+  position: relative;
+  margin: 0;
+  color: #f4efe6;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+.hello__word em { font-style: italic; }
+@keyframes hello-breathe { to { transform: scale(1.12) rotate(18deg); } }
+@keyframes hello-out { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hello { display: none; }
+}
