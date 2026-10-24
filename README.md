@@ -1,39 +1,44 @@
 <p align="center">
-  <a href="https://anthophicous.github.io/parede-da-ia/"><img src="docs/assets/og.png" alt="parede-da-ia" width="100%"></a>
+  <a href="https://anthophicous.github.io/parede-da-ia/"><img src="site/public/og.jpg" alt="parede-da-ia — dê olhos, mãos e repertório ao seu agente" width="100%"></a>
 </p>
 
 <p align="center">
-  <a href="https://anthophicous.github.io/parede-da-ia/"><img alt="site" src="https://img.shields.io/badge/site-parede--da--ia-000?style=flat-square&labelColor=fff"></a>
-  <a href="LICENSE"><img alt="licença MIT" src="https://img.shields.io/badge/licen%C3%A7a-MIT-000?style=flat-square&labelColor=fff"></a>
-  <img alt="Playwright" src="https://img.shields.io/badge/playwright-1.64-000?style=flat-square&labelColor=fff">
-  <img alt="FFmpeg" src="https://img.shields.io/badge/ffmpeg-spritesheet%20%2B%20mp4-000?style=flat-square&labelColor=fff">
-  <img alt="MCP" src="https://img.shields.io/badge/mcp-stdio-000?style=flat-square&labelColor=fff">
-  <img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A518.17-000?style=flat-square&labelColor=fff">
+  <a href="https://anthophicous.github.io/parede-da-ia/"><img alt="site" src="https://img.shields.io/badge/site-parede--da--ia-ff6a1a?style=flat-square&labelColor=050816"></a>
+  <img alt="versão 0.2" src="https://img.shields.io/badge/vers%C3%A3o-0.2-ff6a1a?style=flat-square&labelColor=050816">
+  <a href="LICENSE"><img alt="licença MIT" src="https://img.shields.io/badge/licen%C3%A7a-MIT-ff6a1a?style=flat-square&labelColor=050816"></a>
+  <img alt="Playwright" src="https://img.shields.io/badge/playwright-1.64-ff6a1a?style=flat-square&labelColor=050816">
+  <img alt="FFmpeg" src="https://img.shields.io/badge/ffmpeg-spritesheet%20%2B%20mp4-ff6a1a?style=flat-square&labelColor=050816">
+  <img alt="MCP" src="https://img.shields.io/badge/mcp-stdio-ff6a1a?style=flat-square&labelColor=050816">
+  <img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A518.17-ff6a1a?style=flat-square&labelColor=050816">
 </p>
 
 <h3 align="center">Olhos, mãos e repertório para agentes de IA.</h3>
 
 <p align="center">
-  Rootkit de inspeção web + motor de direção de arte que transforma <b>Claude Code</b>, <b>Codex</b>,
-  <b>OpenCode</b> (e qualquer CLI agêntica) em críticos de design e engenheiros front-end nível Awwwards.
+  Skill open-source que transforma <b>Claude Code</b>, <b>Codex</b>, <b>OpenCode</b>, <b>Cursor</b>
+  (e qualquer CLI agêntica) em diretores de arte e engenheiros front-end que <b>veem</b> o que constroem.
 </p>
 
 ---
 
 ## Por quê
 
-Agentes de IA escrevem front-end sem nunca ver o que construíram. Eles não sentem o scroll, não
-medem o contraste, não percebem o pre-loader travado nem o botão que quebra no mobile.
+Agentes de IA escrevem interface sem nunca ver a tela. Não sentem o scroll, não medem o contraste,
+não percebem o pre-loader travado nem o botão que quebra no mobile — e por isso entregam o
+template médio e dizem "pronto" sem ter testado.
 
-O **parede-da-ia** resolve isso em duas camadas:
+O **parede-da-ia** resolve isso em três camadas:
 
-1. **Toolkit (`/toolkit`)** — comandos `web-*` sobre **Playwright + FFmpeg** para o agente abrir,
-   rolar, clicar, gravar frames, tirar screenshots e dissecar qualquer site (stack, fontes, paleta,
-   shaders, contraste, rede).
-2. **Router de prompts (`/prompts`)** — em vez de um prompt monolítico, um despachante que carrega
-   sob demanda só os módulos necessários, destilados de **10 livros clássicos** de engenharia e design.
+1. **Toolkit (`/toolkit`)** — 16 comandos (`web-*` e `media-frames`) sobre **Playwright + FFmpeg** para o agente abrir,
+   rolar, clicar, arrastar, gravar frames, medir movimento e microinterações, auditar e dissecar
+   qualquer site (stack, fontes, paleta, shaders, contraste, rede).
+2. **Router de prompts (`/prompts`)** — um despachante que identifica a tarefa e o **arquétipo** do
+   projeto (corporativo, pessoal ou ambicioso) e carrega sob demanda só o necessário: **23 livros**
+   destilados, **7 estéticas** com playbooks medidos em sites reais, workflows e templates.
+3. **Library (`/library`)** — receitas de efeitos prontas para usar e adaptar: Hover Font, text
+   morph de partículas, magnético, rastro de pixels, canvas arrastável, campo de gradiente.
 
-## Instalação em 1 comando
+## Instalação em 1 prompt
 
 Cole no seu agente (Claude Code, Codex, OpenCode, Cursor, Windsurf, Gemini CLI):
 
@@ -51,77 +56,91 @@ No final, mostre o resultado do `parede doctor` e em quais agentes o router foi 
 ```bash
 git clone --depth 1 https://github.com/AnThophicous/parede-da-ia.git ~/.parede-da-ia
 cd ~/.parede-da-ia/toolkit && npm install && npx playwright install chromium
-npm link                       # coloca web-* e parede no PATH
+npm link                       # coloca web-*, media-frames e parede no PATH
 parede setup --agent auto      # registra o router no Claude Code / Codex / OpenCode / Gemini / Windsurf
 parede doctor
 ```
 
-Passo a passo completo (inclui FFmpeg, MCP e troubleshooting): [`doc.md`](doc.md).
+Passo a passo completo (inclui FFmpeg, MCP, atualização e troubleshooting): [`doc.md`](doc.md).
 </details>
 
-## Arquitetura
+## Como funciona
 
 ```mermaid
 flowchart LR
     U([Pedido do usuário]) --> R[prompts/router.md]
-    R -->|classifica a intenção| W{{workflows/}}
-    R -->|carrega sob demanda| K[(knowledge-base/<br/>10 módulos)]
-    W --> FM[frontend-master.md<br/>elicitação + QA visual]
-    W --> RT[reference-teardown.md]
+    R -->|intenção + arquétipo| A{corporativo · pessoal · ambicioso}
+    A -->|corporativo| CB[corporate-briefing<br/>briefing + estética + perguntas]
+    A -->|pessoal / ambicioso| CD[creative-direction]
+    CB --> FM[frontend-master<br/>construir → verificar → entregar]
+    CD --> FM
+    R -->|carrega sob demanda| K[(23 livros)]
+    R -->|1 família| E[(7 estéticas)]
+    FM --> L[(library/<br/>receitas de efeitos)]
     FM --> T
-    RT --> T
     subgraph T [toolkit · daemon Playwright]
       direction TB
-      F[web-url-fetch] --> L[web-wait-page-load / web-wait]
-      L --> C[web-control]
-      L --> S[web-screenshot]
-      L --> X[web-scrap]
+      F[web-url-fetch] --> C[web-control]
+      F --> S[web-screenshot]
+      F --> M[web-motion · web-interactions]
+      F --> Q[web-audit]
       C -. simultâneo .- V[web-record-frames → FFmpeg]
     end
-    T --> E([Evidência: PNG · spritesheet · MP4 · JSON])
+    T --> EV([Evidência: PNG · spritesheet · MP4 · JSON · nota 0–100])
 ```
 
 ```
 parede-da-ia/
 ├── doc.md                    instalador universal lido pelo agente
 ├── prompts/
-│   ├── router.md             ponto de entrada (despachante)
-│   ├── knowledge-base/       01…10 — heurísticas e checklists por livro
-│   └── workflows/            frontend-master.md · reference-teardown.md
+│   ├── router.md             ponto de entrada: intenção, arquétipo, portões de qualidade
+│   ├── workflows/            frontend-master · corporate-briefing · creative-direction ·
+│   │                         reference-teardown · motion-teardown
+│   ├── aesthetics/           7 famílias + matriz de decisão + biblioteca de blurs
+│   ├── knowledge-base/       01…23 — heurísticas e checklists por livro
+│   └── templates/            briefing corporativo · direção criativa · motion spec · relatório
+├── library/                  receitas: motion/ · particles/ · gradients/ · loaders/
+├── toolkit/                  CLI + daemon + servidor MCP (TypeScript, Clean Architecture)
+│   ├── src/domain/           regras puras: ações, cores, auditoria, estética, tokens
+│   ├── src/application/      portas (BrowserSession, MediaEncoder…) e casos de uso
+│   ├── src/infrastructure/   Playwright, FFmpeg, sessão, scripts injetados no DOM
+│   └── src/presentation/     CLI, formatadores e MCP (JSON-RPC sobre stdio)
 ├── skill/SKILL.md            template da skill do Claude Code
-├── toolkit/                  CLI + daemon + servidor MCP (TypeScript)
-│   ├── src/core/             sessão, RPC, parser de ações, FFmpeg
-│   ├── src/daemon/           Chromium persistente, controle, gravação, scrap
-│   ├── src/inject/           hooks e scanner injetados no DOM
-│   └── src/mcp/              JSON-RPC sobre stdio
-└── docs/                     landing page (GitHub Pages)
+└── site/                     landing (React + Vite), publicada no GitHub Pages
 ```
 
 Os comandos são clientes leves de um **daemon local** (127.0.0.1 + token) que mantém um único
-Chromium vivo entre chamadas. Por isso o estado persiste, o listener de rede roda a sessão inteira
-e `web-control` pode disparar **enquanto** `web-record-frames` grava.
+Chromium vivo entre chamadas. Por isso o estado persiste, a rede é escutada a sessão inteira e
+`web-control` pode agir **enquanto** `web-record-frames` grava.
 
-## Vitrine da toolkit
+## Toolkit
 
 | Comando | O que faz |
 |---------|-----------|
-| `web-url-fetch <url>` | Abre a URL num Chromium persistente e injeta hooks (canvas, shaders GLSL, WAAPI, rAF, console). Aceita `localhost:5173`, arquivos locais, `--mobile`, `--viewport`, `--dpr`, `--headful`. |
-| `web-wait-page-load` | Espera `load` + `networkidle` (limitado) + fontes + 2 frames. Detecta pre-loaders de tela cheia e avisa. |
-| `web-wait <s>` | Fallback para pre-loaders em canvas/WebGL; `--until-hidden "<seletor>"` espera o loader sumir. |
-| `web-control <ação>` | Eventos **reais**: `scroll-down`, `scroll-up`, `scroll-to`, `click`, `hover`, `mousemove`, `keypress`, `type`, `inventory` e `sequence "a; b; c"`. Detecta scroll virtual (WebGL/transform). |
-| `web-record-frames` | Screencast do compositor a cada **0.5s** (padrão) → frames + **spritesheet** + **MP4** (+ GIF) via FFmpeg. `--while "<ações>"` encadeia; `--detach`/`--stop` para gravação em background. |
-| `web-screenshot` | Alta definição (DPR re-rasterizado via `clip.scale`), viewport, página inteira ou elemento, sem scrollbars/caret. `--viewport 390x844` para responsividade. |
-| `web-scrap` | **Wappalyzer de front-end**: frameworks e libs (GSAP, Lenis, Three.js…), hosting, fontes e provedores (Google/Adobe/self-hosted), ícones (Lucide, Phosphor…), paleta exata (variáveis CSS + cores por área), **contraste WCAG**, escala tipográfica, grid de espaçamento, mídia, shaders e rede. JSON completo + resumo. |
+| `web-url-fetch <url>` | Abre a URL num Chromium persistente e injeta hooks (canvas, shaders GLSL, WAAPI, rAF, console, Web Vitals). Aceita `localhost`, arquivos locais, `--mobile`, `--viewport`, `--dpr`, `--reduced-motion`. |
+| `web-wait-page-load` · `web-wait <s>` | Espera `load` + rede + fontes; fallback para pre-loaders em canvas/WebGL (`--until-hidden`). |
+| `web-control <ação>` | Eventos **reais**: `scroll-down/up/to`, `click`, `hover`, `mousemove`, `drag`, `keypress`, `type`, `inventory` e `sequence "a; b; c"`. |
+| `web-eval "<js>"` | Lê estado da página para inspeção. |
+| `web-screenshot` | Alta definição re-rasterizada no DPR pedido, viewport/página/elemento, `--viewports desktop,tablet,mobile`, `--hide-banners`. |
+| `web-record-frames` | Screencast a cada **0.5s** → frames + **spritesheet** + **MP4** (+ GIF); `--while "<ações>"`, `--selector` para microinterações de perto, fps e jank no manifesto. |
+| `web-scrap` | **Wappalyzer de front-end**: frameworks e libs, fontes, ícones, paleta exata, contraste WCAG, escala tipográfica, espaçamento, mídia, shaders, rede e a **família estética** provável. |
+| `web-motion` | O que anima, durações, curvas, fps e frames longos — inclusive GSAP/Motion empacotados (`--observe`, `--while`). |
+| `web-interactions` | Hover, foco e `:active` de cada interativo, com folha antes/hover/foco e detecção de efeito magnético. |
+| `web-audit` | Nota 0–100 por viewport: acessibilidade (contraste, foco visível, alvos de toque), responsivo, performance (CLS, LCP, long tasks), SEO, console e movimento. `--strict` para CI. |
+| `web-tokens` | Exporta cores, tipos, espaços e movimento como CSS + JSON. |
+| `web-diff` | Compara duas capturas (SSIM/PSNR + imagem de diferença). |
+| `media-frames` | Extrai frames e folha de contato de vídeos de referência (MP4, gravações de tela). |
 | `web-serve <pasta> --detach` | Servidor estático sem cache para o loop de QA. |
 | `parede doctor` · `parede setup` | Diagnóstico da instalação e registro idempotente do router nos agentes. |
 | `parede-mcp` | Os mesmos comandos como ferramentas MCP (stdio). |
 
 ```bash
 web-url-fetch https://seu-site.com && web-wait-page-load
-web-scrap                                                     # stack, fontes, paleta, contraste
+web-scrap                                                       # stack, fontes, paleta, estética
+web-motion --observe 6 --while "scroll-down 4000 --steps 80"    # coreografia e fps
 web-record-frames --while "scroll-down 4000 --steps 80" --interval 0.25
-web-control hover "a.cta" --hold 600ms --screenshot
-web-screenshot --viewport 390x844 --full-page
+web-interactions --limit 12                                     # hover/foco de cada interativo
+web-audit --viewports desktop,tablet,mobile                     # portão de qualidade
 web-close
 ```
 
@@ -129,7 +148,29 @@ web-close
 > cenas WebGL pesadas exigem bastante CPU/RAM/GPU. Em máquinas modestas use `--interval 0.25–0.5`
 > e viewport ≤ 1440px. O manifesto de cada gravação informa `laggedFrames`.
 
-## A base de 10 livros
+## Arquétipos e estéticas
+
+O router decide **antes** de qualquer código:
+
+| Arquétipo | Sinais | O agente faz |
+|-----------|--------|--------------|
+| **Corporativo** | empresa, institucional, B2B, SaaS, conversão de leads | pede **briefing** e escolha de estética, faz perguntas extras; base minimalista-modernista, economia visual |
+| **Pessoal / portfólio** | "meu portfólio", designer, dev, artista | direção criativa curta com foco em personalidade |
+| **Ambicioso / experiência** | "nível Awwwards", WebGL, imersivo | define um **ápice visual** e coreografa scroll e cursor |
+
+| Família | Essência |
+|---------|----------|
+| `corporativo-modernista` | Suíço, econômico, grid rígido, uma cor de acento, movimento mínimo |
+| `corporativo-marca` | A marca protagoniza: cor forte, display arredondado, formas orgânicas |
+| `produto-saas` | O produto é o herói: UI real, provas, demo |
+| `canvas-ludico` | Prancheta de designer viva e arrastável |
+| `editorial-brutalista` | Contraste tipográfico extremo, monocromia, assimetria |
+| `gradiente-atmosferico` | Campos de cor desfocados, grão, vidro (biblioteca de blurs) |
+| `imersivo-webgl` | Cena 3D viva, partículas, física |
+
+Os playbooks foram construídos a partir de referências medidas com a própria toolkit.
+
+## A base de 23 livros
 
 | # | Módulo | Obra |
 |---|--------|------|
@@ -143,20 +184,40 @@ web-close
 | 08 | Telemetria, avaliação contínua | *Designing Machine Learning Systems* — Chip Huyen |
 | 09 | Direção, formato, exemplos, decomposição | *Prompt Engineering for Generative AI* — James Phoenix & Mike Taylor |
 | 10 | Confiabilidade, consistência, fluxo assíncrono | *Designing Data-Intensive Applications* — Martin Kleppmann |
+| 11 | Gatilho, regras, feedback, loops | *Microinteractions* — Dan Saffer |
+| 12 | Os 12 princípios da animação | *The Illusion of Life* — Frank Thomas & Ollie Johnston |
+| 13 | Propósito, duração e coreografia do movimento | *Designing Interface Animation* — Val Head |
+| 14 | Letra, texto e grid tipográfico | *Thinking with Type* — Ellen Lupton |
+| 15 | Grid modular, espaço ativo | *Grid Systems in Graphic Design* — Josef Müller-Brockmann |
+| 16 | Cor relativa, contraste simultâneo | *Interaction of Color* — Josef Albers |
+| 17 | Shaders, ruído, campos de distância | *The Book of Shaders* — Patricio Gonzalez Vivo & Jen Lowe |
+| 18 | Affordances, significantes, mapeamento | *The Design of Everyday Things* — Don Norman |
+| 19 | Identidade, sistema de marca | *Designing Brand Identity* — Alina Wheeler |
+| 20 | Fitts, Hick, Jakob e companhia | *Laws of UX* — Jon Yablonski |
+| 21 | Átomos → páginas, design system | *Atomic Design* — Brad Frost |
+| 22 | Componentes acessíveis de verdade | *Inclusive Components* — Heydon Pickering |
+| 23 | Narrativa e mensagem que convertem | *Building a StoryBrand* — Donald Miller |
 
 Os módulos são **destilações autorais** (heurísticas e checklists para agentes), não transcrições.
 Os livros pertencem aos seus autores — leia os originais.
 
 ## Protocolo `frontend-master`
 
-1. **Elicitação obrigatória** — nada de código antes de saber o objetivo e o *ápice visual*, como os
-   assets serão geridos (código/SVG/WebGL, fornecidos ou de referência) e se há referências ou se o
-   agente deve pesquisar no Awwwards e propor 2–3 direções.
-2. **Loop autônomo de QA visual** — sobe o servidor, abre o próprio trabalho, clica em todos os
-   interativos, testa hover/foco/scroll, grava frames, mede contraste e corrige até zerar os problemas.
+0. **Classificar** — intenção, arquétipo e candidatas de estética, num contrato curto.
+1. **Elicitar** — nada de código de UI antes disso: briefing corporativo, direção criativa ou o ápice
+   visual, referências e como os assets serão geridos.
+2. **Construir em fatias** — tracer bullet: estrutura, conteúdo real, depois movimento.
+3. **Verificar com os próprios olhos** — loop autônomo: abre o próprio trabalho, testa hover, foco e
+   scroll, grava frames, mede movimento e roda o `web-audit` até passar nos portões do router.
+4. **Entregar** — relatório com as evidências (capturas, notas, o que ficou de fora).
 
-A landing page deste repositório passou por esse loop usando a própria toolkit: paleta 100% acromática
-verificada pelo `web-scrap`, zero falhas de contraste, zero erros de console e sem overflow em 390px.
+## A landing
+
+[anthophicous.github.io/parede-da-ia](https://anthophicous.github.io/parede-da-ia/) — React 19,
+Vite, Tailwind 4, shadcn/ui, Paper Shaders, three.js, GSAP e Lenis. Existe para uma coisa: você
+instalar a skill. Usa receitas da própria `library/` (Hover Font no título, text morph de partículas)
+e passou pelo loop com a toolkit: `web-audit` aprovado com 99/100 em desktop, tablet e mobile,
+foco visível e hover em todos os interativos.
 
 ## Desenvolvimento
 
@@ -165,10 +226,17 @@ cd toolkit
 npm install          # compila via "prepare"
 npm run typecheck
 npm run smoke        # teste ponta a ponta de todos os comandos
+
+cd ../site
+npm install
+npm run dev          # landing em http://localhost:5173/parede-da-ia/
+npm run og           # regenera public/og.jpg com a própria toolkit
 ```
 
 Variáveis: `PAREDE_SESSION` (sessões paralelas), `PAREDE_OUT` (pasta de artefatos, padrão `./.parede`),
 `PAREDE_FFMPEG`, `PAREDE_GPU=0` (força SwiftShader), `PAREDE_IDLE_MINUTES` (padrão 30).
+
+Histórico de versões: [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Licença
 

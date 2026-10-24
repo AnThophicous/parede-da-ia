@@ -124,7 +124,7 @@ cd ~/.parede-da-ia/toolkit && npm run smoke
 ```
 
 Esperado: `✔` em node, playwright, chromium e agentes; `✔` ou `⚠` (aceitável) em ffmpeg e PATH;
-o smoke test termina com 10 linhas `✔`.
+o smoke test termina com 24 linhas `✔`.
 
 ## Etapa 8 — Relatório ao usuário
 
@@ -132,8 +132,10 @@ Responda com:
 1. versão instalada e caminho (`~/.parede-da-ia`);
 2. saída resumida do `parede doctor`;
 3. agentes onde o router foi registrado;
-4. como começar: _"peça: crie uma landing para X"_ — o router aplicará o workflow `frontend-master`
-   (perguntas primeiro, depois construção com QA visual automático).
+4. como começar: _"peça: crie uma landing para X"_ — o router identifica o arquétipo do projeto
+   (corporativo pede briefing e estética; portfólio ganha direção criativa; experiência ganha um
+   ápice) e aplica o workflow `frontend-master`: perguntas primeiro, depois construção com QA
+   visual automático (`web-audit`, `web-interactions`, `web-motion`).
 
 Lembre o usuário de **reiniciar a sessão do agente** para que as novas instruções globais sejam carregadas.
 
@@ -142,7 +144,8 @@ Lembre o usuário de **reiniciar a sessão do agente** para que as novas instru�
 ### Atualizar / desinstalar
 
 ```bash
-git -C ~/.parede-da-ia pull --ff-only && (cd ~/.parede-da-ia/toolkit && npm install)
+git -C ~/.parede-da-ia pull --ff-only && (cd ~/.parede-da-ia/toolkit && npm install && npm link)
+parede setup --agent auto   # atualiza o bloco do router (lista de ferramentas) nos agentes
 # desinstalar: npm unlink -g parede-da-ia; remova ~/.parede-da-ia e ~/.parede,
 # e apague os blocos <!-- parede-da-ia:start --> … <!-- parede-da-ia:end --> dos arquivos da Etapa 6.
 ```
