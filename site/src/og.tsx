@@ -1,42 +1,41 @@
 import { createRoot } from 'react-dom/client';
-import { Field } from '@/components/Field';
-import { Lens } from '@/components/Lens';
-import { VERSION } from '@/content';
+import { BOOKS } from '@/content';
+import { seeded } from '@/lib/word';
 import './index.css';
 
 /**
- * Prévia social (1200×630) com a mesma direção do hero: campo de cor congelado num quadro,
- * a lente e o título. Capturada por scripts/og.mjs; `?frame=` escolhe o quadro do campo.
+ * Social preview (1200×630): black ink on white paper, the black hole drawn like the one in the
+ * journey, a few book-stars on the sides. Captured by scripts/og.mjs.
  */
-const frame = Number(new URLSearchParams(location.search).get('frame') ?? 17000);
-
 function Og() {
+  const stars = Array.from({ length: 16 }, (_, i) => ({
+    x: 1040 + seeded(i, 1) * 140, // only on the right edge: never over the type
+    y: 40 + seeded(i, 2) * 560,
+    r: 2 + seeded(i, 3) * 2.6,
+  }));
   return (
-    <div className="relative isolate h-[630px] w-[1200px] overflow-hidden bg-night-900 text-cream">
-      <Field variant="hero" eager frame={frame} className="absolute inset-0 -z-10" />
-      {/* vinheta + topo escurecido: a faixa clara do campo não apaga o eyebrow */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(120%_90%_at_60%_35%,transparent_35%,rgb(3_5_12/0.55)_75%),linear-gradient(to_top,rgb(3_5_12/0.9),transparent_50%),linear-gradient(to_bottom,rgb(3_5_12/0.6),transparent_24%)]" />
-      <Lens className="right-[72px] top-[118px] h-[340px]" />
+    <div className="relative h-[630px] w-[1200px] overflow-hidden bg-paper text-ink">
+      {/* the well, the luminous ring, the shadow and the disk crossing it */}
+      <div className="absolute left-[835px] top-[315px] size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgb(0_0_0/0.95)_0%,rgb(0_0_0/0.92)_22%,rgb(0_0_0/0.5)_36%,rgb(0_0_0/0.12)_52%,transparent_68%)]" />
+      <div className="absolute left-[835px] top-[315px] size-[200px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[14px] border-white/85 blur-[3px]" />
+      <div className="absolute left-[835px] top-[315px] size-[176px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-black" />
+      <div className="absolute left-[835px] top-[315px] h-[10px] w-[560px] -translate-x-1/2 -translate-y-1/2 -rotate-[3.4deg] rounded-full bg-[linear-gradient(90deg,transparent,rgb(255_255_255/0.9)_30%,rgb(255_255_255/0.95)_50%,rgb(255_255_255/0.9)_70%,transparent)] blur-[1.5px]" />
+      {stars.map((s, i) => (
+        <span key={i} className="absolute rounded-full bg-black" style={{ left: s.x, top: s.y, width: s.r * 2, height: s.r * 2 }} />
+      ))}
 
-      <div className="relative z-10 flex h-full flex-col justify-between px-16 pb-14 pt-14">
-        <div className="flex justify-between">
-          <p className="eyebrow text-[13px] text-cream/75">Skill open-source para agentes de IA</p>
-          <p className="eyebrow text-[13px] text-cream/60">v{VERSION} · MIT</p>
-        </div>
-        <h1 className="display -ml-2 text-[188px] text-cream">
-          <span className="block">
-            Par<em>e</em>de
-          </span>
-          <span className="block pl-[1.2em]">
-            d<em>a</em> IA
-          </span>
+      <div className="relative z-10 flex h-full flex-col justify-between px-16 py-14">
+        <p className="eyebrow text-[13px] text-black/55">Open-source skill for AI agents · {BOOKS.length} books</p>
+        <h1 className="text-[150px] font-semibold leading-[0.88] tracking-[-0.05em]">
+          Parede
+          <br />
+          da IA
         </h1>
         <div className="flex items-end justify-between">
-          <p className="text-[28px] font-light leading-tight tracking-[-0.01em] text-cream/90">Dê olhos, mãos e repertório ao seu agente.</p>
-          <p className="font-mono text-[15px] text-cream/60">instale com um prompt</p>
+          <p className="text-[30px] font-light tracking-[-0.02em]">Eyes, hands and taste for your AI agent.</p>
+          <p className="font-mono text-[15px] text-black/55">install with one prompt</p>
         </div>
       </div>
-      <div aria-hidden="true" className="og-grain pointer-events-none absolute inset-0 z-20" />
     </div>
   );
 }

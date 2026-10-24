@@ -1,77 +1,122 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { Cursor } from '@/components/Cursor';
-import { Preloader } from '@/components/Preloader';
-import { Toaster } from '@/components/ui/sonner';
-import { BOOTSTRAP_PROMPT } from '@/content';
-import { copyText } from '@/lib/clipboard';
-import { scrollToTarget, useReducedMotion, useSmoothScroll } from '@/lib/motion';
-import { Footer } from '@/sections/Footer';
-import { Header } from '@/sections/Header';
-import { Hero } from '@/sections/Hero';
-import { Install } from '@/sections/Install';
-import { Morph } from '@/sections/Morph';
-import { Problem } from '@/sections/Problem';
+import { useCallback, useEffect, useState } from 'react';
+import { Cosmos } from '@/components/Cosmos';
+import { Eyes } from '@/components/Eyes';
+import { Captions, Hud, ScrollPill } from '@/components/Hud';
+import { Install } from '@/components/Install';
+import { Lever } from '@/components/Lever';
+import { Word } from '@/components/Word';
+import { Writing } from '@/components/Writing';
+import { journey, STAGE } from '@/lib/journey';
+import { music } from '@/lib/music';
 
+type Phase = 'intro' | 'lever' | 'journey' | 'install';
+
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Which scenes are mounted at a given progress (each one only around its own window). */
+const scenesAt = (p: number) => ({
+  cosmos: p < STAGE.horizonEnd + 0.02,
+  word: p > STAGE.horizonEnd - 0.06 && p < STAGE.solidEnd + 0.06,
+  eyes: p > STAGE.solidEnd - 0.02,
+});
+
+/**
+ * The page: a written intro, a breaker that turns the lights and the music on, a slow journey
+ * that runs by itself (stars → black hole → darkness → the word → eyes) and the install screen.
+ */
 export function App() {
-  const reduced = useReducedMotion();
-  const [ready, setReady] = useState(false);
-  useSmoothScroll(!reduced);
+  const [phase, setPhase] = useState<Phase>(() => (reducedMotion() ? 'install' : 'intro'));
+  const [scenes, setScenes] = useState(() => scenesAt(0));
+  const [lightsOn, setLightsOn] = useState(false);
 
-  const onPreloaderDone = useCallback(() => setReady(true), []);
+  // Progress decides which scenes exist; reaching the end opens the install screen.
+  useEffect(
+    () =>
+      journey.subscribe((p) => {
+        const next = scenesAt(p);
+        setScenes((prev) => (prev.cosmos === next.cosmos && prev.word === next.word && prev.eyes === next.eyes ? prev : next));
+        if (p >= STAGE.install) setPhase((ph) => (ph === 'journey' ? 'install' : ph));
+      }),
+    [],
+  );
 
-  // Âncoras internas passam pelo Lenis (rolagem suave e consistente com a coreografia).
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const link = (e.target as Element | null)?.closest<HTMLAnchorElement>('a[href^="#"]');
-      const hash = link?.getAttribute('href');
-      if (!link || !hash || hash.length < 2) return;
+    document.body.classList.toggle('is-journey', phase !== 'install');
+    if (phase === 'install') journey.stop();
+  }, [phase]);
+
+  // Scroll, swipe and keys only push the journey forward (or slow it down).
+  useEffect(() => {
+    if (phase !== 'journey') return;
+    let touchY: number | null = null;
+    const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      scrollToTarget(hash === '#topo' ? 0 : hash);
+      const unit = e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? 800 : 1;
+      journey.push(Math.max(-2, Math.min(2, (e.deltaY * unit) / 160)));
     };
-    document.addEventListener('click', onClick);
-    return () => document.removeEventListener('click', onClick);
-  }, []);
+    const onTouchStart = (e: TouchEvent) => (touchY = e.touches[0]?.clientY ?? null);
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY;
+      if (touchY === null || y === undefined) return;
+      journey.push(Math.max(-2, Math.min(2, (touchY - y) / 50)));
+      touchY = y;
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (['ArrowDown', 'PageDown', ' ', 'End'].includes(e.key)) journey.push(1.2);
+      if (['ArrowUp', 'PageUp', 'Home'].includes(e.key)) journey.push(-1.2);
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [phase]);
 
-  // "Copiado" vive aqui: o CTA do topo também confirma no botão do card, onde a pessoa chega.
-  const [copied, setCopied] = useState(false);
-  const copiedTimer = useRef(0);
-  const copyPrompt = useCallback(async () => {
-    const ok = await copyText(BOOTSTRAP_PROMPT);
-    if (ok) {
-      toast.success('Prompt copiado', { description: 'Cole no Claude Code, Codex, OpenCode ou Cursor.' });
-      setCopied(true);
-      window.clearTimeout(copiedTimer.current);
-      copiedTimer.current = window.setTimeout(() => setCopied(false), 4000);
-    } else {
-      toast('Selecione o prompt abaixo e copie manualmente.');
-    }
-    return ok;
+  const toLever = useCallback(() => setPhase('lever'), []);
+  const turnOn = useCallback((muted: boolean) => {
+    music.start(muted);
+    setPhase('journey');
+    window.setTimeout(() => setLightsOn(true), 40);
   }, []);
-
-  // CTA do topo: copia e centraliza o card do prompt (a pessoa vê o que copiou e o próximo passo).
-  const install = useCallback(async () => {
-    await copyPrompt();
-    scrollToTarget('#prompt', { center: true });
-  }, [copyPrompt]);
+  const skip = useCallback(() => {
+    if (!music.running) music.start(true);
+    journey.set(STAGE.install);
+    setPhase('install');
+  }, []);
 
   return (
     <>
-      <a href="#conteudo" className="sr-only z-[90] rounded-full bg-cream px-5 py-3 text-night-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
-        Pular para o conteúdo
-      </a>
-      <Preloader onDone={onPreloaderDone} />
-      <Cursor />
-      <div className="grain" aria-hidden="true" />
-      <Header onInstall={install} />
-      <main id="conteudo">
-        <Hero ready={ready} onInstall={install} />
-        <Problem />
-        <Morph />
-        <Install copied={copied} onCopy={copyPrompt} />
-      </main>
-      <Footer />
-      <Toaster position="bottom-center" />
+      {/* What the page is about, for readers and crawlers that do not take the journey. */}
+      <div className="sr-only">
+        <h2>Parede da IA — eyes, hands and taste for your AI agent</h2>
+        <p>
+          An open-source skill for Claude Code, Codex, OpenCode, Cursor, Windsurf and Gemini CLI. It distills 23 books on design and engineering, picks an aesthetic for each
+          project, and gives your agent a real browser to open what it builds, scroll, click, record every frame and measure it before calling anything done.
+        </p>
+      </div>
+
+      {phase === 'intro' && <Writing onDone={toLever} />}
+      {phase === 'lever' && <Lever onOn={turnOn} />}
+
+      {phase === 'journey' && (
+        <main>
+          {scenes.cosmos && <Cosmos />}
+          {scenes.word && <Word />}
+          {scenes.eyes && <Eyes />}
+          {/* the lights come on: everything goes white */}
+          <div className="pointer-events-none fixed inset-0 z-[45] bg-paper transition-opacity duration-[1600ms] ease-out" style={{ opacity: lightsOn ? 0 : 1 }} aria-hidden="true" />
+          <Captions />
+          <ScrollPill />
+        </main>
+      )}
+
+      {phase === 'install' && <Install onReplay={() => window.location.reload()} />}
+      {phase !== 'intro' && <Hud onSkip={phase === 'install' ? undefined : skip} showSound={phase !== 'lever'} />}
     </>
   );
 }

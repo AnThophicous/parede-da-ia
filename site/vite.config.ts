@@ -17,11 +17,11 @@ export default defineConfig({
   server: { fs: { allow: ['..'] } },
   build: {
     target: 'es2022',
-    // O chunk do three (~750 kB) é carregado sob demanda, só perto da seção do morph.
+    // three (~750 kB) gets its own chunk: it downloads in parallel while the intro is being written.
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
-        manualChunks: { three: ['three'], motion: ['gsap', 'lenis'] },
+        manualChunks: { three: ['three'] },
       },
     },
   },
