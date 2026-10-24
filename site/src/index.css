@@ -1,0 +1,191 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter-tight/wght.css";
+@import "@fontsource-variable/inter-tight/wght-italic.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "../../library/loaders/hello-preloader.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Tokens da direção: meia-noite + laranja (prompts/aesthetics/gradiente-atmosferico.md) ── */
+@theme {
+  --color-night-950: #03050c;
+  --color-night-900: #050816;
+  --color-night-800: #0b1638;
+  --color-night-700: #13215a;
+  --color-night-600: #1b2a63;
+  --color-ember-500: #ff6a1a;
+  --color-ember-400: #ff8a3d;
+  --color-ember-300: #ffb36b;
+  --color-volt: #3a5bff;
+  --color-cream: #f4efe6;
+  --color-mist: #9aa3c7;
+
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-out-soft: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --spacing-gutter: clamp(20px, 3.4vw, 56px);
+}
+
+@theme inline {
+  --font-sans: 'Inter Tight Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+/* Tema único (escuro): os componentes shadcn herdam a paleta da direção. */
+:root {
+  /* Grão analógico (feTurbulence): usado pela camada global e pela prévia social. */
+  --grain-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color-scheme: dark;
+  --background: #050816;
+  --foreground: #f4efe6;
+  --card: #0b1638;
+  --card-foreground: #f4efe6;
+  --popover: #0b1638;
+  --popover-foreground: #f4efe6;
+  --primary: #ff6a1a;
+  --primary-foreground: #03050c;
+  --secondary: rgb(244 239 230 / 0.08);
+  --secondary-foreground: #f4efe6;
+  --muted: rgb(244 239 230 / 0.06);
+  --muted-foreground: #9aa3c7;
+  --accent: rgb(244 239 230 / 0.08);
+  --accent-foreground: #f4efe6;
+  --destructive: #ff5a4f;
+  --border: rgb(244 239 230 / 0.12);
+  --input: rgb(244 239 230 / 0.16);
+  --ring: #ffb36b;
+  --radius: 1rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/60;
+  }
+  html {
+    @apply font-sans antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-ember-500);
+    color: var(--color-night-950);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ember-300);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  em {
+    font-style: italic;
+    font-weight: inherit;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-[12px] uppercase tracking-[0.18em] text-mist md:text-[11px];
+  }
+  .display {
+    font-weight: 300;
+    letter-spacing: -0.045em;
+    line-height: 0.9;
+  }
+  /* Grão analógico global: esconde banding dos campos de cor e dá materialidade. */
+  .grain {
+    position: fixed;
+    inset: -12%;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: var(--grain-texture);
+    animation: grain 1s steps(6) infinite;
+  }
+  /* Mesmo grão, estático e contido (og.png). */
+  .og-grain {
+    opacity: 0.07;
+    background-image: var(--grain-texture);
+  }
+  /* Fallback sem WebGL para os campos de cor (biblioteca de blurs: Irregular). */
+  .field-fallback {
+    background:
+      radial-gradient(42% 52% at 72% 38% in oklab, rgb(255 106 26 / 0.55), transparent 70%),
+      radial-gradient(36% 44% at 28% 70% in oklab, rgb(255 179 107 / 0.28), transparent 72%),
+      radial-gradient(70% 70% at 40% 30% in oklab, #13215a, transparent 75%),
+      #050816;
+    filter: blur(24px);
+  }
+}
+
+/* Palavras do "problema": legíveis mesmo antes de acender (≥ 3:1 em texto grande). */
+.problem-word {
+  color: rgb(154 163 199 / 0.6);
+  transition: color 0.35s linear;
+}
+.problem-word.is-lit { color: var(--color-cream); }
+
+/* Cursor customizado esconde o nativo só em ponteiros finos (o componente adiciona a classe). */
+html.has-cursor,
+html.has-cursor a,
+html.has-cursor button { cursor: none; }
+
+@keyframes scroll-cue {
+  0% { transform: translateY(-100%); }
+  60%, 100% { transform: translateY(200%); }
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -4%); }
+  60% { transform: translate(-5%, -1%); }
+  80% { transform: translate(4%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

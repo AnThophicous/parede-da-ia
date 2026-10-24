@@ -5,3 +5,4 @@ toolkit/dist/
 .DS_Store
 Thumbs.db
 .env
+site/dist/
