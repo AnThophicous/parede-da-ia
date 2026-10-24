@@ -1,10 +1,10 @@
 /* ==========================================================================
-   parede-da-ia · selo circular "role ·" (gradiente-atmosferico / editorial)
-   Texto em círculo girando devagar; acelera com o scroll se --scroll-velocity for atualizada.
+   parede-da-ia · circular "scroll ·" badge (atmospheric-gradient / editorial)
+   Text on a circle, slowly rotating; it speeds up with the scroll if --scroll-velocity is updated.
 
    <div class="scroll-badge" aria-hidden="true">
      <svg viewBox="0 0 120 120"><defs><path id="badge-circle" d="M60,60 m-46,0 a46,46 0 1,1 92,0 a46,46 0 1,1 -92,0"/></defs>
-       <text><textPath href="#badge-circle">role · role · role · role ·</textPath></text></svg>
+       <text><textPath href="#badge-circle">scroll · scroll · scroll · scroll ·</textPath></text></svg>
      <span class="scroll-badge__core"></span>
    </div>
    ========================================================================== */

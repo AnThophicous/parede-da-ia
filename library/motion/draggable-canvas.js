@@ -1,13 +1,13 @@
 /**
- * parede-da-ia · canvas arrastável (estética canvas-ludico)
- * Elementos com [data-drag] podem ser arrastados com mouse, toque ou teclado (setas),
- * com inércia curta, leve rotação na direção do movimento e posição salva.
+ * parede-da-ia · draggable canvas (playful-canvas aesthetic)
+ * Elements with [data-drag] can be dragged with mouse, touch or keyboard (arrows),
+ * with short inertia, a slight rotation in the direction of motion and a saved position.
  *
  *   import { draggableCanvas } from './draggable-canvas.js';
  *   const stop = draggableCanvas(document.querySelector('.board'), { storageKey: 'board-v1' });
  *
- * Acessibilidade: itens focáveis (tabindex=0), setas movem 16px (Shift = 64px),
- * Esc devolve à posição original; o conteúdo continua acessível na ordem do DOM.
+ * Accessibility: focusable items (tabindex=0), arrows move 16px (Shift = 64px),
+ * Esc returns to the original position; the content stays accessible in DOM order.
  */
 export function draggableCanvas(board, options = {}) {
   const { selector = '[data-drag]', storageKey = null, friction = 0.9, tilt = 0.06 } = options;
@@ -29,7 +29,7 @@ export function draggableCanvas(board, options = {}) {
     try {
       localStorage.setItem(storageKey, JSON.stringify(out));
     } catch {
-      /* armazenamento indisponível */
+      /* storage unavailable */
     }
   };
 

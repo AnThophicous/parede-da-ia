@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Biblioteca de blurs — parede-da-ia</title>
+  <title>Blur library — parede-da-ia</title>
   <link rel="stylesheet" href="blur-library.css">
   <style>
     :root { color-scheme: dark; --bg: #050816; --fg: #f4efe6; --muted: #8e97bd; }
@@ -22,20 +22,20 @@
   </style>
 </head>
 <body>
-  <h1>Biblioteca de blurs</h1>
-  <p>12 tipos de gradiente, agnósticos de paleta (variáveis <code>--c1…--c4</code>), interpolados em OKLab/OKLCH e com grão. Troque a paleta para ver o mesmo sistema em direções diferentes.</p>
-  <div class="palettes" role="group" aria-label="Paletas">
-    <button aria-pressed="true" data-p="#050816,#1b2a63,#ff6a1a,#ffb36b">Meia-noite + laranja</button>
-    <button aria-pressed="false" data-p="#0d0f0a,#3d4a35,#d89a4a,#e8c79a">Oliva + âmbar</button>
-    <button aria-pressed="false" data-p="#1a0b3b,#4f2bff,#ff4fa3,#00e0c6">Vívida</button>
-    <button aria-pressed="false" data-p="#000000,#2e2e2e,#9a9a9a,#ffffff">Monocromática</button>
+  <h1>Blur library</h1>
+  <p>12 gradient types, palette-agnostic (variables <code>--c1…--c4</code>), interpolated in OKLab/OKLCH and with grain. Switch the palette to see the same system in different directions.</p>
+  <div class="palettes" role="group" aria-label="Palettes">
+    <button aria-pressed="true" data-p="#050816,#1b2a63,#ff6a1a,#ffb36b">Midnight + orange</button>
+    <button aria-pressed="false" data-p="#0d0f0a,#3d4a35,#d89a4a,#e8c79a">Olive + amber</button>
+    <button aria-pressed="false" data-p="#1a0b3b,#4f2bff,#ff4fa3,#00e0c6">Vivid</button>
+    <button aria-pressed="false" data-p="#000000,#2e2e2e,#9a9a9a,#ffffff">Monochrome</button>
   </div>
   <div class="grid" id="grid"></div>
   <script>
     const types = [
       ['irregular', 'Irregular'], ['radial-ramp', 'Radial Ramp'], ['blurred', 'Blurred'], ['edgy', 'Edgy'],
       ['landscape', 'Landscape'], ['multicolor', 'Multicolor'], ['retro', 'Retro'], ['duotone', 'Duotone'],
-      ['tricolor', 'Tricolor'], ['volume-mesh', 'Volume Mesh'], ['banding', 'Banding Gradient'], ['drift', 'Irregular animado'],
+      ['tricolor', 'Tricolor'], ['volume-mesh', 'Volume Mesh'], ['banding', 'Banding Gradient'], ['drift', 'Animated irregular'],
     ];
     const grid = document.getElementById('grid');
     grid.innerHTML = types.map(([id, name]) => `<figure><div class="blur swatch blur--${id === 'drift' ? 'irregular blur--drift' : id}"></div><figcaption>${name}<br><code>.blur--${id}</code></figcaption></figure>`).join('');

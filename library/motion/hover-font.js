@@ -1,16 +1,16 @@
 /**
  * parede-da-ia · Hover Font
- * O peso da fonte variável cresce nas letras próximas ao cursor (efeito de proximidade).
+ * The variable font's weight grows on the letters near the cursor (a proximity effect).
  *
  *   import { hoverFont } from './hover-font.js';
  *   const stop = hoverFont(document.querySelector('h1'), { from: 300, to: 850, radius: 180 });
  *
- * Sem layout shift: cada letra ganha uma caixa de largura fixa (medida no peso de repouso,
- * em `em`) e a diferença de largura do peso maior é compensada com scaleX. Nada se move.
+ * No layout shift: each letter gets a fixed-width box (measured at the rest weight,
+ * in `em`) and the heavier weight's extra width is compensated with scaleX. Nothing moves.
  *
- * Requisitos: fonte variável com eixo wght (ex.: Inter Tight Variable, Geist, Roboto Flex).
- * Acessibilidade: o texto inteiro fica no aria-label do elemento; as letras são aria-hidden.
- * Desligado automaticamente em toque (pointer: coarse) e em prefers-reduced-motion.
+ * Requirements: a variable font with a wght axis (e.g., Inter Tight Variable, Geist, Roboto Flex).
+ * Accessibility: the whole text lives in the element's aria-label; the letters are aria-hidden.
+ * Turned off automatically on touch (pointer: coarse) and with prefers-reduced-motion.
  */
 
 const FALLOFF = {
@@ -23,7 +23,7 @@ const FALLOFF = {
  * @param {HTMLElement} el
  * @param {{ from?: number, to?: number, radius?: number, falloff?: keyof typeof FALLOFF,
  *           lerp?: number, axis?: string, extraAxes?: string }} [options]
- * @returns {() => void} função que desfaz o efeito
+ * @returns {() => void} a function that undoes the effect
  */
 export function hoverFont(el, options = {}) {
   const { from = 300, to = 850, radius = 180, falloff = 'gaussian', lerp = 0.16, axis = 'wght', extraAxes = '' } = options;
@@ -31,8 +31,8 @@ export function hoverFont(el, options = {}) {
 
   const settings = (w) => `'${axis}' ${Math.round(w)}${extraAxes ? `, ${extraAxes}` : ''}`;
   const original = el.innerHTML;
-  // innerText respeita o layout: linhas em blocos (<span class="block">) viram palavras separadas,
-  // onde textContent colaria "Parede" + "da IA" em "Parededa IA".
+  // innerText respects the layout: lines in blocks (<span class="block">) become separate words,
+  // where textContent would glue "Parede" + "da IA" into "Parededa IA".
   el.setAttribute('aria-label', (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim());
 
   /** @type {{ span: HTMLSpanElement, cx: number, cy: number, current: number, rest: number, heavy: number }[]} */
@@ -45,7 +45,7 @@ export function hoverFont(el, options = {}) {
       }
       if (child.nodeType !== Node.TEXT_NODE) continue;
       const frag = document.createDocumentFragment();
-      // Palavras inteiras em nowrap: a quebra de linha nunca acontece no meio de uma palavra.
+      // Whole words in nowrap: a line break never happens in the middle of a word.
       for (const part of (child.textContent ?? '').split(/(\s+)/)) {
         if (!part) continue;
         if (/^\s+$/.test(part)) {
@@ -77,7 +77,7 @@ export function hoverFont(el, options = {}) {
     }
   };
 
-  /** Mede larguras no peso de repouso e no máximo (em lote, sem layout thrashing). */
+  /** Measures widths at the rest and maximum weights (batched, no layout thrashing). */
   const calibrate = () => {
     const fontSize = parseFloat(getComputedStyle(el).fontSize) || 16;
     for (const l of letters) {
@@ -121,8 +121,8 @@ export function hoverFont(el, options = {}) {
   io.observe(el);
 
   const ease = FALLOFF[falloff] ?? FALLOFF.gaussian;
-  // Remede os centros periodicamente: animações de entrada, sticky e transforms
-  // movem as letras sem disparar resize/scroll.
+  // Re-measure the centers periodically: entrance animations, sticky and transforms
+  // move the letters without firing resize/scroll.
   const REMEASURE_MS = 250;
   let lastMeasure = performance.now();
   let raf = 0;

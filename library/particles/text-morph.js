@@ -1,21 +1,22 @@
 /**
- * parede-da-ia · text morph (partículas → texto)
- * Partículas que se reorganizam em palavras, com arcos, atraso individual e repulsão do cursor.
+ * parede-da-ia · text morph (particles → text)
+ * Particles that rearrange into words, with arcs, individual delays and cursor repulsion.
  *
  *   import * as THREE from 'three';
  *   import { createTextMorph } from './text-morph.js';
- *   const morph = await createTextMorph(THREE, container, { words: ['olhos', 'mãos', 'repertório'] });
- *   morph.setProgress(1.4);      // scrub contínuo: 0 = nuvem, 1 = palavra 1, 2 = palavra 2…
- *   morph.morphTo(2);            // ou transição animada até a forma 2
+ *   const morph = await createTextMorph(THREE, container, { words: ['eyes', 'hands', 'taste'] });
+ *   morph.setProgress(1.4);      // continuous scrub: 0 = cloud, 1 = word 1, 2 = word 2…
+ *   morph.morphTo(2);            // or an animated transition to shape 2
  *
- * O THREE é injetado (a receita não importa dependências): funciona com qualquer bundler.
- * Desempenho: DPR limitado a 1.5, pausa fora da viewport; use count menor no mobile.
- * A criação não trava a rolagem: as palavras são amostradas em meia resolução, uma por frame,
- * e o shader compila em paralelo (compileAsync) antes do primeiro render.
- * Acessibilidade: o canvas é decorativo (aria-hidden); mantenha o texto real no HTML.
+ * THREE is injected (the recipe imports no dependencies): it works with any bundler.
+ * Performance: DPR capped at 1.5, paused outside the viewport; use a lower count on mobile.
+ * Start shape: cloud: 'nebula' (a spiral) or 'scatter' (loose particles across the whole screen).
+ * Creation doesn't block scrolling: words are sampled at half resolution, one per frame,
+ * and the shader compiles in parallel (compileAsync) before the first render.
+ * Accessibility: the canvas is decorative (aria-hidden); keep the real text in the HTML.
  */
 
-/** Escala do canvas de amostragem: metade da resolução = 1/4 dos pixels lidos, sem perda visível. */
+/** Sampling canvas scale: half resolution = 1/4 of the pixels read, with no visible loss. */
 const SAMPLE_SCALE = 0.5;
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
 
@@ -42,15 +43,15 @@ const VERTEX = /* glsl */ `
     float delay = aRandom.x * 0.35;
     float p = easeInOutCubic(clamp((uProgress - delay) / 0.65, 0.0, 1.0));
     vec3 from = position;
-    // nebulosa: a forma de origem gira devagar quando é a nuvem (uSwirl = 1 no primeiro segmento)
+    // nebula: the start shape slowly rotates when it is the cloud (uSwirl = 1 on the first segment)
     from.xy = rotate(from.xy, uTime * (0.05 + aRandom.z * 0.08) * uSwirl);
     vec3 pos = mix(from, aTarget, p);
-    // arco: cada partícula sai da linha reta no meio do trajeto
+    // arc: each particle leaves the straight line mid-way
     float arc = sin(p * 3.14159265);
     pos.xy += (aRandom.yz - 0.5) * 180.0 * arc;
-    // respiração ociosa
+    // idle breathing
     pos.xy += vec2(sin(uTime * 0.7 + aRandom.x * 6.2831), cos(uTime * 0.6 + aRandom.y * 6.2831)) * 1.4;
-    // repulsão do cursor
+    // cursor repulsion
     vec2 toMouse = pos.xy - uMouse;
     float d = length(toMouse);
     pos.xy += normalize(toMouse + 0.0001) * smoothstep(uMouseRadius, 0.0, d) * 42.0;
@@ -78,7 +79,7 @@ const FRAGMENT = /* glsl */ `
   }
 `;
 
-/** Amostra pontos (em px, centrados) de uma palavra desenhada num canvas 2D em escala reduzida. */
+/** Samples points (in px, centered) from a word drawn on a downscaled 2D canvas. */
 function sampleWord(word, width, height, font, count) {
   const w = Math.max(1, Math.floor(width * SAMPLE_SCALE));
   const h = Math.max(1, Math.floor(height * SAMPLE_SCALE));
@@ -114,8 +115,7 @@ function sampleWord(word, width, height, font, count) {
   return out;
 }
 
-/** Nuvem inicial: nebulosa densa no centro com braços espirais suaves. */
-/** Partículas soltas pela tela inteira, bem separadas: o começo de uma revelação. */
+/** Loose particles across the whole screen, well apart: the start of a reveal. */
 function sampleScatter(width, height, count) {
   const out = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
@@ -125,6 +125,7 @@ function sampleScatter(width, height, count) {
   return out;
 }
 
+/** Initial cloud: a dense nebula in the center with soft spiral arms. */
 function sampleCloud(width, height, count) {
   const out = new Float32Array(count * 3);
   const radius = Math.min(width, height) * 0.24;
@@ -162,7 +163,7 @@ export async function createTextMorph(THREE, container, options) {
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1000, 1000);
   const geometry = new THREE.BufferGeometry();
   const random = new Float32Array(count * 3).map(() => Math.random());
-  // Tom puxado para as cores quentes: ~15% frio, o resto entre laranja e âmbar.
+  // Tone pulled toward the warm colors: ~15% cool, the rest between the 2nd and 3rd colors.
   const tone = new Float32Array(count).map(() => (Math.random() < 0.15 ? Math.random() * 0.35 : 0.5 + Math.random() * 0.5));
   geometry.setAttribute('aRandom', new THREE.BufferAttribute(random, 3));
   geometry.setAttribute('aTone', new THREE.BufferAttribute(tone, 1));
@@ -189,7 +190,7 @@ export async function createTextMorph(THREE, container, options) {
   let height = 1;
   let buildId = 0;
 
-  /** Amostra as formas uma por frame (nenhuma tarefa longa); devolve false se outra build a substituiu. */
+  /** Samples the shapes one per frame (no long task); returns false if another build replaced it. */
   const build = async () => {
     const id = ++buildId;
     const w = container.clientWidth || 1;
@@ -219,11 +220,11 @@ export async function createTextMorph(THREE, container, options) {
   };
   await build();
   useSegment(0);
-  // Compila o programa em paralelo (KHR_parallel_shader_compile) antes do primeiro render:
-  // sem isso, o primeiro frame espera a compilação e a rolagem engasga.
+  // Compile the program in parallel (KHR_parallel_shader_compile) before the first render:
+  // without it, the first frame waits for the compile and scrolling stutters.
   await renderer.compileAsync?.(scene, camera);
 
-  /** Scrub contínuo: 0 = nuvem, 1 = primeira palavra, n = n-ésima palavra. */
+  /** Continuous scrub: 0 = cloud, 1 = first word, n = nth word. */
   const setProgress = (t) => {
     const clamped = Math.max(0, Math.min(shapes.length - 1, t));
     const k = Math.min(shapes.length - 2, Math.floor(clamped));
@@ -232,7 +233,7 @@ export async function createTextMorph(THREE, container, options) {
   };
 
   let tween = 0;
-  /** Transição animada até a forma `index` (1-based para palavras; 0 = nuvem). */
+  /** Animated transition to shape `index` (1-based for words; 0 = cloud). */
   const morphTo = (index, duration = 1400) => {
     cancelAnimationFrame(tween);
     const start = segment + uniforms.uProgress.value;
@@ -252,7 +253,7 @@ export async function createTextMorph(THREE, container, options) {
   const onLeave = () => uniforms.uMouse.value.set(99999, 99999);
   container.addEventListener('pointermove', onPointer, { passive: true });
   container.addEventListener('pointerleave', onLeave);
-  // Só reconstrói quando o tamanho muda de fato (o observe() sempre notifica uma vez de cara).
+  // Rebuild only when the size really changes (observe() always notifies once right away).
   let resizeTimer = 0;
   const ro = new ResizeObserver(() => {
     if ((container.clientWidth || 1) === width && (container.clientHeight || 1) === height) return;

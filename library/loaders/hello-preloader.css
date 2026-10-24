@@ -1,9 +1,9 @@
 /* ==========================================================================
-   parede-da-ia · pre-loader "olá" com blob desfocado (gradiente-atmosferico)
-   Homenagem ao padrão "hello <cidade>": saudação curta sobre um campo de cor respirando.
-   Regra: ≤ 1,8s; some sozinho mesmo sem JS (animação de saída com atraso).
+   parede-da-ia · "hello" preloader with a blurred blob (atmospheric-gradient)
+   A nod to the "hello <city>" pattern: a short greeting over a breathing color field.
+   Rule: ≤ 1.8s; it disappears on its own even without JS (a delayed exit animation).
 
-   <div class="hello" aria-hidden="true"><div class="hello__blob"></div><p class="hello__word">olá, <em>agente</em></p></div>
+   <div class="hello" aria-hidden="true"><div class="hello__blob"></div><p class="hello__word">hello, <em>agent</em></p></div>
    ========================================================================== */
 
 .hello {

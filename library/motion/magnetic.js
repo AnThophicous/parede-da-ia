@@ -1,12 +1,12 @@
 /**
- * parede-da-ia · botão magnético
- * O alvo se desloca em direção ao cursor; o conteúdo interno se desloca mais (paralaxe).
+ * parede-da-ia · magnetic button
+ * The target moves toward the cursor; its inner content moves further (parallax).
  *
  *   import { magnetic } from './magnetic.js';
  *   const stop = magnetic(button, { strength: 0.35, inner: button.querySelector('span') });
  *
- * Use só em alvos grandes e isolados (CTAs circulares, ícones de navegação).
- * Desligado em toque e em prefers-reduced-motion.
+ * Use it only on large, isolated targets (round CTAs, navigation icons).
+ * Off on touch and with prefers-reduced-motion.
  */
 
 /**

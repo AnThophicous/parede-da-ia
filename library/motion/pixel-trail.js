@@ -1,11 +1,11 @@
 /**
- * parede-da-ia · rastro de pixels no grid (estética canvas-ludico)
- * Células do grid de fundo acendem sob o cursor e esmaecem — como uma prancheta viva.
+ * parede-da-ia · pixel trail on a grid (playful-canvas aesthetic)
+ * Background grid cells light up under the cursor and fade — like a living drafting board.
  *
  *   import { pixelTrail } from './pixel-trail.js';
  *   const stop = pixelTrail(document.querySelector('.canvas'), { cell: 56, color: 'rgba(30,20,10,.08)', fadeMs: 600 });
  *
- * Decorativo: canvas aria-hidden, pointer-events none. Desligado em toque e reduced-motion.
+ * Decorative: an aria-hidden canvas, pointer-events none. Off on touch and with reduced-motion.
  */
 export function pixelTrail(host, options = {}) {
   const { cell = 56, color = 'rgba(0,0,0,.07)', fadeMs = 600, radius = 0 } = options;
@@ -17,7 +17,7 @@ export function pixelTrail(host, options = {}) {
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
   host.prepend(canvas);
   const ctx = canvas.getContext('2d');
-  const lit = new Map(); // "col,row" → instante em que acendeu
+  const lit = new Map(); // "col,row" → when it lit up
   const dpr = Math.min(2, window.devicePixelRatio || 1);
 
   const resize = () => {

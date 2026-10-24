@@ -1,17 +1,17 @@
 /* ==========================================================================
-   parede-da-ia · biblioteca de blurs
-   12 tipos de gradiente (taxonomia popularizada pelo Awwwards), agnósticos de paleta.
-   Uso:  <div class="blur blur--irregular" style="--c1:#050816;--c2:#1b2a63;--c3:#ff6a1a;--c4:#ffb36b"></div>
-   Cores interpoladas em OKLab/OKLCH para evitar o "cinza lamacento" entre complementares.
+   parede-da-ia · blur library
+   12 gradient types (taxonomy popularized by Awwwards), palette-agnostic.
+   Usage:  <div class="blur blur--irregular" style="--c1:#050816;--c2:#1b2a63;--c3:#ff6a1a;--c4:#ffb36b"></div>
+   Colors interpolated in OKLab/OKLCH to avoid the "muddy gray" between complementaries.
    ========================================================================== */
 
 .blur {
-  --c1: #050816; /* fundo / sombra */
-  --c2: #1b2a63; /* meio frio */
-  --c3: #ff6a1a; /* acento quente */
-  --c4: #ffb36b; /* luz */
-  --soft: 28px;  /* raio do desfoque */
-  --grain: 0.09; /* opacidade do grão */
+  --c1: #050816; /* background / shadow */
+  --c2: #1b2a63; /* cool middle */
+  --c3: #ff6a1a; /* warm accent */
+  --c4: #ffb36b; /* light */
+  --soft: 28px;  /* blur radius */
+  --grain: 0.09; /* grain opacity */
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -25,7 +25,7 @@
   filter: blur(var(--soft));
   background: var(--paint);
 }
-/* grão: esconde banding e dá materialidade */
+/* grain: hides banding and adds materiality */
 .blur::after {
   content: '';
   position: absolute;
@@ -36,7 +36,7 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* 1. Irregular — manchas orgânicas assimétricas */
+/* 1. Irregular — asymmetric organic blotches */
 .blur--irregular {
   --paint:
     radial-gradient(38% 46% at 28% 58% in oklab, var(--c3), transparent 70%),
@@ -45,13 +45,13 @@
     radial-gradient(60% 60% at 40% 20% in oklab, var(--c2), transparent 75%);
 }
 
-/* 2. Radial Ramp — anéis concêntricos a partir de um foco */
+/* 2. Radial Ramp — concentric rings from a focus */
 .blur--radial-ramp {
   --soft: 6px;
   --paint: radial-gradient(circle at 50% 108% in oklab, var(--c1) 0%, var(--c2) 18%, var(--c3) 42%, var(--c4) 62%, var(--c2) 88%);
 }
 
-/* 3. Blurred — duas cores fundidas com um brilho */
+/* 3. Blurred — two colors melted together with a glow */
 .blur--blurred {
   --soft: 40px;
   --paint:
@@ -59,7 +59,7 @@
     linear-gradient(135deg in oklch, var(--c3) 0%, var(--c2) 100%);
 }
 
-/* 4. Edgy — manchas com bordas mais nítidas e contraste */
+/* 4. Edgy — blotches with sharper edges and contrast */
 .blur--edgy {
   --soft: 8px;
   --paint:
@@ -68,13 +68,13 @@
     conic-gradient(from 210deg at 50% 50% in oklch, var(--c2), var(--c1), var(--c2));
 }
 
-/* 5. Landscape — faixas horizontais tipo horizonte */
+/* 5. Landscape — horizontal bands like a horizon */
 .blur--landscape {
   --soft: 10px;
   --paint: linear-gradient(180deg in oklab, var(--c4) 0%, var(--c3) 32%, var(--c4) 44%, var(--c2) 60%, var(--c1) 100%);
 }
 
-/* 6. Multicolor — diagonal com ilhas de luz */
+/* 6. Multicolor — a diagonal with islands of light */
 .blur--multicolor {
   --paint:
     radial-gradient(40% 40% at 20% 30% in oklab, var(--c4), transparent 70%),
@@ -82,19 +82,19 @@
     linear-gradient(160deg in oklch, var(--c3) 10%, var(--c2) 60%, var(--c1) 100%);
 }
 
-/* 7. Retro — diagonal de espectro com paradas firmes */
+/* 7. Retro — a spectrum diagonal with hard stops */
 .blur--retro {
   --soft: 4px;
   --paint: linear-gradient(120deg in oklch longer hue, var(--c4) 0%, var(--c3) 35%, var(--c2) 70%, var(--c4) 100%);
 }
 
-/* 8. Duotone — duas cores, transição longa */
+/* 8. Duotone — two colors, a long transition */
 .blur--duotone {
   --soft: 0px;
   --paint: linear-gradient(135deg in oklch, var(--c4) 0%, var(--c3) 100%);
 }
 
-/* 9. Tricolor — três manchas que se encontram */
+/* 9. Tricolor — three blotches meeting */
 .blur--tricolor {
   --paint:
     radial-gradient(55% 55% at 25% 30% in oklab, var(--c2), transparent 70%),
@@ -102,13 +102,13 @@
     radial-gradient(60% 55% at 50% 85% in oklab, var(--c4), transparent 70%);
 }
 
-/* 10. Volume Mesh — esfera iluminada (volume) */
+/* 10. Volume Mesh — a lit sphere (volume) */
 .blur--volume-mesh {
   --soft: 2px;
   --paint: radial-gradient(circle at 32% 30% in oklab, color-mix(in oklab, var(--c4) 60%, white) 0%, var(--c3) 32%, var(--c2) 68%, var(--c1) 100%);
 }
 
-/* 11. Banding — degraus visíveis (estética de gráfica/8-bit) */
+/* 11. Banding — visible steps (print/8-bit aesthetic) */
 .blur--banding {
   --soft: 0px;
   --grain: 0;
@@ -119,14 +119,14 @@
     var(--c2) 75% 87.5%, var(--c1) 87.5% 100%);
 }
 
-/* 12. Gradient / Image — imagem tingida pelo campo (defina --image) */
+/* 12. Gradient / Image — an image tinted by the field (set --image) */
 .blur--image {
   --soft: 0px;
   --paint: linear-gradient(140deg in oklch, color-mix(in oklab, var(--c3) 75%, transparent), color-mix(in oklab, var(--c2) 75%, transparent)), var(--image, none) center / cover;
 }
 .blur--image::before { background-blend-mode: color, normal; }
 
-/* Campo animado leve (sem WebGL): desloca as manchas devagar */
+/* A light animated field (no WebGL): drifts the blotches slowly */
 .blur--drift::before { animation: blur-drift 18s ease-in-out infinite alternate; }
 @keyframes blur-drift {
   50% { transform: translate3d(4%, -3%, 0) rotate(6deg) scale(1.05); }

@@ -1,7 +1,7 @@
 /* ==========================================================================
-   parede-da-ia · card stack (seção que vira card e se afasta revelando a próxima)
-   Visto no portfólio "sarah.": o canvas claro encolhe, arredonda e escurece ao rolar.
-   Puro CSS com scroll-driven animations; navegadores sem suporte ficam estáticos (ok).
+   parede-da-ia · card stack (a section that becomes a card and recedes, revealing the next one)
+   Seen on the "sarah." portfolio: the light canvas shrinks, rounds and darkens on scroll.
+   Pure CSS with scroll-driven animations; browsers without support stay static (fine).
 
    <section class="stack-card">…</section>
    <section class="stack-next">…</section>
