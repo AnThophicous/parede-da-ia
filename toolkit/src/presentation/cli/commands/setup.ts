@@ -23,8 +23,12 @@ ou pipelines de dados/IA, leia o router e siga as instruções dele (ele diz qua
 - Fallback remoto: ${RAW_ROUTER}
 
 Ferramentas (no PATH via \`npm link\`, ou \`node "${repo}/toolkit/bin/parede.js" <comando>\`):
-\`web-url-fetch\` · \`web-wait-page-load\` · \`web-wait\` · \`web-control\` · \`web-record-frames\` ·
-\`web-screenshot\` · \`web-scrap\` · \`web-serve\` · \`web-close\` — ajuda: \`parede help\`.
+- ver e agir: \`web-url-fetch\` · \`web-wait-page-load\` · \`web-wait\` · \`web-control\` · \`web-eval\` ·
+  \`web-screenshot\` · \`web-record-frames\` · \`web-close\`
+- medir: \`web-scrap\` · \`web-motion\` · \`web-interactions\` · \`web-audit\` · \`web-tokens\` · \`web-diff\` · \`media-frames\`
+- servir: \`web-serve\` — ajuda: \`parede help\`.
+
+Receitas de efeitos prontas (Hover Font, text morph, magnético…): \`${repo}/library/\`.
 ${MARK_END}`;
 }
 
