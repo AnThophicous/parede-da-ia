@@ -4,14 +4,14 @@ export type StyleSnapshot = Record<'self' | '::before' | '::after' | 'child', Re
 
 const IGNORE_SAME = new Set(['cursor']);
 
-/** Diferença entre dois instantâneos de estilo computado (antes × depois de uma interação). */
+/** Difference between two computed-style snapshots (before × after an interaction). */
 export function diffStyles(before: StyleSnapshot, after: StyleSnapshot): StyleChange[] {
   const changes: StyleChange[] = [];
   for (const target of ['self', '::before', '::after', 'child'] as const) {
     const a = before[target];
     const b = after[target];
     if (!a || !b) {
-      if (a !== b) changes.push({ target, property: 'presença', from: a ? 'visível' : 'ausente', to: b ? 'visível' : 'ausente' });
+      if (a !== b) changes.push({ target, property: 'presence', from: a ? 'visible' : 'absent', to: b ? 'visible' : 'absent' });
       continue;
     }
     for (const property of Object.keys(b)) {
@@ -22,7 +22,7 @@ export function diffStyles(before: StyleSnapshot, after: StyleSnapshot): StyleCh
   return changes;
 }
 
-/** Componente de translação (px) de um transform computado: matrix(...) ou matrix3d(...). */
+/** Translation component (px) of a computed transform: matrix(...) or matrix3d(...). */
 export function translationOf(transform: string | undefined, translate?: string): { x: number; y: number } {
   let x = 0;
   let y = 0;
@@ -41,7 +41,7 @@ export function translationOf(transform: string | undefined, translate?: string)
   return { x: x + (t[0] ?? 0), y: y + (t[1] ?? 0) };
 }
 
-/** Magnético = o elemento (ou o primeiro filho) se desloca na direção do cursor. */
+/** Magnetic = the element (or its first child) moves toward the cursor. */
 export function isMagnetic(hover: StyleSnapshot, nudged: StyleSnapshot, nudge: { x: number; y: number }): boolean {
   for (const target of ['self', 'child'] as const) {
     const a = hover[target];
@@ -62,20 +62,20 @@ export function focusIsVisible(changes: StyleChange[]): boolean {
   return changes.some((c) => FOCUS_PROPS.test(c.property) && !(c.property.startsWith('outline') && /none|0px/.test(c.to)));
 }
 
-/** Leitura crítica de uma microinteração, no vocabulário dos módulos 03/11/18. */
+/** A critical reading of a microinteraction, in the vocabulary of modules 03/11/18. */
 export function judgeInteraction(item: Omit<InteractionItem, 'verdict'>): string[] {
   const verdict: string[] = [];
-  if (!item.hover.changes.length) verdict.push('sem feedback de hover: o elemento não confirma que é clicável');
-  if (item.hover.changes.length && !item.hover.transition) verdict.push('hover sem transição: a mudança é seca (considere 150–300ms)');
-  if (/\b0s\b/.test(item.hover.transition) && item.hover.changes.length) verdict.push('transição declarada com 0s');
-  if (!item.focus.visible) verdict.push('foco de teclado invisível (WCAG 2.4.7)');
-  if (item.cursor !== 'pointer' && /^(a|button)$/.test(item.tag) && item.cursor !== 'none') verdict.push(`cursor "${item.cursor}" em elemento clicável`);
-  if (item.hover.magnetic) verdict.push('efeito magnético detectado');
-  if (item.press.changes.length) verdict.push('estado :active com resposta tátil');
+  if (!item.hover.changes.length) verdict.push('no hover feedback: the element does not confirm it is clickable');
+  if (item.hover.changes.length && !item.hover.transition) verdict.push('hover without a transition: the change is abrupt (consider 150–300ms)');
+  if (/\b0s\b/.test(item.hover.transition) && item.hover.changes.length) verdict.push('transition declared with 0s');
+  if (!item.focus.visible) verdict.push('invisible keyboard focus (WCAG 2.4.7)');
+  if (item.cursor !== 'pointer' && /^(a|button)$/.test(item.tag) && item.cursor !== 'none') verdict.push(`cursor "${item.cursor}" on a clickable element`);
+  if (item.hover.magnetic) verdict.push('magnetic effect detected');
+  if (item.press.changes.length) verdict.push('an :active state with tactile response');
   return verdict;
 }
 
-/** Resumo curto das mudanças para relatórios ("background #fff→#000 · ::before transform"). */
+/** A short summary of the changes for reports ("background #fff→#000 · ::before transform"). */
 export function summarizeChanges(changes: StyleChange[], max = 4): string {
   if (!changes.length) return '—';
   const parts = changes.slice(0, max).map((c) => {

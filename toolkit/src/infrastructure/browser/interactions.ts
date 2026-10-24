@@ -30,7 +30,7 @@ async function crop(page: Page, box: { x: number; y: number; width: number; heig
   return file;
 }
 
-/** Monta uma folha antes/hover/foco rotulada numa página temporária e captura. */
+/** Builds a labeled before/hover/focus sheet on a temporary page and captures it. */
 async function buildSheet(m: BrowserManager, items: InteractionItem[], file: string) {
   const { readFileSync } = await import('node:fs');
   const img = (p: string | null) => (p ? `<img src="data:image/png;base64,${readFileSync(p).toString('base64')}">` : '<div class="none">—</div>');
@@ -38,7 +38,7 @@ async function buildSheet(m: BrowserManager, items: InteractionItem[], file: str
   const rows = items
     .map(
       (it, i) => `<section><h2>${i + 1}. ${esc(it.selector)} <small>${esc(it.label)}</small></h2>
-      <div class="row"><figure>${img(it.shots.before)}<figcaption>antes</figcaption></figure><figure>${img(it.shots.hover)}<figcaption>hover · ${esc(summarizeChanges(it.hover.changes, 3))}</figcaption></figure><figure>${img(it.shots.focus)}<figcaption>foco · ${it.focus.visible ? 'visível' : 'INVISÍVEL'}</figcaption></figure></div>
+      <div class="row"><figure>${img(it.shots.before)}<figcaption>before</figcaption></figure><figure>${img(it.shots.hover)}<figcaption>hover · ${esc(summarizeChanges(it.hover.changes, 3))}</figcaption></figure><figure>${img(it.shots.focus)}<figcaption>focus · ${it.focus.visible ? 'visible' : 'INVISIBLE'}</figcaption></figure></div>
       <p>${esc(it.verdict.join(' · ') || 'ok')}</p></section>`,
     )
     .join('');
@@ -80,7 +80,7 @@ export async function testInteractions(m: BrowserManager, p: InteractionsParams)
     if (!box || box.width < 2 || box.height < 2) continue;
     const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     const snap = (): Promise<Snap> => page.evaluate(snapshotStyles, target.selector).catch(() => null);
-    // Relê a caixa a cada captura: hovers com transform e menus fixos movem o alvo.
+    // Re-read the box on every capture: hovers with transforms and fixed menus move the target.
     const shot = async (kind: string) => {
       if (!p.shots) return null;
       const current = (await locator.boundingBox().catch(() => null)) ?? box;
@@ -91,38 +91,38 @@ export async function testInteractions(m: BrowserManager, p: InteractionsParams)
     await sleep(p.holdMs / 2);
     const before = await snap();
     if (!before) continue;
-    const beforeShot = await shot('antes');
+    const beforeShot = await shot('before');
 
     await page.mouse.move(center.x, center.y, { steps: 8 });
     await sleep(p.holdMs);
     const hover = await snap();
     const hoverShot = await shot('hover');
 
-    // Sonda magnética: desloca o cursor dentro do alvo e vê se a translação acompanha o cursor.
+    // Magnetic probe: moves the cursor inside the target and checks whether the translation follows it.
     const nudge = { x: box.width * 0.3, y: box.height * 0.2 };
     await page.mouse.move(center.x + nudge.x, center.y + nudge.y, { steps: 4 });
     await sleep(Math.max(300, p.holdMs / 2));
     const nudged = await snap();
     const magnetic = Boolean(hover && nudged && isMagnetic(hover.snapshot, nudged.snapshot, nudge));
 
-    // :active sem disparar clique: pressiona, mede, sai do alvo e solta.
+    // :active without firing a click: press, measure, leave the target and release.
     await page.mouse.move(center.x, center.y, { steps: 2 });
     await page.mouse.down();
     await sleep(140);
     const pressed = await snap();
     await page.mouse.move(rest.x, rest.y, { steps: 2 });
     await page.mouse.up();
-    // pressionar e arrastar até o repouso seleciona texto: limpa para não sujar os próximos recortes
+    // pressing and dragging to the rest point selects text: clear it so the next crops stay clean
     await page.evaluate(() => window.getSelection()?.removeAllRanges()).catch(() => undefined);
     m.mouse = { x: rest.x, y: rest.y, known: true };
     await sleep(p.holdMs / 2);
 
-    // Foco por teclado: Shift ativa a modalidade de teclado, então :focus-visible se aplica.
+    // Keyboard focus: Shift switches to keyboard modality, so :focus-visible applies.
     await page.keyboard.press('Shift');
     await locator.focus().catch(() => undefined);
     await sleep(p.holdMs / 2);
     const focused = await snap();
-    const focusShot = await shot('foco');
+    const focusShot = await shot('focus');
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
 
     const hoverChanges = hover ? diffStyles(before.snapshot, hover.snapshot) : [];
@@ -141,7 +141,7 @@ export async function testInteractions(m: BrowserManager, p: InteractionsParams)
     items.push({ ...base, verdict: judgeInteraction(base) });
   }
 
-  const sheet = p.shots && items.length ? await buildSheet(m, items, join(p.dir, 'interacoes.png')).catch(() => null) : null;
+  const sheet = p.shots && items.length ? await buildSheet(m, items, join(p.dir, 'interactions.png')).catch(() => null) : null;
   return {
     url: page.url(),
     tested: items.length,

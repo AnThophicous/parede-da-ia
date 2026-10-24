@@ -1,18 +1,18 @@
 /**
- * Portas: o que a aplicação precisa do mundo externo (navegador, encoder de mídia, disco).
- * Implementadas em infrastructure/ e injetadas pelos composition roots (main.ts, daemon.ts).
- * Só existem porque cruzam fronteiras de I/O reais — nada de interface para classe única interna.
+ * Ports: what the application needs from the outside world (browser, media encoder, disk).
+ * Implemented in infrastructure/ and injected by the composition roots (main.ts, daemon.ts).
+ * They exist only because they cross real I/O boundaries — no interface for a single internal class.
  */
 
-/** Sessão de navegador controlada pelo daemon (processo separado, via RPC local). */
+/** A browser session controlled by the daemon (a separate process, over local RPC). */
 export interface BrowserSession {
-  /** Garante um daemon vivo, iniciando-o se necessário. */
+  /** Ensures a live daemon, starting it if needed. */
   ensure(): Promise<void>;
-  /** Existe uma sessão registrada (não garante que esteja viva)? */
+  /** Is there a registered session (doesn't guarantee it is alive)? */
   active(): boolean;
-  /** Executa um caso de uso no daemon. */
+  /** Runs a use case in the daemon. */
   call<T = unknown>(method: string, params?: object): Promise<T>;
-  /** Metadados da sessão registrada (para diagnóstico). */
+  /** Metadata of the registered session (for diagnostics). */
   describe(): { name: string; pid: number; port: number; log: string } | null;
 }
 
@@ -31,7 +31,7 @@ export interface SpritesheetJob {
   outDir: string;
   tileWidth: number;
   columns?: number;
-  /** Recorte em pixels do frame (x, y, largura, altura) — foco em um componente. */
+  /** A crop in frame pixels (x, y, width, height) — focus on a component. */
   crop?: { x: number; y: number; width: number; height: number };
 }
 
@@ -47,9 +47,9 @@ export interface SequenceJob {
 export interface ExtractJob {
   input: string;
   outDir: string;
-  /** Um frame a cada N segundos (modo uniforme). */
+  /** One frame every N seconds (uniform mode). */
   everySec?: number;
-  /** Limiar de mudança de cena 0–1 (modo cenas). */
+  /** Scene-change threshold 0–1 (scenes mode). */
   sceneThreshold?: number;
   fromSec?: number;
   toSec?: number;
@@ -77,7 +77,7 @@ export interface CompareResult {
   resized: boolean;
 }
 
-/** Codificador de mídia (FFmpeg). Opcional: sem ele, frames continuam sendo salvos. */
+/** Media encoder (FFmpeg). Optional: without it, frames are still saved. */
 export interface MediaEncoder {
   readonly source: string;
   probe(file: string): Promise<MediaInfo>;
@@ -91,18 +91,18 @@ export interface MediaEncoder {
 
 export type ArtifactKind = 'screenshots' | 'recordings' | 'scrap' | 'motion' | 'interactions' | 'audit' | 'media' | 'diff' | 'tokens';
 
-/** Onde os artefatos (imagens, JSON, vídeos) são gravados para o agente ler depois. */
+/** Where artifacts (images, JSON, videos) are written for the agent to read later. */
 export interface ArtifactStore {
   root(): string;
-  /** Caminho absoluto para um arquivo novo dentro da pasta do tipo (cria a pasta). */
+  /** Absolute path to a new file inside the kind's folder (creates the folder). */
   path(kind: ArtifactKind, file: string): string;
-  /** Pasta nova e vazia para um conjunto de artefatos (gravações, auditorias). */
+  /** A new, empty folder for a set of artifacts (recordings, audits). */
   dir(kind: ArtifactKind, name: string): string;
 }
 
 export interface AppContext {
   session: BrowserSession;
-  /** Resolvido sob demanda: FFmpeg é dependência opcional. */
+  /** Resolved on demand: FFmpeg is an optional dependency. */
   encoder(): MediaEncoder | null;
   artifacts: ArtifactStore;
 }

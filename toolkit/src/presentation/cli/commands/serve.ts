@@ -56,17 +56,17 @@ function serve(root: string, port: number, spa: boolean): Promise<never> {
   });
   return new Promise((_, reject) => {
     server.on('error', (err: NodeJS.ErrnoException) =>
-      reject(err.code === 'EADDRINUSE' ? new ParedeError('PORT_IN_USE', `A porta ${port} já está em uso.`, 'Use --port <outra>.') : err),
+      reject(err.code === 'EADDRINUSE' ? new ParedeError('PORT_IN_USE', `Port ${port} is already in use.`, 'Use --port <another>.') : err),
     );
-    server.listen(port, '127.0.0.1', () => console.log(ok(`servindo ${root} em http://localhost:${port}`)));
+    server.listen(port, '127.0.0.1', () => console.log(ok(`serving ${root} at http://localhost:${port}`)));
   });
 }
 
 export const serveCommand: Command = {
   name: 'web-serve',
-  group: 'operação',
-  summary: 'Servidor estático local sem cache para o loop de QA visual (com --detach).',
-  usage: `web-serve [pasta=.] [--port 4173] [--spa] [--detach] [--stop]`,
+  group: 'operations',
+  summary: 'A local, no-cache static server for the visual QA loop (with --detach).',
+  usage: `web-serve [folder=.] [--port 4173] [--spa] [--detach] [--stop]`,
   async execute(argv) {
     const { values, positionals } = parse(
       argv,
@@ -77,15 +77,15 @@ export const serveCommand: Command = {
 
     if (values.stop) {
       const file = statePath(port);
-      if (!existsSync(file)) return { data: { stopped: false }, text: ok(`nada rodando na porta ${port}`) };
+      if (!existsSync(file)) return { data: { stopped: false }, text: ok(`nothing running on port ${port}`) };
       const { pid } = JSON.parse(readFileSync(file, 'utf8')) as { pid: number };
       if (isPidAlive(pid)) process.kill(pid);
       rmSync(file, { force: true });
-      return { data: { stopped: true, pid }, text: ok(`servidor da porta ${port} encerrado`) };
+      return { data: { stopped: true, pid }, text: ok(`server on port ${port} stopped`) };
     }
 
     const root = resolve(positionals[0] ?? '.');
-    if (!existsSync(root)) throw new ParedeError('BAD_ARG', `Pasta não encontrada: ${root}`);
+    if (!existsSync(root)) throw new ParedeError('BAD_ARG', `Folder not found: ${root}`);
 
     if (values.detach) {
       ensureDir(join(PAREDE_HOME, 'serve'));
@@ -99,7 +99,7 @@ export const serveCommand: Command = {
       writeFileSync(statePath(port), JSON.stringify({ pid: child.pid, root, port }));
       await new Promise((r) => setTimeout(r, 400));
       const url = `http://localhost:${port}`;
-      return { data: { url, pid: child.pid, root }, text: [ok(`servindo em background: ${url}`), kv('pasta', root), next(`web-url-fetch ${url}  ·  parar: web-serve --stop --port ${port}`)].join('\n') };
+      return { data: { url, pid: child.pid, root }, text: [ok(`serving in the background: ${url}`), kv('folder', root), next(`web-url-fetch ${url}  ·  stop: web-serve --stop --port ${port}`)].join('\n') };
     }
 
     return serve(root, port, Boolean(values.spa));

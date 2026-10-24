@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Coletores de movimento executados DENTRO da página. Autocontidos (page.evaluate).
+ * Motion collectors that run INSIDE the page. Self-contained (page.evaluate).
  *
- * collectMotion  → o que está declarado/rodando agora (WAAPI, transições CSS, @keyframes,
- *                  GSAP/ScrollTrigger quando expostos, Lenis/Locomotive, prefers-reduced-motion)
- * startObserve   → começa a observar mutações de estilo inline + amostrar frames (rAF)
- * stopObserve    → encerra e resume: quais elementos animaram, quais propriedades, fps/jank
+ * collectMotion  → what is declared/running now (WAAPI, CSS transitions, @keyframes,
+ *                  GSAP/ScrollTrigger when exposed, Lenis/Locomotive, prefers-reduced-motion)
+ * startObserve   → starts watching inline style mutations + sampling frames (rAF)
+ * stopObserve    → stops and summarizes: which elements animated, which properties, fps/jank
  *
- * A observação funciona mesmo com GSAP/Motion empacotados (sem global): eles escrevem
- * estilos inline a cada frame, e é isso que o MutationObserver registra.
+ * The observation works even with bundled GSAP/Motion (no global): they write
+ * inline styles every frame, and that is what the MutationObserver records.
  */
 
 export function collectMotion() {
@@ -25,7 +25,7 @@ export function collectMotion() {
     const total = [...map.values()].reduce((s, v) => s + v, 0) || 1;
     return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, n).map(([value, c]) => ({ value, share: Math.round((c / total) * 1000) / 10 }));
   };
-  /** Divide listas CSS por vírgulas de nível superior (cubic-bezier(a, b, c, d) tem vírgulas internas). */
+  /** Splits CSS lists on top-level commas (cubic-bezier(a, b, c, d) has inner commas). */
   const splitTop = (value: string) => {
     const out: string[] = [];
     let depth = 0;
@@ -43,7 +43,7 @@ export function collectMotion() {
   };
   const toMs = (v: string) => (v.endsWith('ms') ? parseFloat(v) : parseFloat(v) * 1000);
 
-  // ── animações rodando agora (CSS animations, CSS transitions, WAAPI) ──
+  // ── animations running now (CSS animations, CSS transitions, WAAPI) ──
   const anims: any[] = typeof doc.getAnimations === 'function' ? doc.getAnimations() : [];
   const byKind = new Map<string, number>();
   const items = anims.slice(0, 80).map((a) => {
@@ -73,7 +73,7 @@ export function collectMotion() {
   });
   for (const a of anims.slice(80)) bump(byKind, a.constructor?.name ?? 'Animation');
 
-  // ── transições declaradas (o "vocabulário" de movimento do site) ──
+  // ── declared transitions (the site's motion "vocabulary") ──
   const durations = new Map<string, number>();
   const easings = new Map<string, number>();
   const properties = new Map<string, number>();
@@ -97,7 +97,7 @@ export function collectMotion() {
     });
   }
 
-  // ── @keyframes e regras de reduced-motion em folhas acessíveis ──
+  // ── @keyframes and reduced-motion rules in accessible stylesheets ──
   const keyframes: { name: string; css: string }[] = [];
   let reducedRules = 0;
   const walk = (rules: CSSRuleList) => {
@@ -130,7 +130,7 @@ export function collectMotion() {
     /* ignore */
   }
 
-  // ── GSAP / ScrollTrigger (quando expostos no window) ──
+  // ── GSAP / ScrollTrigger (when exposed on window) ──
   let gsap: any = null;
   const g = w.gsap;
   if (g?.globalTimeline) {
@@ -159,8 +159,8 @@ export function collectMotion() {
     const triggers = ST?.getAll
       ? ST.getAll().slice(0, 80).map((st: any) => ({
           trigger: st.trigger ? label(st.trigger) : '—',
-          start: typeof st.vars?.start === 'string' ? st.vars.start : st.vars?.start ? 'função' : 'top bottom',
-          end: typeof st.vars?.end === 'string' ? st.vars.end : st.vars?.end ? 'função' : 'bottom top',
+          start: typeof st.vars?.start === 'string' ? st.vars.start : st.vars?.start ? 'function' : 'top bottom',
+          end: typeof st.vars?.end === 'string' ? st.vars.end : st.vars?.end ? 'function' : 'bottom top',
           scrub: st.vars?.scrub ?? null,
           pin: Boolean(st.vars?.pin),
           toggleActions: st.vars?.toggleActions ?? null,
@@ -176,7 +176,7 @@ export function collectMotion() {
   const lenis = w.lenis ?? w.__lenis ?? null;
   if (lenis?.options) {
     const o = lenis.options;
-    smooth = { library: 'Lenis', options: { lerp: o.lerp, duration: o.duration, smoothWheel: o.smoothWheel, wheelMultiplier: o.wheelMultiplier, touchMultiplier: o.touchMultiplier, easing: typeof o.easing === 'function' ? 'função' : o.easing, orientation: o.orientation } };
+    smooth = { library: 'Lenis', options: { lerp: o.lerp, duration: o.duration, smoothWheel: o.smoothWheel, wheelMultiplier: o.wheelMultiplier, touchMultiplier: o.touchMultiplier, easing: typeof o.easing === 'function' ? 'function' : o.easing, orientation: o.orientation } };
   } else if (w.lenisVersion || doc.documentElement.classList.contains('lenis')) {
     smooth = { library: 'Lenis', options: null };
   } else if (doc.documentElement.classList.contains('has-scroll-smooth') || doc.querySelector('[data-scroll-container]')) {
@@ -184,7 +184,7 @@ export function collectMotion() {
   }
 
   const libraries: string[] = [];
-  if (gsap) libraries.push(`GSAP ${gsap.version ?? ''}`.trim() + (gsap.global ? '' : ' (empacotado)'));
+  if (gsap) libraries.push(`GSAP ${gsap.version ?? ''}`.trim() + (gsap.global ? '' : ' (bundled)'));
   if (w.ScrollTrigger) libraries.push('ScrollTrigger');
   if (smooth.library) libraries.push(smooth.library);
   if ((w.__PAREDE__?.waapi ?? 0) > 3) libraries.push('Web Animations API (Motion/Framer Motion)');

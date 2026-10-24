@@ -25,29 +25,29 @@ for (const c of COMMANDS) {
 
 export function help(version: string): string {
   const width = Math.max(...COMMANDS.map((c) => c.name.length)) + 2;
-  const groups: Command['group'][] = ['navegador', 'análise', 'mídia', 'operação'];
+  const groups: Command['group'][] = ['browser', 'analysis', 'media', 'operations'];
   return [
-    `parede-da-ia ${version} — olhos, mãos e repertório para agentes de IA`,
+    `parede-da-ia ${version} — eyes, hands and taste for AI agents`,
     '',
-    'Fluxo típico:',
+    'Typical flow:',
     '  web-url-fetch https://lusion.co → web-wait-page-load → web-scrap → web-motion --observe 3',
     '  web-record-frames --while "scroll-down 4000 --steps 80" --interval 0.25',
-    '  web-audit --viewports desktop,tablet,mobile   (QA antes de entregar)',
+    '  web-audit --viewports desktop,tablet,mobile   (QA before delivering)',
     '',
     ...groups.flatMap((g) => [`${g.toUpperCase()}`, ...COMMANDS.filter((c) => c.group === g).map((c) => `  ${c.name.padEnd(width)}${c.summary}`), '']),
-    'Flags globais: --json (saída estruturada) · --help (uso do comando)',
-    'Ambiente: PAREDE_SESSION (sessões paralelas) · PAREDE_OUT (pasta de artefatos) · PAREDE_FFMPEG · PAREDE_GPU=0 · PAREDE_IDLE_MINUTES',
+    'Global flags: --json (structured output) · --help (command usage)',
+    'Environment: PAREDE_SESSION (parallel sessions) · PAREDE_OUT (artifacts folder) · PAREDE_FFMPEG · PAREDE_GPU=0 · PAREDE_IDLE_MINUTES',
   ].join('\n');
 }
 
-/** Execução programática (usada pelo MCP): nunca imprime nem encerra o processo. */
+/** Programmatic execution (used by MCP): never prints nor exits the process. */
 export async function execute(name: string, argv: string[], ctx: AppContext): Promise<CommandResult> {
   const command = registry.get(name);
-  if (!command) throw new ParedeError('BAD_COMMAND', `Comando desconhecido: ${name}`, 'Rode `parede help`.');
+  if (!command) throw new ParedeError('BAD_COMMAND', `Unknown command: ${name}`, 'Run `parede help`.');
   return command.execute(argv, ctx);
 }
 
-/** Interface de terminal: imprime texto (ou JSON) e define o código de saída. */
+/** Terminal interface: prints text (or JSON) and sets the exit code. */
 export async function runCli(command: string | null, argv: string[], ctx: AppContext, version: string): Promise<void> {
   let name = command;
   let args = argv;

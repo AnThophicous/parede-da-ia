@@ -20,8 +20,8 @@ const settle = () => sleep(650);
 export async function runAudit(m: BrowserManager, p: AuditParams): Promise<AuditReport> {
   const page = m.requirePage();
   const original = page.viewportSize();
-  // Vitals da carga lidos antes de qualquer troca de viewport: o resize gera layout shift e
-  // long tasks (ResizeObserver, canvases) que não são da página carregando e inflariam o CLS.
+  // Load vitals read before any viewport change: the resize itself causes layout shifts and
+  // long tasks (ResizeObserver, canvases) that don't belong to the page loading and would inflate CLS.
   const perf = await perfSnapshot(m);
   const issues: AuditIssue[] = [];
   const push = (issue: Omit<AuditIssue, 'targets'> & { targets?: string[] }) => issues.push({ targets: [], ...issue });
@@ -36,24 +36,24 @@ export async function runAudit(m: BrowserManager, p: AuditParams): Promise<Audit
       const local: AuditIssue[] = [];
       const add = (issue: Omit<AuditIssue, 'viewport' | 'targets'> & { targets?: string[] }) => local.push({ targets: [], viewport: name, ...issue });
 
-      if (c.overflowX > 1) add({ id: 'overflow-x', category: 'responsivo', severity: 'erro', message: `rolagem horizontal de ${c.overflowX}px`, targets: c.offenders.map((o) => `${o.selector} (+${o.by}px)`) });
-      if (c.tooSmall.length) add({ id: 'tap-target', category: 'acessibilidade', severity: 'erro', message: `${c.tooSmall.length} alvo(s) de toque menores que ${BUDGET.tapTargetMin}px (WCAG 2.5.8)`, targets: c.tooSmall });
-      if (c.uncomfortable.length) add({ id: 'tap-comfort', category: 'responsivo', severity: 'aviso', message: `${c.uncomfortable.length} alvo(s) abaixo de ${BUDGET.tapTargetComfort}px (confortável para o polegar)`, targets: c.uncomfortable });
-      if (c.smallText.length) add({ id: 'small-text', category: 'responsivo', severity: 'aviso', message: `texto menor que ${BUDGET.mobileTextMin}px no mobile`, targets: c.smallText });
-      if (c.missingAlt.length) add({ id: 'img-alt', category: 'acessibilidade', severity: 'erro', message: `${c.missingAlt.length} imagem(ns) sem alt`, targets: c.missingAlt });
-      if (c.noDimensions.length) add({ id: 'img-dimensions', category: 'performance', severity: 'aviso', message: `${c.noDimensions.length} imagem(ns) sem width/height ou aspect-ratio (risco de layout shift)`, targets: c.noDimensions });
-      if (c.unnamedButtons.length) add({ id: 'button-name', category: 'acessibilidade', severity: 'erro', message: 'botões sem nome acessível', targets: c.unnamedButtons });
-      if (c.unnamedLinks.length) add({ id: 'link-name', category: 'acessibilidade', severity: 'erro', message: 'links sem texto ou aria-label', targets: c.unnamedLinks });
-      if (c.unlabeledInputs.length) add({ id: 'input-label', category: 'acessibilidade', severity: 'erro', message: 'campos de formulário sem rótulo', targets: c.unlabeledInputs });
-      if (c.fakeLinks.length) add({ id: 'fake-link', category: 'acessibilidade', severity: 'aviso', message: '<a> sem href real (use <button> para ações)', targets: c.fakeLinks });
-      if (c.unsafeBlank.length) add({ id: 'blank-noopener', category: 'seo', severity: 'aviso', message: 'target="_blank" sem rel="noopener"', targets: c.unsafeBlank });
-      if (c.h1 !== 1) add({ id: 'h1-count', category: 'conteudo', severity: 'aviso', message: `${c.h1} <h1> na página (esperado: 1)` });
-      if (c.skipped.length) add({ id: 'heading-skip', category: 'conteudo', severity: 'aviso', message: 'níveis de título pulados', targets: c.skipped });
-      if (!c.lang) add({ id: 'html-lang', category: 'acessibilidade', severity: 'erro', message: '<html> sem atributo lang' });
-      if (!c.title) add({ id: 'title', category: 'seo', severity: 'erro', message: 'página sem <title>' });
-      if (!c.description) add({ id: 'meta-description', category: 'seo', severity: 'aviso', message: 'sem meta description' });
-      if (!c.viewportMeta) add({ id: 'meta-viewport', category: 'responsivo', severity: 'erro', message: 'sem <meta name="viewport">' });
-      if (!c.ogImage) add({ id: 'og-image', category: 'seo', severity: 'info', message: 'sem og:image (prévia ao compartilhar)' });
+      if (c.overflowX > 1) add({ id: 'overflow-x', category: 'responsive', severity: 'error', message: `horizontal scroll of ${c.overflowX}px`, targets: c.offenders.map((o) => `${o.selector} (+${o.by}px)`) });
+      if (c.tooSmall.length) add({ id: 'tap-target', category: 'accessibility', severity: 'error', message: `${c.tooSmall.length} touch target(s) smaller than ${BUDGET.tapTargetMin}px (WCAG 2.5.8)`, targets: c.tooSmall });
+      if (c.uncomfortable.length) add({ id: 'tap-comfort', category: 'responsive', severity: 'warning', message: `${c.uncomfortable.length} target(s) below ${BUDGET.tapTargetComfort}px (comfortable for the thumb)`, targets: c.uncomfortable });
+      if (c.smallText.length) add({ id: 'small-text', category: 'responsive', severity: 'warning', message: `text smaller than ${BUDGET.mobileTextMin}px on mobile`, targets: c.smallText });
+      if (c.missingAlt.length) add({ id: 'img-alt', category: 'accessibility', severity: 'error', message: `${c.missingAlt.length} image(s) without alt`, targets: c.missingAlt });
+      if (c.noDimensions.length) add({ id: 'img-dimensions', category: 'performance', severity: 'warning', message: `${c.noDimensions.length} image(s) without width/height or aspect-ratio (layout shift risk)`, targets: c.noDimensions });
+      if (c.unnamedButtons.length) add({ id: 'button-name', category: 'accessibility', severity: 'error', message: 'buttons without an accessible name', targets: c.unnamedButtons });
+      if (c.unnamedLinks.length) add({ id: 'link-name', category: 'accessibility', severity: 'error', message: 'links without text or aria-label', targets: c.unnamedLinks });
+      if (c.unlabeledInputs.length) add({ id: 'input-label', category: 'accessibility', severity: 'error', message: 'form fields without a label', targets: c.unlabeledInputs });
+      if (c.fakeLinks.length) add({ id: 'fake-link', category: 'accessibility', severity: 'warning', message: '<a> without a real href (use <button> for actions)', targets: c.fakeLinks });
+      if (c.unsafeBlank.length) add({ id: 'blank-noopener', category: 'seo', severity: 'warning', message: 'target="_blank" without rel="noopener"', targets: c.unsafeBlank });
+      if (c.h1 !== 1) add({ id: 'h1-count', category: 'content', severity: 'warning', message: `${c.h1} <h1> on the page (expected: 1)` });
+      if (c.skipped.length) add({ id: 'heading-skip', category: 'content', severity: 'warning', message: 'skipped heading levels', targets: c.skipped });
+      if (!c.lang) add({ id: 'html-lang', category: 'accessibility', severity: 'error', message: '<html> without a lang attribute' });
+      if (!c.title) add({ id: 'title', category: 'seo', severity: 'error', message: 'page without <title>' });
+      if (!c.description) add({ id: 'meta-description', category: 'seo', severity: 'warning', message: 'no meta description' });
+      if (!c.viewportMeta) add({ id: 'meta-viewport', category: 'responsive', severity: 'error', message: 'no <meta name="viewport">' });
+      if (!c.ogImage) add({ id: 'og-image', category: 'seo', severity: 'info', message: 'no og:image (share preview)' });
 
       const shot = join(p.dir, `${vp.name}-${vp.width}x${vp.height}.png`);
       await page.screenshot({ path: shot, fullPage: p.fullPage, animations: 'allow', caret: 'hide', scale: 'css', timeout: 60_000 }).catch(() => null);
@@ -65,16 +65,16 @@ export async function runAudit(m: BrowserManager, p: AuditParams): Promise<Audit
     await settle();
   }
 
-  // Contraste (no viewport original) via o mesmo scanner do web-scrap.
+  // Contrast (on the original viewport) through web-scrap's own scanner.
   const scan = await page.evaluate(scanPage, { maxElements: 3000, extraVarNames: [] });
   const certain = scan.contrast.issues.filter((i) => !i.uncertain);
   const unsure = scan.contrast.issues.filter((i) => i.uncertain);
-  if (certain.length) push({ id: 'contrast', category: 'acessibilidade', severity: 'erro', viewport: 'desktop', message: `${certain.length} texto(s) abaixo do contraste WCAG AA`, targets: certain.slice(0, 10).map((i) => `${i.selector} ${i.ratio}:1 (mín ${i.required})`) });
-  if (unsure.length) push({ id: 'contrast-unsure', category: 'acessibilidade', severity: 'info', viewport: 'desktop', message: `${unsure.length} texto(s) sobre imagem/vídeo/WebGL para conferir visualmente`, targets: unsure.slice(0, 6).map((i) => i.selector) });
+  if (certain.length) push({ id: 'contrast', category: 'accessibility', severity: 'error', viewport: 'desktop', message: `${certain.length} text(s) below WCAG AA contrast`, targets: certain.slice(0, 10).map((i) => `${i.selector} ${i.ratio}:1 (min ${i.required})`) });
+  if (unsure.length) push({ id: 'contrast-unsure', category: 'accessibility', severity: 'info', viewport: 'desktop', message: `${unsure.length} text(s) over image/video/WebGL to check visually`, targets: unsure.slice(0, 6).map((i) => i.selector) });
 
-  // Foco visível: Tab real, compara o elemento focado com ele mesmo sem foco.
-  // Transições desligadas durante a sonda: com `transition-all`, ler o estilo no instante em que
-  // a transição começa devolve o valor de partida e acusaria falta de foco (falso positivo).
+  // Visible focus: a real Tab, comparing the focused element with itself unfocused.
+  // Transitions off during the probe: with `transition-all`, reading the style the moment the
+  // transition starts returns the starting value and would report missing focus (a false positive).
   const missingFocus: string[] = [];
   let focused = 0;
   const noTransitions = await page.addStyleTag({ content: '*, *::before, *::after { transition: none !important; }' }).catch(() => null);
@@ -95,36 +95,36 @@ export async function runAudit(m: BrowserManager, p: AuditParams): Promise<Audit
       return [cs.outlineStyle, cs.outlineWidth, cs.outlineColor, cs.boxShadow, cs.borderTopColor, cs.backgroundColor, cs.color, cs.textDecorationLine, cs.transform].join('|');
     });
     if (off !== null && off === on.styles) missingFocus.push(on.selector);
-    // devolve o foco ao ponto da navegação sequencial
+    // put focus back where the sequential navigation was
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');
   }
   await noTransitions?.evaluate((el) => (el as Element).remove()).catch(() => undefined);
-  if (focused === 0) push({ id: 'no-focusable', category: 'acessibilidade', severity: 'aviso', viewport: 'desktop', message: 'Tab não alcançou nenhum elemento (foco preso ou sem interativos)' });
-  if (missingFocus.length) push({ id: 'focus-visible', category: 'acessibilidade', severity: 'erro', viewport: 'desktop', message: `${missingFocus.length} elemento(s) sem indicador de foco visível`, targets: [...new Set(missingFocus)] });
+  if (focused === 0) push({ id: 'no-focusable', category: 'accessibility', severity: 'warning', viewport: 'desktop', message: 'Tab reached no element (trapped focus or no interactive elements)' });
+  if (missingFocus.length) push({ id: 'focus-visible', category: 'accessibility', severity: 'error', viewport: 'desktop', message: `${missingFocus.length} element(s) without a visible focus indicator`, targets: [...new Set(missingFocus)] });
 
-  // Movimento: bibliotecas de animação sem tratamento de prefers-reduced-motion.
+  // Motion: animation libraries without prefers-reduced-motion handling.
   const motion = await page.evaluate(collectMotion);
   const animated = motion.libraries.length > 0 || motion.running.total > 3;
   if (animated && !motion.reducedMotion.respected) {
-    push({ id: 'reduced-motion', category: 'movimento', severity: 'aviso', viewport: 'todos', message: `há movimento (${motion.libraries.join(', ') || `${motion.running.total} animações`}) mas nenhuma regra prefers-reduced-motion foi encontrada` });
+    push({ id: 'reduced-motion', category: 'motion', severity: 'warning', viewport: 'all', message: `there is motion (${motion.libraries.join(', ') || `${motion.running.total} animations`}) but no prefers-reduced-motion rule was found` });
   }
 
-  // Performance: Web Vitals (lidos no início) + orçamento de peso.
+  // Performance: Web Vitals (read at the start) + weight budget.
   const totalBytes = m.network.reduce((n, e) => n + (e.bytes ?? 0), 0);
   const jsBytes = m.network.filter((e) => e.type === 'script').reduce((n, e) => n + (e.bytes ?? 0), 0);
   const fontFiles = m.network.filter((e) => e.type === 'font').length;
-  if (perf.cls !== null && perf.cls > BUDGET.clsWarn) push({ id: 'cls', category: 'performance', severity: perf.cls > BUDGET.clsError ? 'erro' : 'aviso', viewport: 'carga', message: `CLS ${perf.cls} (bom ≤ ${BUDGET.clsWarn})` });
-  if (perf.lcpMs !== null && perf.lcpMs > BUDGET.lcpWarnMs) push({ id: 'lcp', category: 'performance', severity: perf.lcpMs > BUDGET.lcpErrorMs ? 'erro' : 'aviso', viewport: 'carga', message: `LCP ${(perf.lcpMs / 1000).toFixed(2)}s em ${perf.lcpElement ?? '?'} (bom ≤ 2.5s)` });
-  if (perf.longTasks > BUDGET.longTasksWarn) push({ id: 'long-tasks', category: 'performance', severity: 'aviso', viewport: 'carga', message: `${perf.longTasks} long tasks (${perf.longTaskMs}ms bloqueando a main thread)` });
-  if (totalBytes > BUDGET.bytesWarn) push({ id: 'weight', category: 'performance', severity: totalBytes > BUDGET.bytesError ? 'erro' : 'aviso', viewport: 'carga', message: `${(totalBytes / 1048576).toFixed(1)} MB transferidos` });
-  if (jsBytes > BUDGET.jsWarn) push({ id: 'js-weight', category: 'performance', severity: 'aviso', viewport: 'carga', message: `${(jsBytes / 1048576).toFixed(1)} MB de JavaScript` });
-  if (fontFiles > BUDGET.fontFilesWarn) push({ id: 'font-files', category: 'performance', severity: 'aviso', viewport: 'carga', message: `${fontFiles} arquivos de fonte (subconjunto/variable font reduziriam)` });
+  if (perf.cls !== null && perf.cls > BUDGET.clsWarn) push({ id: 'cls', category: 'performance', severity: perf.cls > BUDGET.clsError ? 'error' : 'warning', viewport: 'load', message: `CLS ${perf.cls} (good ≤ ${BUDGET.clsWarn})` });
+  if (perf.lcpMs !== null && perf.lcpMs > BUDGET.lcpWarnMs) push({ id: 'lcp', category: 'performance', severity: perf.lcpMs > BUDGET.lcpErrorMs ? 'error' : 'warning', viewport: 'load', message: `LCP ${(perf.lcpMs / 1000).toFixed(2)}s on ${perf.lcpElement ?? '?'} (good ≤ 2.5s)` });
+  if (perf.longTasks > BUDGET.longTasksWarn) push({ id: 'long-tasks', category: 'performance', severity: 'warning', viewport: 'load', message: `${perf.longTasks} long tasks (${perf.longTaskMs}ms blocking the main thread)` });
+  if (totalBytes > BUDGET.bytesWarn) push({ id: 'weight', category: 'performance', severity: totalBytes > BUDGET.bytesError ? 'error' : 'warning', viewport: 'load', message: `${(totalBytes / 1048576).toFixed(1)} MB transferred` });
+  if (jsBytes > BUDGET.jsWarn) push({ id: 'js-weight', category: 'performance', severity: 'warning', viewport: 'load', message: `${(jsBytes / 1048576).toFixed(1)} MB of JavaScript` });
+  if (fontFiles > BUDGET.fontFilesWarn) push({ id: 'font-files', category: 'performance', severity: 'warning', viewport: 'load', message: `${fontFiles} font files (subsetting/a variable font would reduce them)` });
 
   const errors = (await m.consoleEntries()).filter((c) => c.type === 'error' || c.type === 'pageerror');
-  if (errors.length) push({ id: 'console', category: 'console', severity: 'erro', viewport: 'todos', message: `${errors.length} erro(s) de console`, targets: errors.slice(0, 6).map((e) => e.text.slice(0, 140)) });
+  if (errors.length) push({ id: 'console', category: 'console', severity: 'error', viewport: 'all', message: `${errors.length} console error(s)`, targets: errors.slice(0, 6).map((e) => e.text.slice(0, 140)) });
   const failed = m.network.filter((e) => e.failure || (e.status ?? 0) >= 400);
-  if (failed.length) push({ id: 'network-fail', category: 'console', severity: 'aviso', viewport: 'carga', message: `${failed.length} requisição(ões) com falha`, targets: failed.slice(0, 6).map((e) => `${e.status ?? e.failure} ${e.url.slice(0, 100)}`) });
+  if (failed.length) push({ id: 'network-fail', category: 'console', severity: 'warning', viewport: 'load', message: `${failed.length} failed request(s)`, targets: failed.slice(0, 6).map((e) => `${e.status ?? e.failure} ${e.url.slice(0, 100)}`) });
 
   const { scores, overall, verdict } = scoreAudit(issues);
   return {

@@ -2,8 +2,8 @@ import { detectOverlay } from './inject/scanner.js';
 import type { BrowserManager } from './manager.js';
 
 /**
- * Espera "padrão ouro": load → networkidle → fontes prontas → dois frames pintados.
- * Se a rede nunca ociosa (analytics, long-polling, vídeo em stream), segue em frente e avisa.
+ * The "gold standard" wait: load → networkidle → fonts ready → two painted frames.
+ * If the network never goes idle (analytics, long polling, streaming video), it moves on and warns.
  */
 export async function waitPageLoad(m: BrowserManager, timeoutMs: number, idleCapMs = 10_000) {
   const page = m.requirePage();
@@ -13,10 +13,10 @@ export async function waitPageLoad(m: BrowserManager, timeoutMs: number, idleCap
   await page.waitForLoadState('load', { timeout: timeoutMs });
   const remaining = () => Math.max(1000, timeoutMs - (Date.now() - started));
   try {
-    // Sites com analytics/streams nunca ociosam: limita a espera para não travar o agente.
+    // Sites with analytics/streams never go idle: cap the wait so the agent never hangs.
     await page.waitForLoadState('networkidle', { timeout: Math.min(remaining(), idleCapMs) });
   } catch {
-    warnings.push('A rede não ficou ociosa (polling/analytics/stream). A página pode estar pronta mesmo assim.');
+    warnings.push('The network never went idle (polling/analytics/stream). The page may be ready anyway.');
   }
   await page.evaluate(() => Promise.race([document.fonts?.ready, new Promise((r) => setTimeout(r, 4000))])).catch(() => undefined);
   await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))).catch(() => undefined);
@@ -24,8 +24,8 @@ export async function waitPageLoad(m: BrowserManager, timeoutMs: number, idleCap
   const overlay = await page.evaluate(detectOverlay).catch(() => null);
   if (overlay) {
     warnings.push(
-      `Overlay de tela cheia detectado (${overlay.selector}${overlay.looksLikeLoader ? ', parece pre-loader' : ''}). ` +
-        `Use \`web-wait <s>\` ou \`web-wait --until-hidden "${overlay.selector}"\` antes de capturar.`,
+      `Full-screen overlay detected (${overlay.selector}${overlay.looksLikeLoader ? ', looks like a preloader' : ''}). ` +
+        `Use \`web-wait <s>\` or \`web-wait --until-hidden "${overlay.selector}"\` before capturing.`,
     );
   }
 

@@ -14,51 +14,51 @@ const posix = (p: string) => p.replace(/\\/g, '/');
 function block(): string {
   const repo = posix(REPO_ROOT);
   return `${MARK_START}
-## parede-da-ia — direção de arte e engenharia front-end
+## parede-da-ia — art direction and front-end engineering
 
-Antes de qualquer tarefa de front-end, UI/UX, direção de arte, revisão de código, commits, prompts
-ou pipelines de dados/IA, leia o router e siga as instruções dele (ele diz quais módulos carregar):
+Before any front-end, UI/UX, art direction, code review, commit, prompt or data/AI pipeline task,
+read the router and follow its instructions (it says which modules to load):
 
-- Router local: \`${repo}/prompts/router.md\`
-- Fallback remoto: ${RAW_ROUTER}
+- Local router: \`${repo}/prompts/router.md\`
+- Remote fallback: ${RAW_ROUTER}
 
-Ferramentas (no PATH via \`npm link\`, ou \`node "${repo}/toolkit/bin/parede.js" <comando>\`):
-- ver e agir: \`web-url-fetch\` · \`web-wait-page-load\` · \`web-wait\` · \`web-control\` · \`web-eval\` ·
+Tools (on the PATH via \`npm link\`, or \`node "${repo}/toolkit/bin/parede.js" <command>\`):
+- see and act: \`web-url-fetch\` · \`web-wait-page-load\` · \`web-wait\` · \`web-control\` · \`web-eval\` ·
   \`web-screenshot\` · \`web-record-frames\` · \`web-close\`
-- medir: \`web-scrap\` · \`web-motion\` · \`web-interactions\` · \`web-audit\` · \`web-tokens\` · \`web-diff\` · \`media-frames\`
-- servir: \`web-serve\` — ajuda: \`parede help\`.
+- measure: \`web-scrap\` · \`web-motion\` · \`web-interactions\` · \`web-audit\` · \`web-tokens\` · \`web-diff\` · \`media-frames\`
+- serve: \`web-serve\` — help: \`parede help\`.
 
-Receitas de efeitos prontas (Hover Font, text morph, magnético…): \`${repo}/library/\`.
+Ready-made effect recipes (Hover Font, text morph, magnetic…): \`${repo}/library/\`.
 ${MARK_END}`;
 }
 
-/** Insere ou substitui o bloco delimitado pelos marcadores (idempotente). */
-function upsert(file: string, content: string, dryRun: boolean): 'criado' | 'atualizado' | 'inalterado' {
+/** Inserts or replaces the block delimited by the markers (idempotent). */
+function upsert(file: string, content: string, dryRun: boolean): 'created' | 'updated' | 'unchanged' {
   const existed = existsSync(file);
   const current = existed ? readFileSync(file, 'utf8') : '';
   const pattern = new RegExp(`${MARK_START}[\\s\\S]*?${MARK_END}`);
   const updated = pattern.test(current) ? current.replace(pattern, content) : `${current.trimEnd()}${current.trim() ? '\n\n' : ''}${content}\n`;
-  if (updated === current) return 'inalterado';
+  if (updated === current) return 'unchanged';
   if (!dryRun) {
     ensureDir(dirname(file));
     writeFileSync(file, updated);
   }
-  return existed ? 'atualizado' : 'criado';
+  return existed ? 'updated' : 'created';
 }
 
-function writeWhole(file: string, content: string, dryRun: boolean): 'criado' | 'atualizado' | 'inalterado' {
+function writeWhole(file: string, content: string, dryRun: boolean): 'created' | 'updated' | 'unchanged' {
   const existed = existsSync(file);
-  if (existed && readFileSync(file, 'utf8') === content) return 'inalterado';
+  if (existed && readFileSync(file, 'utf8') === content) return 'unchanged';
   if (!dryRun) {
     ensureDir(dirname(file));
     writeFileSync(file, content);
   }
-  return existed ? 'atualizado' : 'criado';
+  return existed ? 'updated' : 'created';
 }
 
 function skillContent(): string {
   const template = join(REPO_ROOT, 'skill', 'SKILL.md');
-  if (!existsSync(template)) throw new ParedeError('MISSING', `Template da skill ausente: ${template}`);
+  if (!existsSync(template)) throw new ParedeError('MISSING', `Skill template missing: ${template}`);
   return readFileSync(template, 'utf8').replaceAll('{{PAREDE_REPO}}', posix(REPO_ROOT));
 }
 
@@ -93,12 +93,12 @@ function targets(): Record<string, Target> {
 
 export const setup: Command = {
   name: 'setup',
-  group: 'operação',
-  summary: 'Registra o router nas instruções globais dos agentes (idempotente).',
+  group: 'operations',
+  summary: "Registers the router in the agents' global instructions (idempotent).",
   usage: `parede setup [--agent auto|all|claude|codex|opencode|gemini|windsurf] [--project] [--dry-run]
-  auto (padrão)  registra nos agentes cujas pastas de config existem
-  --project      também grava ./AGENTS.md e .cursor/rules/parede-da-ia.mdc no diretório atual
-  --dry-run      mostra o que seria alterado sem escrever`,
+  auto (default) registers in the agents whose config folders exist
+  --project      also writes ./AGENTS.md and .cursor/rules/parede-da-ia.mdc in the current directory
+  --dry-run      shows what would change without writing`,
   async execute(argv) {
     const { values } = parse(argv, { agent: { type: 'string', multiple: true }, project: { type: 'boolean' }, 'dry-run': { type: 'boolean' } }, this.usage);
     const all = targets();
@@ -109,7 +109,7 @@ export const setup: Command = {
     else {
       chosen = requested.map((name) => {
         const t = all[name];
-        if (!t) throw new ParedeError('BAD_ARG', `Agente desconhecido: ${name}`, this.usage);
+        if (!t) throw new ParedeError('BAD_ARG', `Unknown agent: ${name}`, this.usage);
         return t;
       });
     }
@@ -119,15 +119,15 @@ export const setup: Command = {
 
     if (values.project) {
       const cwd = process.cwd();
-      changes.push({ agent: 'Projeto (AGENTS.md)', file: join(cwd, 'AGENTS.md'), result: upsert(join(cwd, 'AGENTS.md'), block(), dryRun) });
-      const mdc = `---\ndescription: parede-da-ia — router de direção de arte e engenharia front-end\nalwaysApply: true\n---\n\n${block()}\n`;
-      changes.push({ agent: 'Cursor (projeto)', file: join(cwd, '.cursor', 'rules', 'parede-da-ia.mdc'), result: writeWhole(join(cwd, '.cursor', 'rules', 'parede-da-ia.mdc'), mdc, dryRun) });
+      changes.push({ agent: 'Project (AGENTS.md)', file: join(cwd, 'AGENTS.md'), result: upsert(join(cwd, 'AGENTS.md'), block(), dryRun) });
+      const mdc = `---\ndescription: parede-da-ia — art direction and front-end engineering router\nalwaysApply: true\n---\n\n${block()}\n`;
+      changes.push({ agent: 'Cursor (project)', file: join(cwd, '.cursor', 'rules', 'parede-da-ia.mdc'), result: writeWhole(join(cwd, '.cursor', 'rules', 'parede-da-ia.mdc'), mdc, dryRun) });
     }
 
     const lines = changes.length
-      ? [ok(`${dryRun ? '[dry-run] ' : ''}router registrado em ${new Set(changes.map((c) => c.agent)).size} destino(s)`), ...changes.map((c) => kv(c.result, `${c.agent} → ${c.file}`))]
-      : ['⚠ nenhum agente detectado (pastas ~/.claude, ~/.codex, ~/.config/opencode, ~/.gemini, ~/.codeium/windsurf ausentes)', next('use --agent claude (ou outro) para forçar, ou --project para este repositório')];
-    lines.push(next(`MCP opcional: claude mcp add parede-da-ia -- node "${posix(join(REPO_ROOT, 'toolkit', 'bin', 'parede-mcp.js'))}"`));
+      ? [ok(`${dryRun ? '[dry-run] ' : ''}router registered in ${new Set(changes.map((c) => c.agent)).size} destination(s)`), ...changes.map((c) => kv(c.result, `${c.agent} → ${c.file}`))]
+      : ['⚠ no agent detected (folders ~/.claude, ~/.codex, ~/.config/opencode, ~/.gemini, ~/.codeium/windsurf missing)', next('use --agent claude (or another) to force it, or --project for this repository')];
+    lines.push(next(`Optional MCP: claude mcp add parede-da-ia -- node "${posix(join(REPO_ROOT, 'toolkit', 'bin', 'parede-mcp.js'))}"`));
     return { data: { dryRun, changes }, text: lines.join('\n') };
   },
 };

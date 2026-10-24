@@ -1,19 +1,19 @@
 import type { AuditIssue, Severity } from './reports.js';
 
 /**
- * Regras de pontuação da auditoria (puras). Cada categoria começa em 100 e perde
- * pontos por problema; problemas repetidos em vários viewports pesam uma vez só.
+ * The audit's scoring rules (pure). Each category starts at 100 and loses
+ * points per problem; a problem repeated across viewports counts only once.
  */
-const PENALTY: Record<Severity, number> = { erro: 14, aviso: 5, info: 1 };
+const PENALTY: Record<Severity, number> = { error: 14, warning: 5, info: 1 };
 
 export const CATEGORY_WEIGHTS: Record<AuditIssue['category'], number> = {
-  acessibilidade: 0.28,
-  responsivo: 0.2,
+  accessibility: 0.28,
+  responsive: 0.2,
   performance: 0.15,
   console: 0.1,
-  conteudo: 0.1,
+  content: 0.1,
   seo: 0.1,
-  movimento: 0.07,
+  motion: 0.07,
 };
 
 export const PASS_SCORE = 85;
@@ -34,11 +34,11 @@ export function scoreAudit(issues: AuditIssue[]) {
     overall += scores[category] * weight;
   }
   overall = Math.round(overall);
-  const hasErrors = issues.some((i) => i.severity === 'erro');
-  return { scores, overall, verdict: (overall >= PASS_SCORE && !hasErrors ? 'aprovado' : 'reprovado') as 'aprovado' | 'reprovado' };
+  const hasErrors = issues.some((i) => i.severity === 'error');
+  return { scores, overall, verdict: (overall >= PASS_SCORE && !hasErrors ? 'approved' : 'rejected') as 'approved' | 'rejected' };
 }
 
-/** Limites de performance usados pela auditoria (Core Web Vitals + orçamento de peso). */
+/** Performance limits used by the audit (Core Web Vitals + weight budget). */
 export const BUDGET = {
   clsWarn: 0.1,
   clsError: 0.25,

@@ -1,6 +1,6 @@
 /**
- * Instantâneo de estilo computado de um elemento, seus pseudo-elementos e primeiro filho.
- * Usado para descobrir o que muda no hover/foco/clique (microinterações). Autocontido.
+ * A computed-style snapshot of an element, its pseudo-elements and first child.
+ * Used to find out what changes on hover/focus/click (microinteractions). Self-contained.
  */
 export function snapshotStyles(selector: string) {
   const el = document.querySelector(selector);

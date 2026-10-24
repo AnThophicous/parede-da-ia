@@ -5,9 +5,9 @@ import type { ExtractedFrame, MediaEncoder, MediaInfo } from '../ports.js';
 export interface VideoFramesOptions {
   input: string;
   outDir: string;
-  /** Segundos entre frames; se ausente, calcula para ~`target` frames. */
+  /** Seconds between frames; when absent, computed for ~`target` frames. */
   everySec?: number;
-  /** Limiar 0–1 para modo "mudança de cena" (ignora everySec). */
+  /** 0–1 threshold for "scene change" mode (ignores everySec). */
   scenes?: number;
   fromSec?: number;
   toSec?: number;
@@ -20,20 +20,20 @@ export interface VideoFramesOptions {
 export interface VideoFramesResult {
   input: string;
   info: MediaInfo;
-  mode: 'uniforme' | 'cenas';
+  mode: 'uniform' | 'scenes';
   everySec: number | null;
   frames: ExtractedFrame[];
   sheets: string[];
 }
 
 /**
- * Deixa o agente "assistir" um vídeo: gravações de tela de referências, protótipos
- * em movimento, bugs reproduzidos. Gera frames com timestamp e folhas de contato numeradas.
+ * Lets the agent "watch" a video: screen recordings of references, moving prototypes,
+ * reproduced bugs. Produces timestamped frames and numbered contact sheets.
  */
 export async function extractVideoFrames(encoder: MediaEncoder | null, o: VideoFramesOptions): Promise<VideoFramesResult> {
-  if (!encoder) throw new ParedeError('FFMPEG_MISSING', 'media-frames precisa do FFmpeg.', 'Instale ffmpeg ou rode `npm i ffmpeg-static` na toolkit.');
+  if (!encoder) throw new ParedeError('FFMPEG_MISSING', 'media-frames needs FFmpeg.', 'Install ffmpeg or run `npm i ffmpeg-static` in the toolkit.');
   const info = await encoder.probe(o.input);
-  if (!info.width) throw new ParedeError('BAD_MEDIA', `Não encontrei uma trilha de vídeo em ${o.input}.`);
+  if (!info.width) throw new ParedeError('BAD_MEDIA', `No video track found in ${o.input}.`);
   const from = o.fromSec ?? 0;
   const to = Math.min(o.toSec ?? info.durationSec, info.durationSec || Infinity);
   const span = Math.max(0.5, to - from);
@@ -50,13 +50,13 @@ export async function extractVideoFrames(encoder: MediaEncoder | null, o: VideoF
     width: o.width,
   });
 
-  // Folhas de contato em blocos de até 6×5 frames (legíveis numa única imagem).
+  // Contact sheets in blocks of up to 6×5 frames (legible in a single image).
   const perSheet = Math.min(30, o.columns * 5);
   const sheets: string[] = [];
   for (let i = 0; i < frames.length; i += perSheet) {
     const chunk = frames.slice(i, i + perSheet);
-    const sheet = join(o.outDir, `contato-${String(sheets.length + 1).padStart(2, '0')}.png`);
+    const sheet = join(o.outDir, `contact-${String(sheets.length + 1).padStart(2, '0')}.png`);
     sheets.push(await encoder.contactSheet(chunk, sheet, o.columns, Math.min(480, Math.round(2400 / o.columns))));
   }
-  return { input: o.input, info, mode: o.scenes !== undefined ? 'cenas' : 'uniforme', everySec, frames, sheets };
+  return { input: o.input, info, mode: o.scenes !== undefined ? 'scenes' : 'uniform', everySec, frames, sheets };
 }

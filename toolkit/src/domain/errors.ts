@@ -1,4 +1,4 @@
-/** Erro de domínio com código estável e dica acionável para o agente. */
+/** A domain error with a stable code and an actionable hint for the agent. */
 export class ParedeError extends Error {
   constructor(
     public readonly code: string,
@@ -16,7 +16,7 @@ export class ParedeError extends Error {
 
 const firstLine = (text: string) => text.split('\n')[0].trim();
 
-/** Traduz erros crus (Playwright, rede, fs) em erros com dica de correção. */
+/** Translates raw errors (Playwright, network, fs) into errors with a fix hint. */
 export function toParedeError(err: unknown): ParedeError {
   if (err instanceof ParedeError) return err;
   const message = err instanceof Error ? err.message : String(err);
@@ -24,29 +24,29 @@ export function toParedeError(err: unknown): ParedeError {
   if (/Executable doesn't exist|Please run the following command to download new browsers/i.test(message)) {
     return new ParedeError(
       'BROWSER_MISSING',
-      'O Chromium do Playwright não está instalado.',
-      'Rode: npx playwright install chromium (dentro de toolkit/).',
+      "Playwright's Chromium is not installed.",
+      'Run: npx playwright install chromium (inside toolkit/).',
     );
   }
   if (/Timeout \d+ms exceeded/i.test(message)) {
     return new ParedeError(
       'TIMEOUT',
       firstLine(message),
-      'Aumente --timeout ou use `web-wait <segundos>` para pre-loaders em canvas/WebGL.',
+      'Raise --timeout or use `web-wait <seconds>` for canvas/WebGL preloaders.',
     );
   }
   if (/net::ERR_|ECONNREFUSED/.test(message)) {
-    return new ParedeError('NETWORK', firstLine(message), 'Confira a URL e se o servidor local está no ar.');
+    return new ParedeError('NETWORK', firstLine(message), 'Check the URL and whether the local server is up.');
   }
   if (/strict mode violation|waiting for locator|No node found/i.test(message)) {
     return new ParedeError(
       'SELECTOR',
       firstLine(message),
-      'Rode `web-control inventory` para listar seletores clicáveis válidos.',
+      'Run `web-control inventory` to list valid clickable selectors.',
     );
   }
   if (/Target page, context or browser has been closed/i.test(message)) {
-    return new ParedeError('PAGE_CLOSED', 'A página foi fechada.', 'Rode `web-url-fetch <url>` novamente.');
+    return new ParedeError('PAGE_CLOSED', 'The page was closed.', 'Run `web-url-fetch <url>` again.');
   }
   return new ParedeError('UNKNOWN', firstLine(message));
 }

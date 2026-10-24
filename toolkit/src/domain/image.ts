@@ -1,4 +1,4 @@
-/** Lê largura/altura de PNG ou JPEG direto do buffer (sem decodificar a imagem). */
+/** Reads the width/height of a PNG or JPEG straight from the buffer (without decoding the image). */
 export function imageSize(buf: Buffer): { width: number; height: number } | null {
   if (buf.length > 24 && buf.readUInt32BE(0) === 0x89504e47) {
     return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
@@ -12,7 +12,7 @@ export function imageSize(buf: Buffer): { width: number; height: number } | null
       }
       const marker = buf[i + 1];
       const length = buf.readUInt16BE(i + 2);
-      // SOF0..SOF15, exceto DHT (C4), JPG (C8) e DAC (CC)
+      // SOF0..SOF15, except DHT (C4), JPG (C8) and DAC (CC)
       if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker)) {
         return { height: buf.readUInt16BE(i + 5), width: buf.readUInt16BE(i + 7) };
       }

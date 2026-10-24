@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Inspetor de DOM computado executado DENTRO da página (page.evaluate).
- * Autocontido por obrigação: nenhuma referência a imports ou closures externas.
+ * Computed-DOM inspector that runs INSIDE the page (page.evaluate).
+ * Self-contained by necessity: no references to imports or outer closures.
  */
 export interface ScanOptions {
   maxElements: number;
@@ -17,7 +17,7 @@ export function scanPage(opts: ScanOptions) {
   const vh = window.innerHeight;
   const dpr = window.devicePixelRatio || 1;
 
-  // ───────────────────────── cores ─────────────────────────
+  // ───────────────────────── colors ─────────────────────────
   type Rgba = { r: number; g: number; b: number; a: number; hex: string };
   const probe = doc.createElement('canvas') as any;
   probe.__paredeInternal = true;
@@ -78,7 +78,7 @@ export function scanPage(opts: ScanOptions) {
       .map(([value, weight]) => ({ value, share: Math.round((weight / total) * 1000) / 10 }));
   };
 
-  // ───────────────────────── seletores ─────────────────────────
+  // ───────────────────────── selectors ─────────────────────────
   const safeIdent = (s: string) => /^[A-Za-z_][\w-]*$/.test(s);
   const unique = (sel: string) => {
     try {
@@ -119,7 +119,7 @@ export function scanPage(opts: ScanOptions) {
     return text.replace(/\s+/g, ' ').trim();
   };
 
-  // ───────────────────────── folhas de estilo ─────────────────────────
+  // ───────────────────────── stylesheets ─────────────────────────
   const varSources = new Map<string, string>();
   const keyframes = new Set<string>();
   const fontFaces: { family: string; weight: string; style: string; display: string; src: string }[] = [];
@@ -169,7 +169,7 @@ export function scanPage(opts: ScanOptions) {
       crossOriginSheets++;
     }
   }
-  for (const name of opts.extraVarNames) if (!varSources.has(name)) varSources.set(name, '(css externo)');
+  for (const name of opts.extraVarNames) if (!varSources.has(name)) varSources.set(name, '(external css)');
 
   const rootStyle = getComputedStyle(root);
   const bodyStyle = doc.body ? getComputedStyle(doc.body) : rootStyle;
@@ -183,7 +183,7 @@ export function scanPage(opts: ScanOptions) {
     else if (otherVars.length < 150) otherVars.push({ name, value: value.slice(0, 80) });
   }
 
-  // ───────────────────────── varredura do DOM ─────────────────────────
+  // ───────────────────────── DOM sweep ─────────────────────────
   const all = Array.from(doc.querySelectorAll('body *'));
   const elements = all.slice(0, opts.maxElements);
   const bg = new Map<string, number>();
@@ -209,7 +209,7 @@ export function scanPage(opts: ScanOptions) {
   const motionEasings = new Map<string, number>();
   const motionProps = new Map<string, number>();
   const maxWidths = new Map<string, number>();
-  /** Divide listas CSS por vírgulas de nível superior (cubic-bezier tem vírgulas internas). */
+  /** Splits CSS lists on top-level commas (cubic-bezier has inner commas). */
   const splitTop = (value: string) => {
     const out: string[] = [];
     let depth = 0;
@@ -256,7 +256,7 @@ export function scanPage(opts: ScanOptions) {
     return { color: base, uncertain };
   };
 
-  // Mídias (mesmo irmãs, com pointer-events: none) que podem estar atrás de textos.
+  // Media (even siblings with pointer-events: none) that may sit behind texts.
   const mediaRects = Array.from(doc.querySelectorAll('img, video, canvas, picture, iframe, svg[width]'))
     .map((m) => {
       const r = m.getBoundingClientRect();
@@ -327,7 +327,7 @@ export function scanPage(opts: ScanOptions) {
         const large = fontSize >= 24 || (fontSize >= 18.66 && weight >= 700);
         const required = large ? 3 : 4.5;
         const blended = cs.mixBlendMode !== 'normal';
-        // Textos quebrados em letras (SplitText) geram uma falha por caractere: agrupa pelo bloco.
+        // Texts split into letters (SplitText) produce one failure per character: group them by block.
         const block = el.closest('h1, h2, h3, h4, h5, h6, p, a, button, li, label') ?? el.parentElement?.parentElement ?? el;
         const groupKey = `${shown.hex}|${back.color.hex}`;
         const seen = contrastGroups.get(groupKey) ?? new Set<Element>();
@@ -341,7 +341,7 @@ export function scanPage(opts: ScanOptions) {
             bg: back.color.hex,
             ratio: Math.round(ratio * 100) / 100,
             required,
-            // Cor idêntica ao fundo quase sempre = texto sobre vídeo/WebGL fora da árvore de ancestrais.
+            // A color identical to the background almost always = text over video/WebGL outside the ancestor tree.
             uncertain: back.uncertain || blended || ratio < 1.05 || overMedia(el),
           });
         }
@@ -412,7 +412,7 @@ export function scanPage(opts: ScanOptions) {
   }
   if (rootStyle.cursor === 'none' || bodyStyle.cursor === 'none') effects.customCursor = true;
 
-  // ───────────────────────── paleta ─────────────────────────
+  // ───────────────────────── palette ─────────────────────────
   const parse = (hex: string) => parseColor(hex)!;
   const bgTop = top(bg, 8);
   const textTop = top(text, 8);
@@ -429,7 +429,7 @@ export function scanPage(opts: ScanOptions) {
   const allUsed = new Set([...bg.keys(), ...text.keys(), ...borders.keys(), ...svgPaint.keys(), ...gradients.keys()]);
   const chromatic = [...allUsed].filter((hex) => chroma(parse(hex)) > 6);
 
-  // ───────────────────────── tipografia ─────────────────────────
+  // ───────────────────────── typography ─────────────────────────
   const loadedFaces = Array.from((doc.fonts as any) ?? []).map((f: any) => ({
     family: String(f.family).replace(/["']/g, ''),
     weight: String(f.weight),
@@ -445,7 +445,7 @@ export function scanPage(opts: ScanOptions) {
     })
     .sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
 
-  // ───────────────────────── ícones ─────────────────────────
+  // ───────────────────────── icons ─────────────────────────
   const has = (sel: string) => {
     try {
       return Boolean(doc.querySelector(sel));
@@ -478,7 +478,7 @@ export function scanPage(opts: ScanOptions) {
   addIcon('Ionicons', has('ion-icon'));
   addIcon('Radix Icons', (viewBoxes.get('0 0 15 15') ?? 0) >= 3);
 
-  // ───────────────────────── mídia ─────────────────────────
+  // ───────────────────────── media ─────────────────────────
   const inView = (r: DOMRect) => r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
   const ext = (url: string) => (/\.(avif|webp|png|jpe?g|gif|svg|mp4|webm|mov|m3u8)(\?|#|$)/i.exec(url)?.[1] ?? (url.startsWith('data:') ? 'data-uri' : '?')).toLowerCase();
   const images = Array.from(doc.images).slice(0, 150).map((img) => {
@@ -513,7 +513,7 @@ export function scanPage(opts: ScanOptions) {
       selector: selectorOf(c),
       size: `${c.width}x${c.height}`,
       css: `${Math.round(r.width)}x${Math.round(r.height)}`,
-      context: hooks?.canvasContext?.get(c) ?? 'desconhecido',
+      context: hooks?.canvasContext?.get(c) ?? 'unknown',
       fixed: cs.position === 'fixed',
       fullscreen: r.width >= vw * 0.9 && r.height >= vh * 0.9,
     };
@@ -542,41 +542,41 @@ export function scanPage(opts: ScanOptions) {
   add('Solid', 'framework', w._$HY);
   add('Gatsby', 'framework', has('#___gatsby'));
   add('Remix / React Router', 'framework', w.__remixContext || w.__reactRouterContext);
-  add('Webflow', 'plataforma', root.hasAttribute('data-wf-site') || w.Webflow);
-  add('Framer', 'plataforma', has('[data-framer-name], #__framer-badge-container') || w.__framer_importFromPackage);
-  add('Wix', 'plataforma', w.wixBiSession);
-  add('Shopify', 'plataforma', w.Shopify);
-  add('WordPress', 'plataforma', has('link[href*="wp-content"], script[src*="wp-includes"]'));
-  add('Squarespace', 'plataforma', w.Static?.SQUARESPACE_CONTEXT);
-  add('GSAP', 'animação', w.gsap || w.gsapVersions || w.TweenMax, w.gsapVersions?.[0] ?? w.gsap?.version);
-  add('ScrollTrigger', 'animação', w.ScrollTrigger || has('.pin-spacer'));
+  add('Webflow', 'platform', root.hasAttribute('data-wf-site') || w.Webflow);
+  add('Framer', 'platform', has('[data-framer-name], #__framer-badge-container') || w.__framer_importFromPackage);
+  add('Wix', 'platform', w.wixBiSession);
+  add('Shopify', 'platform', w.Shopify);
+  add('WordPress', 'platform', has('link[href*="wp-content"], script[src*="wp-includes"]'));
+  add('Squarespace', 'platform', w.Static?.SQUARESPACE_CONTEXT);
+  add('GSAP', 'animation', w.gsap || w.gsapVersions || w.TweenMax, w.gsapVersions?.[0] ?? w.gsap?.version);
+  add('ScrollTrigger', 'animation', w.ScrollTrigger || has('.pin-spacer'));
   add('Lenis', 'scroll', w.lenisVersion || w.lenis || root.classList.contains('lenis'), w.lenisVersion);
   add('Locomotive Scroll', 'scroll', w.LocomotiveScroll || has('[data-scroll-container]') || root.classList.contains('has-scroll-smooth'));
   add('Three.js', '3d/webgl', w.__THREE__ || w.THREE || /#define SHADER_(NAME|TYPE)/.test(shaderText), w.__THREE__);
   add('PixiJS', '3d/webgl', w.PIXI || w.__PIXI_APP__);
   add('Babylon.js', '3d/webgl', w.BABYLON);
   add('p5.js', 'canvas', w.p5);
-  add('Matter.js', 'física', w.Matter);
-  add('Lottie', 'animação', w.lottie || w.bodymovin || has('lottie-player, dotlottie-player, dotlottie-wc'));
-  add('Rive', 'animação', w.rive);
+  add('Matter.js', 'physics', w.Matter);
+  add('Lottie', 'animation', w.lottie || w.bodymovin || has('lottie-player, dotlottie-player, dotlottie-wc'));
+  add('Rive', 'animation', w.rive);
   add('Spline', '3d/webgl', has('spline-viewer'));
   add('model-viewer', '3d/webgl', has('model-viewer'));
-  add('Barba.js', 'transições', w.barba || has('[data-barba]'));
-  add('Swup', 'transições', w.swup || has('#swup'));
+  add('Barba.js', 'transitions', w.barba || has('[data-barba]'));
+  add('Swup', 'transitions', w.swup || has('#swup'));
   add('Swiper', 'ui', w.Swiper || has('.swiper-initialized'));
-  add('Splitting.js', 'tipografia', w.Splitting || has('.splitting'));
-  add('Anime.js', 'animação', w.anime);
-  add('Web Animations API (Motion/Framer Motion)', 'animação', (hooks?.waapi ?? 0) > 3);
+  add('Splitting.js', 'typography', w.Splitting || has('.splitting'));
+  add('Anime.js', 'animation', w.anime);
+  add('Web Animations API (Motion/Framer Motion)', 'animation', (hooks?.waapi ?? 0) > 3);
   add('Alpine.js', 'framework', w.Alpine || has('[x-data]'));
   add('htmx', 'framework', w.htmx);
-  add('jQuery', 'biblioteca', w.jQuery, w.jQuery?.fn?.jquery);
+  add('jQuery', 'library', w.jQuery, w.jQuery?.fn?.jquery);
   add('Tailwind CSS', 'css', varNames.some((n) => n.startsWith('--tw-')) || classMatches(/(^|\s)(px-\d|py-\d|text-(xs|sm|lg|xl)|items-center|justify-between|bg-[a-z]+-\d{2,3})(\s|$)/) > 15);
   add('Bootstrap', 'css', varNames.some((n) => n.startsWith('--bs-')) || w.bootstrap);
   add('styled-components', 'css', has('style[data-styled]'));
   add('Emotion', 'css', has('style[data-emotion]'));
   add('CSS Modules', 'css', classMatches(/\b[\w-]+_[\w-]+__[A-Za-z0-9_-]{5}\b|\b[A-Za-z]+-module__[\w-]+/) > 5);
 
-  // ───────────────────────── arquitetura ─────────────────────────
+  // ───────────────────────── architecture ─────────────────────────
   const meta = (name: string) =>
     doc.querySelector(`meta[name="${name}"], meta[property="${name}"]`)?.getAttribute('content')?.slice(0, 300) ?? null;
   const scripts = Array.from(doc.scripts);
@@ -696,7 +696,7 @@ export function scanPage(opts: ScanOptions) {
 
 export type ScanResult = ReturnType<typeof scanPage>;
 
-/** Lista elementos interativos visíveis com seletores estáveis (para o loop de QA). */
+/** Lists visible interactive elements with stable selectors (for the QA loop). */
 export function inventoryPage(limit: number) {
   const doc = document;
   const vw = window.innerWidth;
@@ -764,7 +764,7 @@ export function inventoryPage(limit: number) {
   return { total: candidates.size, items };
 }
 
-/** Detecta overlays de tela cheia (pre-loaders, splash, cookie walls) que bloqueiam a página. */
+/** Detects full-screen overlays (preloaders, splash screens, cookie walls) blocking the page. */
 export function detectOverlay() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;

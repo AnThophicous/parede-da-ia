@@ -12,7 +12,7 @@ export interface ScreenshotParams {
   viewport?: Viewport;
   clean?: boolean;
   hide?: string[];
-  /** Oculta (só visualmente) banners de cookie/consentimento conhecidos. Nunca aceita nada. */
+  /** Hides (visually only) known cookie/consent banners. Never accepts anything. */
   hideBanners?: boolean;
   scrollThrough?: boolean;
   quality?: number;
@@ -26,7 +26,7 @@ const BANNER_SELECTORS = [
   '[class*="cookies-bar" i]', '[aria-label*="cookie" i][role="dialog"]', '[aria-label*="consent" i][role="dialog"]',
 ];
 
-/** CSS que remove "ruído de navegador": scrollbars, caret piscando, highlights de foco. */
+/** CSS that removes "browser noise": scrollbars, a blinking caret, focus highlights. */
 const CLEAN_CSS = `
   html { scrollbar-width: none !important; }
   ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
@@ -40,7 +40,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const settle = (page: Page) =>
   page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
 
-/** Rola a página inteira com wheel real para disparar lazy-load e reveals de scroll. */
+/** Scrolls the whole page with a real wheel to trigger lazy-loading and scroll reveals. */
 async function scrollThrough(m: BrowserManager, page: Page) {
   const vp = page.viewportSize() ?? { width: 1280, height: 800 };
   await page.mouse.move(vp.width / 2, vp.height / 2);
@@ -92,23 +92,23 @@ export async function takeScreenshot(m: BrowserManager, p: ScreenshotParams) {
       return { width: scroller.scrollWidth, height: scroller.scrollHeight, nestedScroller: nested };
     });
     if (p.fullPage && docSize.height * dpr > MAX_TEXTURE) {
-      warnings.push(`Página com ${docSize.height}px × dpr ${dpr} excede ${MAX_TEXTURE}px de textura; partes podem sair em branco. Use --dpr 1 ou capture por seções.`);
+      warnings.push(`A page of ${docSize.height}px × dpr ${dpr} exceeds a ${MAX_TEXTURE}px texture; parts may come out blank. Use --dpr 1 or capture by sections.`);
     }
     if (p.fullPage && docSize.nestedScroller && docSize.height <= viewport.height + 4) {
-      warnings.push('O conteúdo rola dentro de um container (smooth-scroll com transform). Full-page só pega a viewport: prefira web-record-frames + scroll-down.');
+      warnings.push('The content scrolls inside a container (transform-based smooth scroll). Full-page only gets the viewport: prefer web-record-frames + scroll-down.');
     }
 
     mkdirSync(dirname(p.path), { recursive: true });
     const type = /\.jpe?g$/i.test(p.path) ? 'jpeg' : 'png';
     const options = { path: p.path, type, quality: type === 'jpeg' ? (p.quality ?? 92) : undefined, animations: 'allow', caret: 'hide', scale: 'device' } as const;
-    // Captura que sai da viewport redimensiona a página por um instante; smooth-scroll (Lenis,
-    // ScrollTrigger) reage e muda a rolagem. A posição é devolvida depois da captura.
+    // A capture that goes beyond the viewport resizes the page for an instant; smooth scroll (Lenis,
+    // ScrollTrigger) reacts and changes the scroll. The position is restored after the capture.
     scroll = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
     let buffer: Buffer;
     if (dpr !== contextDpr && m.context) {
-      // DPR diferente do contexto: Page.captureScreenshot com clip.scale re-rasteriza o conteúdo
-      // na escala pedida (nitidez real, não bitmap esticado) sem recriar o contexto.
-      // A imagem sai com clip × scale pixels: o DSF do contexto não entra na conta.
+      // A DPR different from the context's: Page.captureScreenshot with clip.scale re-rasterizes the content
+      // at the requested scale (real sharpness, not a stretched bitmap) without recreating the context.
+      // The image comes out at clip × scale pixels: the context's DSF doesn't count.
       cdp = await m.context.newCDPSession(page);
       const view = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY, width: window.innerWidth, height: window.innerHeight }));
       const clip = p.selector

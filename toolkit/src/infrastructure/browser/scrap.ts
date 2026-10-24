@@ -6,28 +6,28 @@ import type { BrowserManager, NetworkEntry } from './manager.js';
 const FONT_EXT = /\.(woff2?|ttf|otf|eot)(\?|#|$)/i;
 const ASSET_3D = /\.(glb|gltf|obj|fbx|usdz|hdr|exr|ktx2|basis|splinecode|riv|drc)(\?|#|$)/i;
 
-/** Detecção por URL de script/asset — complementa a detecção por globals no DOM. */
+/** Detection by script/asset URL — complements the detection by DOM globals. */
 const URL_SIGNATURES: [RegExp, string, string][] = [
-  [/gsap|TweenMax/i, 'GSAP', 'animação'],
-  [/ScrollTrigger/i, 'ScrollTrigger', 'animação'],
+  [/gsap|TweenMax/i, 'GSAP', 'animation'],
+  [/ScrollTrigger/i, 'ScrollTrigger', 'animation'],
   [/\/three(@[\d.]+)?\/|three(\.module)?(\.min)?\.js/i, 'Three.js', '3d/webgl'],
   [/lenis/i, 'Lenis', 'scroll'],
   [/locomotive/i, 'Locomotive Scroll', 'scroll'],
-  [/barba/i, 'Barba.js', 'transições'],
+  [/barba/i, 'Barba.js', 'transitions'],
   [/swiper/i, 'Swiper', 'ui'],
-  [/lottie|dotlottie/i, 'Lottie', 'animação'],
+  [/lottie|dotlottie/i, 'Lottie', 'animation'],
   [/pixi/i, 'PixiJS', '3d/webgl'],
   [/babylon/i, 'Babylon.js', '3d/webgl'],
   [/@splinetool|spline\.design/i, 'Spline', '3d/webgl'],
-  [/@rive-app|\.riv(\?|$)/i, 'Rive', 'animação'],
+  [/@rive-app|\.riv(\?|$)/i, 'Rive', 'animation'],
   [/\/_next\//, 'Next.js', 'framework'],
   [/\/_nuxt\//, 'Nuxt', 'framework'],
   [/\/_astro\//, 'Astro', 'framework'],
-  [/webflow/i, 'Webflow', 'plataforma'],
-  [/framerusercontent\.com|framer\.com\/m\//i, 'Framer', 'plataforma'],
-  [/cdn\.shopify\.com/i, 'Shopify', 'plataforma'],
-  [/wp-content|wp-includes/i, 'WordPress', 'plataforma'],
-  [/jquery/i, 'jQuery', 'biblioteca'],
+  [/webflow/i, 'Webflow', 'platform'],
+  [/framerusercontent\.com|framer\.com\/m\//i, 'Framer', 'platform'],
+  [/cdn\.shopify\.com/i, 'Shopify', 'platform'],
+  [/wp-content|wp-includes/i, 'WordPress', 'platform'],
+  [/jquery/i, 'jQuery', 'library'],
   [/googletagmanager\.com/i, 'Google Tag Manager', 'analytics'],
   [/google-analytics\.com|gtag\/js/i, 'Google Analytics', 'analytics'],
   [/plausible\.io/i, 'Plausible', 'analytics'],
@@ -35,7 +35,7 @@ const URL_SIGNATURES: [RegExp, string, string][] = [
   [/hotjar/i, 'Hotjar', 'analytics'],
   [/posthog/i, 'PostHog', 'analytics'],
   [/_vercel\/insights|vercel-insights/i, 'Vercel Analytics', 'analytics'],
-  [/sentry/i, 'Sentry', 'monitoramento'],
+  [/sentry/i, 'Sentry', 'monitoring'],
 ];
 
 function fontProvider(url: string, pageHost: string): string {
@@ -43,7 +43,7 @@ function fontProvider(url: string, pageHost: string): string {
   try {
     host = new URL(url).hostname;
   } catch {
-    return 'desconhecido';
+    return 'unknown';
   }
   if (/fonts\.(googleapis|gstatic)\.com$/.test(host)) return 'Google Fonts';
   if (/typekit\.net$/.test(host)) return 'Adobe Fonts';
@@ -132,7 +132,7 @@ function parseExternalCss(bodies: Map<string, string>) {
   return { varNames: [...varNames], fontFaces };
 }
 
-/** Web Vitals coletados pelos hooks (CLS, LCP, long tasks). */
+/** Web Vitals collected by the hooks (CLS, LCP, long tasks). */
 export async function perfSnapshot(m: BrowserManager): Promise<PerfSnapshot> {
   const empty: PerfSnapshot = { cls: null, lcpMs: null, lcpElement: null, longTasks: 0, longTaskMs: 0 };
   const perf = await m
@@ -157,16 +157,16 @@ export async function scrap(m: BrowserManager, maxElements: number): Promise<Scr
   const dom = await page.evaluate(scanPage, { maxElements, extraVarNames: external.varNames });
   const network = summarizeNetwork(m.network, pageHost);
 
-  // Stack: une detecção por DOM/globals com assinaturas de URL na rede.
+  // Stack: merges DOM/globals detection with URL signatures in the network.
   const stack = [...dom.stack.map((s) => ({ ...s, source: 'dom' }))];
   for (const e of m.network) {
     if (e.type !== 'script' && e.type !== 'fetch' && e.type !== 'other' && !ASSET_3D.test(e.url)) continue;
     for (const [re, name, category] of URL_SIGNATURES) {
-      if (re.test(e.url) && !stack.some((s) => s.name === name)) stack.push({ name, category, version: undefined, source: 'rede' });
+      if (re.test(e.url) && !stack.some((s) => s.name === name)) stack.push({ name, category, version: undefined, source: 'network' });
     }
   }
 
-  // Fontes: famílias declaradas (@font-face interno + externo), arquivos baixados e provedores.
+  // Fonts: declared families (internal + external @font-face), downloaded files and providers.
   const fontFiles = m.network
     .filter((e) => e.type === 'font' || FONT_EXT.test(e.url))
     .map((e) => ({ url: e.url, format: FONT_EXT.exec(e.url)?.[1]?.toLowerCase() ?? e.mime ?? '?', bytes: e.bytes, provider: fontProvider(e.url, pageHost) }));
@@ -208,7 +208,7 @@ export async function scrap(m: BrowserManager, maxElements: number): Promise<Scr
   }
   for (const family of googleFamilies) touch(family).sources.add('Google Fonts');
 
-  // O uso vem por família+peso: soma os pesos para obter a participação da família.
+  // Usage comes per family+weight: sum the weights to get the family's share.
   const usedShare = new Map<string, number>();
   for (const u of dom.typography.used) usedShare.set(u.family, Math.round(((usedShare.get(u.family) ?? 0) + u.share) * 10) / 10);
   const fonts = {

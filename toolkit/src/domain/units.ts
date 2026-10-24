@@ -6,13 +6,13 @@ export interface Viewport {
 }
 
 /**
- * Converte "500ms", "2s", "1.5" em milissegundos.
- * Números sem unidade usam `bareUnit` (segundos para esperas, ms para intervalos de passo).
+ * Converts "500ms", "2s", "1.5" into milliseconds.
+ * Unitless numbers use `bareUnit` (seconds for waits, ms for step intervals).
  */
 export function parseDuration(value: string | number, bareUnit: 's' | 'ms' = 's'): number {
   if (typeof value === 'number') return bareUnit === 's' ? value * 1000 : value;
   const match = /^\s*(\d+(?:\.\d+)?)\s*(ms|s|m)?\s*$/i.exec(value);
-  if (!match) throw new ParedeError('BAD_ARG', `Duração inválida: "${value}".`, 'Use 0.5, 500ms, 2s ou 1m.');
+  if (!match) throw new ParedeError('BAD_ARG', `Invalid duration: "${value}".`, 'Use 0.5, 500ms, 2s or 1m.');
   const amount = Number(match[1]);
   const unit = (match[2] ?? bareUnit).toLowerCase();
   if (unit === 'ms') return Math.round(amount);
@@ -22,24 +22,24 @@ export function parseDuration(value: string | number, bareUnit: 's' | 'ms' = 's'
 
 export function parseViewport(value: string): Viewport {
   const match = /^\s*(\d{2,5})\s*[x×,]\s*(\d{2,5})\s*$/i.exec(value);
-  if (!match) throw new ParedeError('BAD_ARG', `Viewport inválido: "${value}".`, 'Use LARGURAxALTURA, ex.: 1440x900 ou 390x844.');
+  if (!match) throw new ParedeError('BAD_ARG', `Invalid viewport: "${value}".`, 'Use WIDTHxHEIGHT, e.g. 1440x900 or 390x844.');
   return { width: Number(match[1]), height: Number(match[2]) };
 }
 
 export function parseNumber(value: string | undefined, name: string, fallback: number): number {
   if (value === undefined) return fallback;
   const n = Number(value);
-  if (!Number.isFinite(n)) throw new ParedeError('BAD_ARG', `--${name} precisa ser numérico (recebido "${value}").`);
+  if (!Number.isFinite(n)) throw new ParedeError('BAD_ARG', `--${name} must be numeric (got "${value}").`);
   return n;
 }
 
-/** "120,340" → { x, y }; qualquer outra coisa é tratada como seletor. */
+/** "120,340" → { x, y }; anything else is treated as a selector. */
 export function parsePoint(value: string): { x: number; y: number } | null {
   const match = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/.exec(value);
   return match ? { x: Number(match[1]), y: Number(match[2]) } : null;
 }
 
-/** Tokenizador estilo shell (aspas simples/duplas) usado em `sequence` e `--while`. */
+/** A shell-style tokenizer (single/double quotes) used by `sequence` and `--while`. */
 export function tokenize(source: string): string[] {
   const tokens: string[] = [];
   let current = '';
@@ -61,12 +61,12 @@ export function tokenize(source: string): string[] {
       hasToken = true;
     }
   }
-  if (quote) throw new ParedeError('BAD_ARG', `Aspas não fechadas em: ${source}`);
+  if (quote) throw new ParedeError('BAD_ARG', `Unclosed quotes in: ${source}`);
   if (hasToken || current) tokens.push(current);
   return tokens;
 }
 
-/** Divide "a; b; c" respeitando aspas. */
+/** Splits "a; b; c" while respecting quotes. */
 export function splitSequence(source: string): string[] {
   const parts: string[] = [];
   let current = '';

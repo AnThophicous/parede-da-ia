@@ -16,9 +16,9 @@ import { runAudit, type AuditParams } from './infrastructure/browser/audit.js';
 import { evaluateExpression } from './infrastructure/browser/evaluate.js';
 
 /**
- * COMPOSITION ROOT do daemon: liga os casos de uso de navegador (infrastructure/browser)
- * a um servidor RPC local. Um único Chromium vivo entre chamadas da CLI/MCP.
- * Escuta só em 127.0.0.1, exige token e recusa requisições com Origin (browsers).
+ * The daemon's COMPOSITION ROOT: wires the browser use cases (infrastructure/browser)
+ * to a local RPC server. One single Chromium alive across CLI/MCP calls.
+ * Listens only on 127.0.0.1, requires a token and refuses requests with an Origin (browsers).
  */
 const IDLE_MS = Number(process.env.PAREDE_IDLE_MINUTES ?? 30) * 60_000;
 const token = randomBytes(24).toString('hex');
@@ -47,7 +47,7 @@ const handlers: Record<string, Handler> = {
   state: () => manager.state(),
   logs: async (p: { limit: number }) => (await manager.consoleEntries()).slice(-(p.limit || 50)),
   close: async () => {
-    setImmediate(() => void shutdown('close solicitado'));
+    setImmediate(() => void shutdown('close requested'));
     return { closed: true };
   },
 };
@@ -55,7 +55,7 @@ const handlers: Record<string, Handler> = {
 async function shutdown(reason: string) {
   if (shuttingDown) return;
   shuttingDown = true;
-  log('encerrando:', reason);
+  log('shutting down:', reason);
   removeSession(process.pid);
   await manager.close();
   server.close();
@@ -69,9 +69,9 @@ function send(res: http.ServerResponse, status: number, body: unknown) {
 }
 
 const server = http.createServer((req, res) => {
-  if (req.method !== 'POST' || req.url !== '/rpc') return send(res, 404, { ok: false, error: { code: 'NOT_FOUND', message: 'rota inválida' } });
-  if (req.headers.origin) return send(res, 403, { ok: false, error: { code: 'FORBIDDEN', message: 'origem não permitida' } });
-  if (req.headers['x-parede-token'] !== token) return send(res, 403, { ok: false, error: { code: 'FORBIDDEN', message: 'token inválido' } });
+  if (req.method !== 'POST' || req.url !== '/rpc') return send(res, 404, { ok: false, error: { code: 'NOT_FOUND', message: 'invalid route' } });
+  if (req.headers.origin) return send(res, 403, { ok: false, error: { code: 'FORBIDDEN', message: 'origin not allowed' } });
+  if (req.headers['x-parede-token'] !== token) return send(res, 403, { ok: false, error: { code: 'FORBIDDEN', message: 'invalid token' } });
 
   const chunks: Buffer[] = [];
   req.on('data', (c: Buffer) => chunks.push(c));
@@ -83,12 +83,12 @@ const server = http.createServer((req, res) => {
       const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
       method = body.method;
       const handler = handlers[method];
-      if (!handler) throw Object.assign(new Error(`método desconhecido: ${method}`), { code: 'BAD_METHOD' });
+      if (!handler) throw Object.assign(new Error(`unknown method: ${method}`), { code: 'BAD_METHOD' });
       const result = await handler(body.params ?? {});
       send(res, 200, { ok: true, result });
     } catch (err) {
       const e = toParedeError(err);
-      if (method !== 'health') log(`erro em ${method}:`, e.message);
+      if (method !== 'health') log(`error in ${method}:`, e.message);
       send(res, 200, { ok: false, error: e.toJSON() });
     } finally {
       inFlight--;
@@ -103,11 +103,11 @@ server.listen(0, '127.0.0.1', () => {
   const address = server.address();
   const port = typeof address === 'object' && address ? address.port : 0;
   writeSession({ name: SESSION_NAME, port, token, pid: process.pid, startedAt: new Date().toISOString(), version: VERSION });
-  log(`daemon ${VERSION} (sessão "${SESSION_NAME}") ouvindo em 127.0.0.1:${port}`);
+  log(`daemon ${VERSION} (session "${SESSION_NAME}") listening on 127.0.0.1:${port}`);
 });
 
 setInterval(() => {
-  if (inFlight === 0 && Date.now() - lastActivity > IDLE_MS) void shutdown(`ocioso por ${IDLE_MS / 60_000} min`);
+  if (inFlight === 0 && Date.now() - lastActivity > IDLE_MS) void shutdown(`idle for ${IDLE_MS / 60_000} min`);
 }, 30_000).unref();
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) process.on(signal, () => void shutdown(signal));

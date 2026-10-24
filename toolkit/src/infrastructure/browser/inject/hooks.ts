@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Instrumentação injetada ANTES de qualquer script da página (context.addInitScript).
- * Precisa ser autocontida: o Playwright serializa a função com toString().
+ * Instrumentation injected BEFORE any page script (context.addInitScript).
+ * It must be self-contained: Playwright serializes the function with toString().
  *
- * Coleta, sem alterar o comportamento da página:
- *  - contextos de canvas criados (2d / webgl / webgl2 / webgpu / bitmaprenderer)
- *  - código-fonte de shaders GLSL compilados (deduplicado)
- *  - chamadas à Web Animations API (Motion/Framer Motion usam WAAPI)
- *  - frequência de requestAnimationFrame (indica loop de animação em JS)
- *  - fontes carregadas via document.fonts
- *  - console.error/warn, rejeições não tratadas
- *  - Web Vitals: CLS, LCP (e o elemento), long tasks
+ * Collects, without changing the page's behavior:
+ *  - canvas contexts created (2d / webgl / webgl2 / webgpu / bitmaprenderer)
+ *  - source code of compiled GLSL shaders (deduplicated)
+ *  - Web Animations API calls (Motion/Framer Motion use WAAPI)
+ *  - requestAnimationFrame frequency (a sign of a JS animation loop)
+ *  - fonts loaded through document.fonts
+ *  - console.error/warn, unhandled rejections
+ *  - Web Vitals: CLS, LCP (and its element), long tasks
  */
 export function installHooks(): void {
   const w = window as any;
@@ -38,14 +38,14 @@ export function installHooks(): void {
   try {
     performance.setResourceTimingBufferSize(10_000);
   } catch {
-    /* navegadores antigos */
+    /* old browsers */
   }
 
   const observe = (type: string, onEntries: (entries: any[]) => void) => {
     try {
       new PerformanceObserver((list) => onEntries(list.getEntries())).observe({ type, buffered: true } as PerformanceObserverInit);
     } catch {
-      /* tipo não suportado */
+      /* unsupported type */
     }
   };
   observe('layout-shift', (entries) => {
@@ -84,7 +84,7 @@ export function installHooks(): void {
           state.contexts[key in state.contexts ? key : 'other']++;
         }
       } catch {
-        /* nunca quebrar a página */
+        /* never break the page */
       }
       return ctx;
     };
@@ -128,8 +128,8 @@ export function installHooks(): void {
     };
   }
 
-  // console.error/warn capturados aqui (barato) em vez de via CDP: sites com detecção anti-DevTools
-  // (truques com %c e getters) degradam o render quando um cliente serializa o console.
+  // console.error/warn captured here (cheap) instead of through CDP: sites with anti-DevTools detection
+  // (tricks with %c and getters) degrade rendering when a client serializes the console.
   const describe = (a: unknown) =>
     typeof a === 'string' ? a : a instanceof Error ? `${a.name}: ${a.message}` : typeof a === 'number' || typeof a === 'boolean' ? String(a) : Object.prototype.toString.call(a);
   const pushLog = (type: string, args: unknown[]) => {

@@ -6,58 +6,58 @@ import { parseSequence } from '../../../domain/actions.js';
 import { ParedeError } from '../../../domain/errors.js';
 import { stamp } from '../../../domain/naming.js';
 import { parseDuration, parseNumber, parseViewport } from '../../../domain/units.js';
-// Gravação em background é operação de processo (spawn/estado em disco): fala com a infraestrutura.
+// Background recording is a process operation (spawn/state on disk): it talks to the infrastructure.
 import { ensureDir, recordingStatePath, TOOLKIT_ROOT } from '../../../infrastructure/session/paths.js';
 import { isPidAlive } from '../../../infrastructure/session/session.js';
 import { kv, next, ok, parse, requireSession, warn, type Command } from './shared.js';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const usage = `web-record-frames [opções]
-  --interval 0.5         segundos por frame (padrão 0.5s; aceita 250ms)
-  --duration 6           duração total em segundos (padrão 5s, ou até as ações do --while terminarem)
-  --while "<ações>"      ações executadas DURANTE a gravação, ex.: "scroll-down 3000 --steps 60"
-  --tail 1               segundos extras gravados depois que as ações do --while terminam
-  --selector <css>       recorta spritesheet/vídeo neste elemento (microinterações de perto)
-  --max-frames 600       trava de segurança contra gravações sem fim
-  --viewport 390x844     viewport temporária durante a gravação
-  --format jpeg|png      formato dos frames (padrão jpeg q85; png = sem perdas, mais pesado)
-  --tile-width 360       largura de cada frame na spritesheet
-  --columns 6            colunas da spritesheet (padrão: raiz quadrada, máx. 8)
-  --no-spritesheet       não gera spritesheets
-  --no-video             não gera MP4
-  --gif                  gera também um GIF (dither bayer)
-  --out <dir>            pasta de saída (padrão .parede/recordings/<data>)
-  --detach               grava em background e retorna na hora (pare com --stop)
-  --stop                 encerra a gravação em background e gera os artefatos
+const usage = `web-record-frames [options]
+  --interval 0.5         seconds per frame (default 0.5s; accepts 250ms)
+  --duration 6           total duration in seconds (default 5s, or until the --while actions finish)
+  --while "<actions>"    actions run DURING the recording, e.g. "scroll-down 3000 --steps 60"
+  --tail 1               extra seconds recorded after the --while actions finish
+  --selector <css>       crops the spritesheet/video to this element (microinteractions up close)
+  --max-frames 600       safety limit against endless recordings
+  --viewport 390x844     temporary viewport during the recording
+  --format jpeg|png      frame format (default jpeg q85; png = lossless, heavier)
+  --tile-width 360       width of each frame in the spritesheet
+  --columns 6            spritesheet columns (default: square root, max 8)
+  --no-spritesheet       no spritesheets
+  --no-video             no MP4
+  --gif                  also produces a GIF (bayer dither)
+  --out <dir>            output folder (default .parede/recordings/<date>)
+  --detach               records in the background and returns right away (stop with --stop)
+  --stop                 stops the background recording and builds the artifacts
 
-O manifesto inclui fps/jank da página e quais elementos animaram durante a gravação.
+The manifest includes the page fps/jank and which elements animated during the recording.
 
-⚠ Custo: frames vêm do screencast do compositor (barato), mas intervalos < 100ms,
-  viewports grandes e cenas WebGL pesadas ainda consomem CPU/RAM/disco.
-  Em máquinas modestas prefira --interval 0.25–0.5, --format jpeg e viewport ≤ 1440px.`;
+⚠ Cost: frames come from the compositor screencast (cheap), but intervals < 100ms,
+  large viewports and heavy WebGL scenes still consume CPU/RAM/disk.
+  On modest machines prefer --interval 0.25–0.5, --format jpeg and a viewport ≤ 1440px.`;
 
 function render(m: RecordingManifest, manifestFile: string) {
   const pf = m.pageFrames;
   return [
-    ok(`${m.frameCount} frames em ${(m.durationMs / 1000).toFixed(1)}s (a cada ${m.intervalMs}ms · parada: ${m.stopReason})`),
+    ok(`${m.frameCount} frames in ${(m.durationMs / 1000).toFixed(1)}s (every ${m.intervalMs}ms · stop: ${m.stopReason})`),
     kv('frames', m.framesDir),
     ...m.outputs.spritesheets.map((s) => kv('sprite', s)),
-    ...(m.outputs.video ? [kv('vídeo', m.outputs.video)] : []),
+    ...(m.outputs.video ? [kv('video', m.outputs.video)] : []),
     ...(m.outputs.gif ? [kv('gif', m.outputs.gif)] : []),
-    ...(pf ? [kv('página', `${pf.fps} fps · p95 ${pf.p95FrameMs}ms · ${pf.longFrames} frames longos`)] : []),
-    ...(m.animated?.elements.length ? [kv('animou', m.animated.elements.slice(0, 5).map((e) => `${e.selector} ×${e.changes}`).join(' · '))] : []),
-    ...(m.crop ? [kv('recorte', `${Math.round(m.crop.width)}×${Math.round(m.crop.height)}px`)] : []),
+    ...(pf ? [kv('page', `${pf.fps} fps · p95 ${pf.p95FrameMs}ms · ${pf.longFrames} long frames`)] : []),
+    ...(m.animated?.elements.length ? [kv('animated', m.animated.elements.slice(0, 5).map((e) => `${e.selector} ×${e.changes}`).join(' · '))] : []),
+    ...(m.crop ? [kv('crop', `${Math.round(m.crop.width)}×${Math.round(m.crop.height)}px`)] : []),
     kv('manifest', manifestFile),
     ...m.warnings.map(warn),
-    next('leia a spritesheet para avaliar a coreografia de scroll/hover quadro a quadro'),
+    next('read the spritesheet to judge the scroll/hover choreography frame by frame'),
   ].join('\n');
 }
 
 export const recordFrames: Command = {
   name: 'web-record-frames',
-  group: 'mídia',
-  summary: 'Grava frames da sessão (padrão 0.5s/frame) → spritesheet + MP4 + métricas de jank.',
+  group: 'media',
+  summary: 'Records session frames (default 0.5s/frame) → spritesheet + MP4 + jank metrics.',
   usage,
   async execute(argv, ctx) {
     const { values } = parse(
@@ -86,14 +86,14 @@ export const recordFrames: Command = {
 
     const statePath = recordingStatePath();
     if (values.stop) {
-      if (!existsSync(statePath)) throw new ParedeError('NO_RECORDING', 'Nenhuma gravação em background.', 'Inicie com `web-record-frames --detach`.');
+      if (!existsSync(statePath)) throw new ParedeError('NO_RECORDING', 'No background recording.', 'Start one with `web-record-frames --detach`.');
       const state = JSON.parse(readFileSync(statePath, 'utf8')) as { dir: string };
       writeFileSync(join(state.dir, '.stop'), String(Date.now()));
       const manifestFile = join(state.dir, 'manifest.json');
       const deadline = Date.now() + 180_000;
       while (!existsSync(manifestFile) && Date.now() < deadline) await sleep(300);
       rmSync(statePath, { force: true });
-      if (!existsSync(manifestFile)) throw new ParedeError('TIMEOUT', 'A gravação não finalizou em 3 min.', `Veja ${join(state.dir, 'record.log')}`);
+      if (!existsSync(manifestFile)) throw new ParedeError('TIMEOUT', 'The recording did not finish within 3 min.', `See ${join(state.dir, 'record.log')}`);
       const manifest = JSON.parse(readFileSync(manifestFile, 'utf8')) as RecordingManifest;
       return { data: manifest, text: render(manifest, manifestFile) };
     }
@@ -109,7 +109,7 @@ export const recordFrames: Command = {
       if (existsSync(statePath)) {
         const previous = JSON.parse(readFileSync(statePath, 'utf8')) as { pid: number; dir: string };
         const finished = existsSync(join(previous.dir, 'manifest.json')) || !isPidAlive(previous.pid);
-        if (!finished) throw new ParedeError('BUSY', 'Já existe uma gravação em background.', 'Rode `web-record-frames --stop` antes.');
+        if (!finished) throw new ParedeError('BUSY', 'A background recording is already running.', 'Run `web-record-frames --stop` first.');
         rmSync(statePath, { force: true });
       }
       const forwarded = argv.filter((a) => a !== '--detach');
@@ -126,14 +126,14 @@ export const recordFrames: Command = {
       writeFileSync(statePath, JSON.stringify({ pid: child.pid, dir, startedAt: new Date().toISOString() }));
       return {
         data: { detached: true, pid: child.pid, dir },
-        text: [ok(`gravando em background (pid ${child.pid}) a cada ${intervalMs}ms`), kv('saída', dir), next('dispare web-control ... e depois rode: web-record-frames --stop')].join('\n'),
+        text: [ok(`recording in the background (pid ${child.pid}) every ${intervalMs}ms`), kv('output', dir), next('fire web-control ... and then run: web-record-frames --stop')].join('\n'),
       };
     }
 
     const lines: string[] = [];
-    if (intervalMs < 100) lines.push(warn(`intervalo de ${intervalMs}ms: alto consumo de CPU/RAM/disco. Use só para micro-interações curtas.`));
+    if (intervalMs < 100) lines.push(warn(`a ${intervalMs}ms interval: high CPU/RAM/disk use. Use it only for short microinteractions.`));
     const maxFrames = parseNumber(values['max-frames'], 'max-frames', 600);
-    if (durationMs && durationMs / intervalMs > maxFrames) lines.push(warn(`duração pede ${Math.ceil(durationMs / intervalMs)} frames; limitado a ${maxFrames} (--max-frames).`));
+    if (durationMs && durationMs / intervalMs > maxFrames) lines.push(warn(`the duration asks for ${Math.ceil(durationMs / intervalMs)} frames; capped at ${maxFrames} (--max-frames).`));
 
     const frames = await ctx.session.call<RecordedFrames>('record', {
       dir,

@@ -25,7 +25,7 @@ export function writeSession(info: SessionInfo, file = sessionFilePath()): void 
   writeFileSync(file, JSON.stringify(info, null, 2), { mode: 0o600 });
 }
 
-/** Remove o arquivo de sessão; com `onlyPid`, só remove se ainda pertencer a esse processo. */
+/** Removes the session file; with `onlyPid`, only if it still belongs to that process. */
 export function removeSession(onlyPid?: number, file = sessionFilePath()): void {
   if (onlyPid !== undefined && readSession(file)?.pid !== onlyPid) return;
   rmSync(file, { force: true });

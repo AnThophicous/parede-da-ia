@@ -1,7 +1,7 @@
 /**
- * Contratos dos relatórios que atravessam o RPC (daemon → CLI/MCP).
- * Vivem no domínio para que infraestrutura (produtora) e apresentação (consumidora)
- * dependam ambas para dentro.
+ * Contracts of the reports that cross the RPC (daemon → CLI/MCP).
+ * They live in the domain so that infrastructure (producer) and presentation (consumer)
+ * both depend inward.
  */
 
 export interface Ranked {
@@ -39,7 +39,7 @@ export interface StackItem {
 
 export interface AestheticGuess {
   primary: string;
-  /** Segunda família quando também pontua alto (sites ambiciosos costumam misturar). */
+  /** A second family when it also scores high (ambitious sites often mix them). */
   secondary: string | null;
   confidence: number;
   scores: Record<string, number>;
@@ -258,11 +258,11 @@ export interface InteractionsReport {
 
 // ─────────────────────────────── audit ───────────────────────────────
 
-export type Severity = 'erro' | 'aviso' | 'info';
+export type Severity = 'error' | 'warning' | 'info';
 
 export interface AuditIssue {
   id: string;
-  category: 'acessibilidade' | 'responsivo' | 'performance' | 'conteudo' | 'seo' | 'console' | 'movimento';
+  category: 'accessibility' | 'responsive' | 'performance' | 'content' | 'seo' | 'console' | 'motion';
   severity: Severity;
   message: string;
   viewport: string;
@@ -285,7 +285,7 @@ export interface AuditReport {
   issues: AuditIssue[];
   scores: Record<string, number>;
   overall: number;
-  verdict: 'aprovado' | 'reprovado';
+  verdict: 'approved' | 'rejected';
   perf: PerfSnapshot & { requests: number; totalBytes: number; jsBytes: number; fontFiles: number };
   reportFile: string | null;
 }

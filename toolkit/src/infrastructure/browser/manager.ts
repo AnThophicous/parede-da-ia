@@ -12,7 +12,7 @@ export interface OpenOptions {
   userAgent?: string;
   colorScheme?: 'light' | 'dark' | 'no-preference';
   reducedMotion?: boolean;
-  /** Escuta o console inteiro via CDP. Desligado por padrão: alguns sites detectam e degradam o render. */
+  /** Listens to the whole console through CDP. Off by default: some sites detect it and degrade rendering. */
   fullConsole?: boolean;
   hooks?: boolean;
   waitUntil?: 'commit' | 'domcontentloaded' | 'load' | 'networkidle';
@@ -40,7 +40,7 @@ const MAX_NETWORK = 5000;
 const MAX_CSS_BODIES = 60;
 const MAX_CONSOLE = 300;
 
-/** Dono único do Chromium da sessão: navegador, contexto, página e telemetria. */
+/** The single owner of the session's Chromium: browser, context, page and telemetry. */
 export class BrowserManager {
   browser?: Browser;
   context?: BrowserContext;
@@ -57,7 +57,7 @@ export class BrowserManager {
 
   requirePage(): Page {
     if (!this.page || this.page.isClosed()) {
-      throw new ParedeError('NO_PAGE', 'Nenhuma página aberta nesta sessão.', 'Rode `web-url-fetch <url>` primeiro.');
+      throw new ParedeError('NO_PAGE', 'No page open in this session.', 'Run `web-url-fetch <url>` first.');
     }
     return this.page;
   }
@@ -72,7 +72,7 @@ export class BrowserManager {
       await this.browser?.close().catch(() => undefined);
       this.browser = await chromium.launch({
         headless: !o.headful,
-        // GPU real (D3D/Metal/GL) em vez de SwiftShader: WebGL pesado roda ~4× mais rápido em headless.
+        // A real GPU (D3D/Metal/GL) instead of SwiftShader: heavy WebGL runs ~4× faster headless.
         args: process.env.PAREDE_GPU === '0' ? [] : ['--enable-gpu', '--ignore-gpu-blocklist', ...(process.platform === 'win32' ? ['--use-angle=d3d11'] : [])],
       });
       this.launchKey = launchKey;
@@ -135,7 +135,7 @@ export class BrowserManager {
         mime: null,
         bytes: null,
         fromCache: false,
-        failure: request.failure()?.errorText ?? 'falhou',
+        failure: request.failure()?.errorText ?? 'failed',
       });
     });
     if (fullConsole) page.on('console', (msg) => this.pushConsole(msg.type(), msg.text()));
@@ -175,12 +175,12 @@ export class BrowserManager {
         this.cssBodies.set(entry.url, body.slice(0, 3_000_000));
       }
     } catch {
-      // respostas canceladas/redirecionadas não têm corpo
+      // canceled/redirected responses have no body
     }
   }
 
-  /** Erros de console desde um instante (ms relativos à abertura). */
-  /** pageerror (CDP) + console.error/warn capturados pelos hooks (ou console completo com fullConsole). */
+  /** Console errors since an instant (ms relative to the opening). */
+  /** pageerror (CDP) + console.error/warn captured by the hooks (or the full console with fullConsole). */
   async consoleEntries(): Promise<ConsoleEntry[]> {
     if (this.options?.fullConsole || !this.page || this.page.isClosed()) return [...this.consoleLog];
     const inPage = await this.page

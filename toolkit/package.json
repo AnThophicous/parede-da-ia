@@ -1,7 +1,7 @@
 {
   "name": "parede-da-ia",
-  "version": "0.2.0",
-  "description": "Olhos, mãos e repertório para agentes de IA: inspeção web, movimento, microinterações, QA e mídia. Playwright + FFmpeg.",
+  "version": "0.3.0",
+  "description": "Eyes, hands and taste for AI agents: web inspection, motion, microinteractions, QA and media. Playwright + FFmpeg.",
   "type": "module",
   "license": "MIT",
   "author": "Brenno Leon (https://github.com/AnThophicous)",

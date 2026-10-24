@@ -11,11 +11,11 @@ import { kv, next, ok, parse, requireSession, type Command } from './shared.js';
 
 export const scrap: Command = {
   name: 'web-scrap',
-  group: 'análise',
-  summary: 'Wappalyzer de front-end: estética provável, stack, fontes, paleta, contraste, mídia, efeitos, vitals e rede.',
-  usage: `web-scrap [--out arquivo.json] [--max-elements 4000]
-  Rode depois de web-wait-page-load. Para capturar recursos de scroll, role antes (web-control scroll-to bottom).
-  A linha "estética" aponta o playbook em prompts/aesthetics/ mais próximo da página.`,
+  group: 'analysis',
+  summary: 'A front-end Wappalyzer: likely aesthetic, stack, fonts, palette, contrast, media, effects, vitals and network.',
+  usage: `web-scrap [--out file.json] [--max-elements 4000]
+  Run it after web-wait-page-load. To catch scroll-loaded resources, scroll first (web-control scroll-to bottom).
+  The "aesthetic" line points to the closest playbook in prompts/aesthetics/.`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const { values } = parse(argv, { out: { type: 'string' }, 'max-elements': { type: 'string' } }, this.usage);
@@ -28,14 +28,14 @@ export const scrap: Command = {
 
 export const motion: Command = {
   name: 'web-motion',
-  group: 'análise',
-  summary: 'Disseca o movimento: transições, curvas, @keyframes, GSAP/ScrollTrigger, Lenis, jank e tokens.',
-  usage: `web-motion [opções]
-  --observe 3            observa por N segundos o que anima (estilos inline/classes) + fps
-  --while "<ações>"      ações durante a observação, ex.: "scroll-down 3000 --steps 60"
-  --out arquivo.json
+  group: 'analysis',
+  summary: 'Dissects motion: transitions, easings, @keyframes, GSAP/ScrollTrigger, Lenis, jank and tokens.',
+  usage: `web-motion [options]
+  --observe 3            watches for N seconds what animates (inline styles/classes) + fps
+  --while "<actions>"    actions during the observation, e.g. "scroll-down 3000 --steps 60"
+  --out file.json
 
-Funciona com GSAP/Motion empacotados: a observação registra o que eles escrevem no DOM a cada frame.`,
+Works with bundled GSAP/Motion: the observation records what they write to the DOM every frame.`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const { values } = parse(argv, { observe: { type: 'string' }, while: { type: 'string' }, out: { type: 'string' } }, this.usage);
@@ -50,13 +50,13 @@ Funciona com GSAP/Motion empacotados: a observação registra o que eles escreve
 
 export const interactions: Command = {
   name: 'web-interactions',
-  group: 'análise',
-  summary: 'Testa microinterações: hover, :active, foco e efeito magnético de cada interativo, com folha antes/depois.',
-  usage: `web-interactions [opções]
-  --limit 12             quantos elementos interativos testar (do inventory)
-  --selector <css>       testa só este elemento
-  --hold 500ms           tempo para as transições terminarem antes de medir
-  --no-shots             não captura recortes (mais rápido)`,
+  group: 'analysis',
+  summary: 'Tests microinteractions: hover, :active, focus and magnetic effect of every interactive element, with a before/after sheet.',
+  usage: `web-interactions [options]
+  --limit 12             how many interactive elements to test (from the inventory)
+  --selector <css>       test only this element
+  --hold 500ms           time for the transitions to finish before measuring
+  --no-shots             no crops (faster)`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const { values } = parse(argv, { limit: { type: 'string' }, selector: { type: 'string' }, hold: { type: 'string' }, 'no-shots': { type: 'boolean' } }, this.usage);
@@ -76,15 +76,15 @@ export const interactions: Command = {
 
 export const audit: Command = {
   name: 'web-audit',
-  group: 'análise',
-  summary: 'QA automático em vários viewports: responsivo, a11y, contraste, foco, vitals, peso, console → nota e veredito.',
-  usage: `web-audit [opções]
-  --viewports desktop,tablet,mobile   presets ou LxA (padrão: desktop,tablet,mobile)
-  --full-page            capturas de página inteira por viewport
-  --focus-steps 12       quantos Tabs para checar foco visível
-  --strict               sai com código 1 se reprovar (CI)
+  group: 'analysis',
+  summary: 'Automatic QA on several viewports: responsive, a11y, contrast, focus, vitals, weight, console → a score and a verdict.',
+  usage: `web-audit [options]
+  --viewports desktop,tablet,mobile   presets or WxH (default: desktop,tablet,mobile)
+  --full-page            full-page captures per viewport
+  --focus-steps 12       how many Tabs to check visible focus
+  --strict               exits with code 1 when rejected (CI)
 
-Gera audit.md (relatório) e audit.json na pasta .parede/audit/<data>/.`,
+Writes audit.md (report) and audit.json to .parede/audit/<date>/.`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const { values } = parse(argv, { viewports: { type: 'string' }, 'full-page': { type: 'boolean' }, 'focus-steps': { type: 'string' }, strict: { type: 'boolean' } }, this.usage);
@@ -95,18 +95,18 @@ Gera audit.md (relatório) e audit.json na pasta .parede/audit/<data>/.`,
     const report: AuditReport = { ...result, reportFile: md };
     writeFileSync(md, auditMarkdown(report));
     writeFileSync(resolve(dir, 'audit.json'), JSON.stringify(report, null, 2));
-    if (values.strict && report.verdict === 'reprovado') process.exitCode = 1;
+    if (values.strict && report.verdict === 'rejected') process.exitCode = 1;
     return { data: report, text: formatAudit(report) };
   },
 };
 
 export const tokens: Command = {
   name: 'web-tokens',
-  group: 'análise',
-  summary: 'Exporta design tokens (cor, fonte, escala, espaço, raio, sombra, movimento) da página em CSS + JSON.',
-  usage: `web-tokens [--out pasta] [--no-motion]
-  Útil para auditar consistência do próprio projeto ou estudar o sistema de uma referência
-  (estude, não copie: tokens de terceiros são ponto de partida, não entrega).`,
+  group: 'analysis',
+  summary: 'Exports the page design tokens (color, font, scale, space, radius, shadow, motion) as CSS + JSON.',
+  usage: `web-tokens [--out folder] [--no-motion]
+  Useful to audit your own project's consistency or to study a reference's system
+  (study, don't copy: third-party tokens are a starting point, not a deliverable).`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const { values } = parse(argv, { out: { type: 'string' }, 'no-motion': { type: 'boolean' } }, this.usage);
@@ -123,7 +123,7 @@ export const tokens: Command = {
     const count = Object.values(set.json).reduce((n, g) => n + Object.keys(g).length, 0);
     return {
       data: { css, json, tokens: set.json },
-      text: [ok(`${count} tokens extraídos de ${s.page.url}`), kv('css', css), kv('json', json), ...set.css.split('\n').slice(2, 14).map((l) => `    ${l.trim()}`), next('compare com os tokens do seu projeto para achar valores fora da escala')].join('\n'),
+      text: [ok(`${count} tokens extracted from ${s.page.url}`), kv('css', css), kv('json', json), ...set.css.split('\n').slice(2, 14).map((l) => `    ${l.trim()}`), next('compare with your project tokens to find off-scale values')].join('\n'),
     };
   },
 };

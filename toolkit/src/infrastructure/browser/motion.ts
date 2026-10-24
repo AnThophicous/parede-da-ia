@@ -5,15 +5,15 @@ import { collectMotion, startObserve, stopObserve } from './inject/motion.js';
 import type { BrowserManager } from './manager.js';
 
 export interface MotionParams {
-  /** Observa mutações de estilo + frames por N ms (0 = só o que está declarado). */
+  /** Watches style mutations + frames for N ms (0 = only what is declared). */
   observeMs: number;
-  /** Ações executadas durante a observação (ex.: scroll-down 3000). */
+  /** Actions run during the observation (e.g. scroll-down 3000). */
   actions: Action[];
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Sugere tokens de movimento (CSS) a partir das durações/curvas mais usadas. */
+/** Suggests motion tokens (CSS) from the most used durations/easings. */
 function motionTokens(durations: Ranked[], easings: Ranked[]) {
   const ds = durations.slice(0, 4).map((d) => d.value);
   const es = easings.slice(0, 4).map((e) => e.value);

@@ -19,7 +19,7 @@ export interface RecordParams {
   quality?: number;
   viewport?: Viewport;
   stopFile: string;
-  /** Recorta spritesheet/vídeo na caixa deste elemento (posição no início da gravação). */
+  /** Crops the spritesheet/video to this element's box (its position when the recording starts). */
   selector?: string;
 }
 
@@ -28,9 +28,9 @@ const CROP_PAD = 16;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Captura um frame a cada `intervalMs` enquanto (opcionalmente) executa ações em paralelo.
- * Para quando: a duração acaba, o limite de frames é atingido, o arquivo de stop aparece
- * ou — no modo `--while` sem duração — as ações terminam e o "rabo" (tail) é gravado.
+ * Captures a frame every `intervalMs` while (optionally) running actions in parallel.
+ * Stops when: the duration ends, the frame limit is reached, the stop file appears
+ * or — in `--while` mode without a duration — the actions finish and the tail is recorded.
  */
 export async function recordFrames(m: BrowserManager, p: RecordParams) {
   const page = m.requirePage();
@@ -51,9 +51,9 @@ export async function recordFrames(m: BrowserManager, p: RecordParams) {
   let actionsEndedAt = 0;
   let lagged = 0;
 
-  // Screencast do compositor: o Chromium empurra frames quando a tela muda; a cada tick
-  // gravamos o mais recente. Não força renders extras (ao contrário de page.screenshot),
-  // então funciona mesmo em cenas WebGL pesadas em máquinas modestas.
+  // Compositor screencast: Chromium pushes frames when the screen changes; on every tick
+  // we record the latest one. It forces no extra renders (unlike page.screenshot),
+  // so it works even on heavy WebGL scenes on modest machines.
   const viewport = page.viewportSize() ?? { width: 1280, height: 800 };
   let latest: Buffer | null = null;
   let freshFrames = 0;
@@ -69,13 +69,13 @@ export async function recordFrames(m: BrowserManager, p: RecordParams) {
     while (!latest && Date.now() < firstFrameDeadline) await sleep(30);
   }
 
-  // Recorte por elemento: converte a caixa CSS para pixels do frame do screencast.
+  // Crop by element: converts the CSS box to the screencast frame's pixels.
   let crop: { x: number; y: number; width: number; height: number } | null = null;
   if (p.selector) {
     const locator = page.locator(p.selector).first();
     await locator.scrollIntoViewIfNeeded({ timeout: 8000 }).catch(() => undefined);
     const box = await locator.boundingBox();
-    if (!box) throw new ParedeError('SELECTOR', `"${p.selector}" não está visível para recorte.`, 'Rode `web-control inventory` para listar alvos visíveis.');
+    if (!box) throw new ParedeError('SELECTOR', `"${p.selector}" is not visible to crop.`, 'Run `web-control inventory` to list visible targets.');
     const size = latest ? imageSize(latest) : null;
     const scale = size ? size.width / viewport.width : 1;
     const x = Math.max(0, (box.x - CROP_PAD) * scale);
@@ -85,7 +85,7 @@ export async function recordFrames(m: BrowserManager, p: RecordParams) {
     crop = { x, y, width: Math.min(maxW, (box.width + CROP_PAD * 2) * scale), height: Math.min(maxH, (box.height + CROP_PAD * 2) * scale) };
   }
 
-  // Observa o que anima (estilos inline/classes) e a cadência real de frames da página.
+  // Watches what animates (inline styles/classes) and the page's real frame cadence.
   await page.evaluate(startObserve).catch(() => undefined);
 
   const actionsRun = (async () => {
@@ -105,7 +105,7 @@ export async function recordFrames(m: BrowserManager, p: RecordParams) {
     actionsEndedAt = Date.now() - start;
   })();
 
-  // scrollY é amostrado em paralelo: um evaluate por frame bloquearia o relógio da gravação.
+  // scrollY is sampled in parallel: one evaluate per frame would block the recording clock.
   let lastScrollY = -1;
   let polling = false;
   const scrollPoll = setInterval(() => {
@@ -114,21 +114,21 @@ export async function recordFrames(m: BrowserManager, p: RecordParams) {
     page.evaluate(() => Math.round(window.scrollY)).then((y) => (lastScrollY = y), () => undefined).finally(() => (polling = false));
   }, 200);
 
-  let stopReason = 'duração';
+  let stopReason = 'duration';
   try {
     for (let i = 0; ; i++) {
       const elapsed = Date.now() - start;
       if (p.durationMs !== undefined && elapsed >= p.durationMs) break;
       if (p.durationMs === undefined && actionsDone && elapsed >= actionsEndedAt + p.tailMs) {
-        stopReason = 'ações concluídas';
+        stopReason = 'actions finished';
         break;
       }
       if (frames.length >= p.maxFrames) {
-        stopReason = 'limite de frames';
+        stopReason = 'frame limit';
         break;
       }
       if (existsSync(p.stopFile)) {
-        stopReason = 'stop solicitado';
+        stopReason = 'stop requested';
         break;
       }
 

@@ -1,4 +1,4 @@
-/** Matemática de cor pura (sRGB / WCAG). Sem dependências. */
+/** Pure color math (sRGB / WCAG). No dependencies. */
 
 export interface Rgb {
   r: number;
@@ -32,7 +32,7 @@ export function contrastRatio(a: Rgb, b: Rgb): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-/** Diferença entre o maior e o menor canal: 0 = cinza puro. */
+/** Difference between the largest and the smallest channel: 0 = pure gray. */
 export const chroma = (c: Rgb) => Math.max(c.r, c.g, c.b) - Math.min(c.r, c.g, c.b);
 
 export function toHsl(c: Rgb): { h: number; s: number; l: number } {
@@ -50,19 +50,19 @@ export function toHsl(c: Rgb): { h: number; s: number; l: number } {
   return { h: Math.round(h), s: Math.round(s * 100) / 100, l: Math.round(l * 100) / 100 };
 }
 
-/** Off-white "quente" (papel, creme): muito claro, levemente amarelado/avermelhado. */
+/** A "warm" off-white (paper, cream): very light, slightly yellowish/reddish. */
 export function isWarmPaper(c: Rgb): boolean {
   const { l } = toHsl(c);
   return l >= 0.88 && l < 0.99 && c.r >= c.b && chroma(c) >= 3 && chroma(c) <= 30;
 }
 
-/** Cor saturada o bastante para funcionar como acento de marca. */
+/** A color saturated enough to work as a brand accent. */
 export function isVivid(c: Rgb): boolean {
   const { s, l } = toHsl(c);
   return s >= 0.45 && l >= 0.25 && l <= 0.85 && chroma(c) >= 60;
 }
 
-/** Número de famílias de matiz distintas (faixas de 30°) entre cores vívidas. */
+/** Number of distinct hue families (30° bands) among vivid colors. */
 export function distinctHues(colors: Rgb[]): number {
   const buckets = new Set<number>();
   for (const c of colors) if (isVivid(c)) buckets.add(Math.floor(toHsl(c).h / 30));

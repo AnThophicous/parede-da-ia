@@ -3,9 +3,9 @@ import type { AppContext } from '../../../application/ports.js';
 import { ParedeError } from '../../../domain/errors.js';
 
 export interface CommandResult {
-  /** Saída estruturada (impressa com --json e devolvida pelo MCP). */
+  /** Structured output (printed with --json and returned by MCP). */
   data: unknown;
-  /** Resumo legível para humanos e agentes. */
+  /** A summary readable by humans and agents. */
   text: string;
 }
 
@@ -13,14 +13,14 @@ export interface Command {
   name: string;
   summary: string;
   usage: string;
-  /** Grupo no `parede help`. */
-  group: 'navegador' | 'análise' | 'mídia' | 'operação';
+  /** Group in `parede help`. */
+  group: 'browser' | 'analysis' | 'media' | 'operations';
   execute(argv: string[], ctx: AppContext): Promise<CommandResult>;
 }
 
 type Options = NonNullable<ParseArgsConfig['options']>;
 
-/** parseArgs estrito com erro amigável que inclui o uso correto. */
+/** A strict parseArgs with a friendly error that includes the correct usage. */
 export function parse<T extends Options>(argv: string[], options: T, usage: string) {
   try {
     return parseArgs({ args: argv, options, allowPositionals: true, strict: true });
@@ -30,7 +30,7 @@ export function parse<T extends Options>(argv: string[], options: T, usage: stri
 }
 
 export function requireSession(ctx: AppContext) {
-  if (!ctx.session.active()) throw new ParedeError('NO_SESSION', 'Nenhuma sessão de navegador ativa.', 'Rode `web-url-fetch <url>` primeiro.');
+  if (!ctx.session.active()) throw new ParedeError('NO_SESSION', 'No active browser session.', 'Run `web-url-fetch <url>` first.');
 }
 
 export const ok = (text: string) => `✔ ${text}`;

@@ -9,8 +9,8 @@ import { readSession, removeSession, type SessionInfo } from './session.js';
 
 type RpcResponse<T> = { ok: true; result: T } | { ok: false; error: { code: string; message: string; hint?: string } };
 
-const noSession = (detail = 'Nenhuma sessão de navegador ativa.') =>
-  new ParedeError('NO_SESSION', detail, 'Rode `web-url-fetch <url>` para abrir uma página primeiro.');
+const noSession = (detail = 'No active browser session.') =>
+  new ParedeError('NO_SESSION', detail, 'Run `web-url-fetch <url>` to open a page first.');
 
 function post<T>(session: SessionInfo, body: unknown, timeoutMs = 0): Promise<RpcResponse<T>> {
   return new Promise((resolve, reject) => {
@@ -34,7 +34,7 @@ function post<T>(session: SessionInfo, body: unknown, timeoutMs = 0): Promise<Rp
           try {
             resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')) as RpcResponse<T>);
           } catch {
-            reject(new ParedeError('PROTOCOL', `Resposta inválida do daemon (HTTP ${res.statusCode}).`));
+            reject(new ParedeError('PROTOCOL', `Invalid daemon response (HTTP ${res.statusCode}).`));
           }
         });
       },
@@ -45,7 +45,7 @@ function post<T>(session: SessionInfo, body: unknown, timeoutMs = 0): Promise<Rp
   });
 }
 
-/** Chamada RPC ao daemon da sessão atual. Sem timeout: gravações longas são legítimas. */
+/** An RPC call to the current session's daemon. No timeout: long recordings are legitimate. */
 export async function rpc<T = unknown>(method: string, params: object = {}): Promise<T> {
   const session = readSession();
   if (!session) throw noSession();
@@ -56,7 +56,7 @@ export async function rpc<T = unknown>(method: string, params: object = {}): Pro
     const code = (err as NodeJS.ErrnoException).code;
     if (code === 'ECONNREFUSED' || code === 'ECONNRESET') {
       removeSession(session.pid);
-      throw noSession('A sessão anterior foi encerrada (daemon fora do ar).');
+      throw noSession('The previous session ended (daemon down).');
     }
     throw err;
   }
@@ -81,7 +81,7 @@ function tail(file: string, lines = 15): string {
   }
 }
 
-/** Garante um daemon vivo para a sessão atual, iniciando-o em background se preciso. */
+/** Ensures a live daemon for the current session, starting it in the background if needed. */
 export async function ensureDaemon(): Promise<SessionInfo> {
   const existing = readSession();
   if (existing && (await isAlive(existing))) return existing;
@@ -105,15 +105,15 @@ export async function ensureDaemon(): Promise<SessionInfo> {
   while (Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 150));
     if (exitCode !== null) {
-      throw new ParedeError('DAEMON_FAILED', `O daemon terminou ao iniciar (código ${exitCode}).`, tail(logFile) || undefined);
+      throw new ParedeError('DAEMON_FAILED', `The daemon exited while starting (code ${exitCode}).`, tail(logFile) || undefined);
     }
     const session = readSession();
     if (session && session.pid === child.pid && (await isAlive(session))) return session;
   }
-  throw new ParedeError('DAEMON_TIMEOUT', 'O daemon não respondeu em 20s.', `Veja o log: ${logFile}`);
+  throw new ParedeError('DAEMON_TIMEOUT', 'The daemon did not answer within 20s.', `See the log: ${logFile}`);
 }
 
-/** Adaptador da porta BrowserSession: RPC HTTP local para o daemon Playwright. */
+/** BrowserSession port adapter: local HTTP RPC to the Playwright daemon. */
 export const rpcSession: BrowserSession = {
   ensure: async () => {
     await ensureDaemon();

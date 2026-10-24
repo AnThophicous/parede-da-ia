@@ -1,9 +1,9 @@
 import type { MotionReport, Ranked, ScrapReport } from './reports.js';
 
 /**
- * Converte o que foi medido numa página em design tokens reutilizáveis
- * (formato próximo do W3C Design Tokens + CSS custom properties).
- * Serve para auditar consistência ou para partir de uma referência sem copiá-la.
+ * Turns what was measured on a page into reusable design tokens
+ * (a format close to W3C Design Tokens + CSS custom properties).
+ * Useful to audit consistency or to start from a reference without copying it.
  */
 export interface TokenSet {
   json: Record<string, Record<string, { $value: string; $type: string; $description?: string }>>;
@@ -23,8 +23,8 @@ export function buildTokens(s: ScrapReport, motion?: MotionReport | null): Token
     json[group][name] = { $value: value, $type: type, ...(description ? { $description: description } : {}) };
   };
 
-  ranked(s.colors.background, 3).forEach((c, i) => add('color', i === 0 ? 'bg' : `bg-${i + 1}`, c.value, 'color', `${c.share}% da área`));
-  ranked(s.colors.text, 3).forEach((c, i) => add('color', i === 0 ? 'fg' : `fg-${i + 1}`, c.value, 'color', `${c.share}% do texto`));
+  ranked(s.colors.background, 3).forEach((c, i) => add('color', i === 0 ? 'bg' : `bg-${i + 1}`, c.value, 'color', `${c.share}% of the area`));
+  ranked(s.colors.text, 3).forEach((c, i) => add('color', i === 0 ? 'fg' : `fg-${i + 1}`, c.value, 'color', `${c.share}% of the text`));
   ranked(s.colors.accent, 4).forEach((c, i) => add('color', `accent-${i + 1}`, c.value, 'color'));
   ranked(s.colors.borders, 2).forEach((c, i) => add('color', i === 0 ? 'border' : `border-${i + 1}`, c.value, 'color'));
 
@@ -32,13 +32,13 @@ export function buildTokens(s: ScrapReport, motion?: MotionReport | null): Token
   const largest = [...s.fonts.scale].sort((a, b) => px(b.size) - px(a.size))[0];
   const mono = byShare.find((f) => /mono|code|courier/i.test(f.family));
   if (largest) add('font', 'display', `"${largest.family}"`, 'fontFamily');
-  if (byShare[0]) add('font', 'body', `"${byShare[0].family}"`, 'fontFamily', `${byShare[0].usedShare}% do texto`);
+  if (byShare[0]) add('font', 'body', `"${byShare[0].family}"`, 'fontFamily', `${byShare[0].usedShare}% of the text`);
   if (mono) add('font', 'mono', `"${mono.family}"`, 'fontFamily');
 
   const scale = uniq([...s.fonts.scale].sort((a, b) => px(b.size) - px(a.size)).map((t) => t.size));
   scale.slice(0, 9).forEach((size, i) => {
     const style = s.fonts.scale.find((t) => t.size === size)!;
-    add('text', `size-${i + 1}`, size, 'dimension', `peso ${style.weight} · lh ${style.lineHeight} · ls ${style.letterSpacing} · ex.: "${style.sample.slice(0, 24)}"`);
+    add('text', `size-${i + 1}`, size, 'dimension', `weight ${style.weight} · lh ${style.lineHeight} · ls ${style.letterSpacing} · e.g. "${style.sample.slice(0, 24)}"`);
   });
 
   uniq(s.layout.spacingScale.map((r) => Number(r.value)).filter((n) => n > 0))
@@ -55,10 +55,10 @@ export function buildTokens(s: ScrapReport, motion?: MotionReport | null): Token
 
   const durations = motion?.transitions.durations ?? s.motion.durations;
   const easings = motion?.transitions.easings ?? s.motion.easings;
-  ranked(durations, 4).forEach((d, i) => add('motion', `duration-${i + 1}`, d.value, 'duration', `${d.share}% das transições`));
-  ranked(easings, 4).forEach((e, i) => add('motion', `ease-${i + 1}`, e.value, 'cubicBezier', `${e.share}% das transições`));
+  ranked(durations, 4).forEach((d, i) => add('motion', `duration-${i + 1}`, d.value, 'duration', `${d.share}% of the transitions`));
+  ranked(easings, 4).forEach((e, i) => add('motion', `ease-${i + 1}`, e.value, 'cubicBezier', `${e.share}% of the transitions`));
 
-  const lines: string[] = [`/* Tokens extraídos de ${s.page.url} em ${s.generatedAt} por parede-da-ia web-tokens. */`, ':root {'];
+  const lines: string[] = [`/* Tokens extracted from ${s.page.url} on ${s.generatedAt} by parede-da-ia web-tokens. */`, ':root {'];
   for (const [group, entries] of Object.entries(json)) {
     for (const [name, token] of Object.entries(entries)) {
       lines.push(`  --${group}-${name}: ${token.$value};${token.$description ? ` /* ${token.$description.replace(/\*\//g, '')} */` : ''}`);

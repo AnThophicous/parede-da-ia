@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * Verificações de QA executadas DENTRO da página para um viewport. Autocontido.
- * Devolve achados brutos; a severidade e a pontuação são decididas no domínio.
+ * QA checks that run INSIDE the page for one viewport. Self-contained.
+ * Returns raw findings; severity and scoring are decided in the domain.
  */
 export interface AuditChecksInput {
   mobile: boolean;
@@ -32,7 +32,7 @@ export function auditChecks(o: AuditChecksInput) {
     return false;
   };
 
-  // ── responsivo: overflow horizontal ──
+  // ── responsive: horizontal overflow ──
   const overflowX = Math.max(0, doc.documentElement.scrollWidth - vw);
   const offenders: { selector: string; by: number }[] = [];
   if (overflowX > 1) {
@@ -43,7 +43,7 @@ export function auditChecks(o: AuditChecksInput) {
     offenders.sort((a, b) => b.by - a.by);
   }
 
-  // ── alvos de toque e texto pequeno (mobile) ──
+  // ── touch targets and small text (mobile) ──
   const interactive = Array.from(doc.querySelectorAll('a[href], button, [role="button"], input:not([type="hidden"]), select, textarea, summary')).filter(visible);
   const tooSmall: string[] = [];
   const uncomfortable: string[] = [];
@@ -52,7 +52,7 @@ export function auditChecks(o: AuditChecksInput) {
       const r = el.getBoundingClientRect();
       const inlineLink = el.tagName === 'A' && getComputedStyle(el).display === 'inline' && (el.parentElement?.innerText.length ?? 0) > (el as HTMLElement).innerText.length + 20;
       if (inlineLink) continue;
-      // Erro só quando as duas dimensões ficam abaixo do mínimo (a WCAG 2.5.8 aceita espaçamento compensatório).
+      // An error only when both dimensions fall below the minimum (WCAG 2.5.8 accepts compensating spacing).
       if (r.width < o.tapMin && r.height < o.tapMin) tooSmall.push(`${label(el)} (${Math.round(r.width)}×${Math.round(r.height)})`);
       else if (r.width < o.tapComfort || r.height < o.tapComfort) uncomfortable.push(`${label(el)} (${Math.round(r.width)}×${Math.round(r.height)})`);
     }
@@ -63,7 +63,7 @@ export function auditChecks(o: AuditChecksInput) {
       const own = Array.from(el.childNodes).some((n) => n.nodeType === 3 && (n.textContent ?? '').trim().length > 3);
       if (!own || !visible(el)) continue;
       let size = parseFloat(getComputedStyle(el).fontSize);
-      // Texto em SVG: o font-size está em unidades do viewBox; o tamanho real é × a escala na tela.
+      // Text in SVG: font-size is in viewBox units; the real size is × the on-screen scale.
       if (el instanceof SVGGraphicsElement) {
         const m = el.getScreenCTM();
         if (m) size = Math.round(size * Math.hypot(m.a, m.b) * 10) / 10;
@@ -72,7 +72,7 @@ export function auditChecks(o: AuditChecksInput) {
     }
   }
 
-  // ── conteúdo e semântica ──
+  // ── content and semantics ──
   const imgs = Array.from(doc.images).filter(visible);
   const missingAlt = imgs.filter((i) => !i.hasAttribute('alt') && i.getAttribute('role') !== 'presentation' && i.getAttribute('aria-hidden') !== 'true').map(label);
   const noDimensions = imgs.filter((i) => !(i.getAttribute('width') && i.getAttribute('height')) && getComputedStyle(i).aspectRatio === 'auto').map(label);
@@ -82,7 +82,7 @@ export function auditChecks(o: AuditChecksInput) {
   let prev = 0;
   for (const h of headings) {
     const level = Number(h.tagName[1]);
-    if (prev && level > prev + 1) skipped.push(`h${prev}→h${level} em ${label(h)}`);
+    if (prev && level > prev + 1) skipped.push(`h${prev}→h${level} at ${label(h)}`);
     prev = level;
   }
   const unnamedButtons = Array.from(doc.querySelectorAll('button, [role="button"]')).filter(visible).filter((b) => !accessibleName(b)).map(label);
@@ -124,13 +124,13 @@ export function auditChecks(o: AuditChecksInput) {
   };
 }
 
-/** Lê o elemento focado e o "peso visual" do foco para comparação antes/depois do blur. */
+/** Reads the focused element and the focus "visual weight" to compare before/after the blur. */
 export function focusProbe() {
   const el = document.activeElement as HTMLElement | null;
   if (!el || el === document.body) return null;
   const cs = getComputedStyle(el);
   const cls = typeof el.className === 'string' ? el.className.trim().split(' ').filter(Boolean).slice(0, 2) : [];
-  // Marca temporária para reencontrar exatamente este elemento depois do blur.
+  // A temporary mark to find exactly this element again after the blur.
   document.querySelectorAll('[data-parede-focus]').forEach((n) => n.removeAttribute('data-parede-focus'));
   el.setAttribute('data-parede-focus', '');
   return {

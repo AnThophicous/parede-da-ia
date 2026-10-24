@@ -1,6 +1,6 @@
-/** Nomes de arquivo estáveis e legíveis para artefatos. Funções puras. */
+/** Stable, readable file names for artifacts. Pure functions. */
 
-/** Carimbo de tempo seguro para nomes de arquivo (horário local): 2026-10-23T18-50-00. */
+/** A filename-safe timestamp (local time): 2026-10-23T18-50-00. */
 export function stamp(date = new Date()): string {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
   return local.toISOString().slice(0, 19).replace(/:/g, '-');

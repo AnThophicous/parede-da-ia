@@ -21,7 +21,7 @@ interface ControlResult {
   consoleErrors: { text: string }[];
 }
 
-/** Viewports nomeados para testes de responsividade em um comando. */
+/** Named viewports for responsiveness tests in a single command. */
 export const VIEWPORT_PRESETS: Record<string, Viewport> = {
   desktop: { width: 1440, height: 900 },
   laptop: { width: 1280, height: 800 },
@@ -44,29 +44,29 @@ export function parseViewportList(value: string): { name: string; viewport: View
 
 export const control: Command = {
   name: 'web-control',
-  group: 'navegador',
-  summary: 'Eventos reais: scroll, click, hover, mousemove, keypress, drag (encadeáveis).',
-  usage: `web-control <ação> [parâmetros] [--screenshot]
+  group: 'browser',
+  summary: 'Real events: scroll, click, hover, mousemove, keypress, drag (chainable).',
+  usage: `web-control <action> [parameters] [--screenshot]
 
 ${ACTION_HELP}
 
-  --screenshot     captura a viewport depois da ação (ex.: validar estado de hover)
+  --screenshot     captures the viewport after the action (e.g. to check a hover state)
 
-Exemplos:
+Examples:
   web-control scroll-down 1200 --steps 24 --interval 50ms
   web-control hover "a.cta" --hold 600ms --screenshot
   web-control drag ".card" 400,300 --steps 30
   web-control sequence "scroll-to #pricing; wait 0.5; click 'button.buy'"
-  web-record-frames --while "scroll-down 4000 --steps 80"     # ações durante a gravação`,
+  web-record-frames --while "scroll-down 4000 --steps 80"     # actions during the recording`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const withShot = argv.includes('--screenshot');
     const tokens = argv.filter((a) => a !== '--screenshot');
-    if (!tokens.length) throw new ParedeError('BAD_ARG', 'Informe uma ação.', this.usage);
+    if (!tokens.length) throw new ParedeError('BAD_ARG', 'Provide an action.', this.usage);
 
     let actions: Action[];
     if (tokens[0] === 'sequence') {
-      if (!tokens[1]) throw new ParedeError('BAD_ARG', 'sequence precisa de uma string "ação; ação; ...".', this.usage);
+      if (!tokens[1]) throw new ParedeError('BAD_ARG', 'sequence needs a string "action; action; ...".', this.usage);
       actions = parseSequence(tokens.slice(1).join(' '));
     } else {
       actions = [parseAction(tokens)];
@@ -77,9 +77,9 @@ Exemplos:
     for (const { action, result } of r.results) {
       if (action === 'inventory') {
         const inv = result as unknown as { total: number; items: { selector: string; tag: string; label: string; inViewport: boolean; disabled: boolean }[] };
-        lines.push(ok(`inventory: ${inv.items.length} de ${inv.total} elementos interativos`));
+        lines.push(ok(`inventory: ${inv.items.length} of ${inv.total} interactive elements`));
         for (const item of inv.items) {
-          lines.push(`  ${item.inViewport ? '◉' : '○'} ${item.selector}  ${item.tag}${item.label ? ` "${item.label}"` : ''}${item.disabled ? ' (desabilitado)' : ''}`);
+          lines.push(`  ${item.inViewport ? '◉' : '○'} ${item.selector}  ${item.tag}${item.label ? ` "${item.label}"` : ''}${item.disabled ? ' (disabled)' : ''}`);
         }
       } else {
         const detail = Object.keys(result).length ? ` ${JSON.stringify(result)}` : '';
@@ -87,14 +87,14 @@ Exemplos:
       }
     }
     const s = r.state;
-    lines.push(kv('estado', `scrollY ${s.scrollY}/${Math.max(0, s.scrollHeight - s.innerHeight)} · foco ${s.activeElement ?? '—'} · ${s.url}`));
-    if (s.pages > 1) lines.push(warn(`${s.pages} abas abertas (um clique abriu nova aba; a sessão continua na original)`));
-    if (r.consoleErrors.length) lines.push(warn(`${r.consoleErrors.length} erro(s) novo(s) no console: ${r.consoleErrors.map((e) => e.text.slice(0, 100)).join(' | ')}`));
+    lines.push(kv('state', `scrollY ${s.scrollY}/${Math.max(0, s.scrollHeight - s.innerHeight)} · focus ${s.activeElement ?? '—'} · ${s.url}`));
+    if (s.pages > 1) lines.push(warn(`${s.pages} tabs open (a click opened a new tab; the session stays on the original)`));
+    if (r.consoleErrors.length) lines.push(warn(`${r.consoleErrors.length} new console error(s): ${r.consoleErrors.map((e) => e.text.slice(0, 100)).join(' | ')}`));
 
     let shot: ShotResult | undefined;
     if (withShot) {
       shot = await ctx.session.call<ShotResult>('screenshot', { path: ctx.artifacts.path('screenshots', `${stamp()}-after-${actions[actions.length - 1].type}.png`) });
-      lines.push(kv('captura', shot.path));
+      lines.push(kv('capture', shot.path));
     }
     return { data: { ...r, screenshot: shot }, text: lines.join('\n') };
   },
@@ -102,21 +102,21 @@ Exemplos:
 
 export const screenshot: Command = {
   name: 'web-screenshot',
-  group: 'navegador',
-  summary: 'Screenshot em alta definição, limpo de UI de navegador; viewport, página, elemento ou vários viewports.',
-  usage: `web-screenshot [opções]
-  --full-page            página inteira (padrão: só a viewport)
-  --selector <css>       captura apenas um elemento
-  --dpr 3                deviceScaleFactor desta captura (re-rasteriza; padrão: o da sessão)
-  --viewport 390x844     viewport temporária (testes de responsividade)
-  --viewports desktop,tablet,mobile   várias capturas de uma vez (presets: ${Object.keys(VIEWPORT_PRESETS).join(', ')} ou LxA)
-  --scroll-through       rola a página antes para disparar lazy-load/reveals
-  --hide <css>           oculta elementos (repetível)
-  --hide-banners         oculta banners de cookie/consentimento conhecidos (só visual; nada é aceito)
-  --no-clean             mantém scrollbars/caret
-  --out <arquivo.png>    destino (padrão .parede/screenshots/)
-  --quality 92           qualidade JPEG quando --out termina em .jpg
-  --timeout 60           segundos (cenas WebGL pesadas em máquinas modestas demoram a pintar)`,
+  group: 'browser',
+  summary: 'High-definition screenshot without browser chrome; viewport, page, element or several viewports.',
+  usage: `web-screenshot [options]
+  --full-page            full page (default: just the viewport)
+  --selector <css>       captures a single element
+  --dpr 3                deviceScaleFactor of this capture (re-rasterizes; default: the session's)
+  --viewport 390x844     temporary viewport (responsiveness tests)
+  --viewports desktop,tablet,mobile   several captures at once (presets: ${Object.keys(VIEWPORT_PRESETS).join(', ')} or WxH)
+  --scroll-through       scrolls the page first to trigger lazy-loading/reveals
+  --hide <css>           hides elements (repeatable)
+  --hide-banners         hides known cookie/consent banners (visual only; nothing is accepted)
+  --no-clean             keeps scrollbars/caret
+  --out <file.png>       destination (default .parede/screenshots/)
+  --quality 92           JPEG quality when --out ends in .jpg
+  --timeout 60           seconds (heavy WebGL scenes on modest machines take a while to paint)`,
   async execute(argv, ctx) {
     requireSession(ctx);
     const { values } = parse(
@@ -161,9 +161,9 @@ export const screenshot: Command = {
     }
     const lines = results.flatMap((r) => {
       const px = r.pixels ? `${r.pixels.width}×${r.pixels.height}px` : '';
-      return [ok(r.path), kv('imagem', `${px} @${r.dpr}x · ${formatBytes(r.bytes)} · ${r.fullPage ? 'página inteira' : 'viewport'} ${r.viewport.width}x${r.viewport.height}`), ...r.warnings.map(warn)];
+      return [ok(r.path), kv('image', `${px} @${r.dpr}x · ${formatBytes(r.bytes)} · ${r.fullPage ? 'full page' : 'viewport'} ${r.viewport.width}x${r.viewport.height}`), ...r.warnings.map(warn)];
     });
-    lines.push(next('abra as imagens para inspecionar (o agente pode lê-las diretamente)'));
+    lines.push(next('open the images to inspect them (the agent can read them directly)'));
     return { data: results.length === 1 ? results[0] : results, text: lines.join('\n') };
   },
 };

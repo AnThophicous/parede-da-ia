@@ -24,14 +24,14 @@ export interface FinalizeOptions {
   columns?: number;
 }
 
-/** Transforma frames crus em artefatos legíveis por agentes: spritesheets, MP4 e GIF. */
+/** Turns raw frames into agent-readable artifacts: spritesheets, MP4 and GIF. */
 export async function finalizeRecording(frames: RecordedFrames, encoder: MediaEncoder | null, o: FinalizeOptions) {
   const outputs: { spritesheets: string[]; video: string | null; gif: string | null } = { spritesheets: [], video: null, gif: null };
   const warnings: string[] = [];
   const crop = frames.crop ?? undefined;
 
-  if (frames.frameCount === 0) warnings.push('Nenhum frame capturado.');
-  else if (!encoder) warnings.push('FFmpeg não encontrado: frames salvos, mas sem spritesheet/vídeo. Instale ffmpeg ou rode `npm i ffmpeg-static` na toolkit.');
+  if (frames.frameCount === 0) warnings.push('No frames captured.');
+  else if (!encoder) warnings.push('FFmpeg not found: frames saved, but no spritesheet/video. Install ffmpeg or run `npm i ffmpeg-static` in the toolkit.');
   else {
     const fps = Math.max(0.1, 1000 / frames.intervalMs);
     const sequence = { framesDir: frames.framesDir, ext: frames.format, fps, crop };
@@ -46,12 +46,12 @@ export async function finalizeRecording(frames: RecordedFrames, encoder: MediaEn
   }
 
   if (frames.laggedFrames > frames.frameCount * 0.2) {
-    warnings.push(`${frames.laggedFrames} frames atrasaram: a máquina não acompanha ${frames.intervalMs}ms. Aumente --interval ou use --format jpeg.`);
+    warnings.push(`${frames.laggedFrames} frames lagged: the machine can't keep up with ${frames.intervalMs}ms. Raise --interval or use --format jpeg.`);
   }
   if (frames.pageFrames && frames.pageFrames.longFrames > frames.pageFrames.fps) {
-    warnings.push(`jank: ${frames.pageFrames.longFrames} frames da página acima de 34ms (pior: ${frames.pageFrames.worstFrameMs}ms).`);
+    warnings.push(`jank: ${frames.pageFrames.longFrames} page frames above 34ms (worst: ${frames.pageFrames.worstFrameMs}ms).`);
   }
-  for (const a of frames.actions) if (a.error) warnings.push(`ação "${a.action}" falhou: ${a.error}`);
+  for (const a of frames.actions) if (a.error) warnings.push(`action "${a.action}" failed: ${a.error}`);
   return { ...frames, ffmpeg: encoder?.source ?? null, outputs, warnings };
 }
 

@@ -11,18 +11,18 @@ const fmtTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:$
 
 export const mediaFrames: Command = {
   name: 'media-frames',
-  group: 'mídia',
-  summary: 'Deixa o agente "assistir" um vídeo: frames com timestamp + folhas de contato numeradas.',
-  usage: `media-frames <vídeo> [opções]
-  --every 1.5            um frame a cada N segundos (padrão: ~24 frames no vídeo todo)
-  --scenes 0.25          em vez de intervalo fixo, um frame por mudança de cena (0–1)
-  --from 5 --to 20       recorte de tempo em segundos
-  --max 60               limite de frames
-  --width 640            largura de cada frame extraído
-  --columns 5            colunas da folha de contato
+  group: 'media',
+  summary: 'Lets the agent "watch" a video: timestamped frames + numbered contact sheets.',
+  usage: `media-frames <video> [options]
+  --every 1.5            one frame every N seconds (default: ~24 frames across the whole video)
+  --scenes 0.25          instead of a fixed interval, one frame per scene change (0–1)
+  --from 5 --to 20       a time range in seconds
+  --max 60               frame limit
+  --width 640            width of each extracted frame
+  --columns 5            contact sheet columns
   --out <dir>
 
-Use para gravações de tela que o usuário enviar (referências, bugs, protótipos).`,
+Use it on screen recordings the user sends (references, bugs, prototypes).`,
   async execute(argv, ctx) {
     const { values, positionals } = parse(
       argv,
@@ -30,9 +30,9 @@ Use para gravações de tela que o usuário enviar (referências, bugs, protóti
       this.usage,
     );
     const input = positionals.join(' ').trim();
-    if (!input) throw new ParedeError('BAD_ARG', 'Informe o arquivo de vídeo.', this.usage);
+    if (!input) throw new ParedeError('BAD_ARG', 'Provide the video file.', this.usage);
     const path = /^https?:/.test(input) ? input : resolve(input);
-    if (!/^https?:/.test(path) && !existsSync(path)) throw new ParedeError('NOT_FOUND', `Arquivo não encontrado: ${path}`);
+    if (!/^https?:/.test(path) && !existsSync(path)) throw new ParedeError('NOT_FOUND', `File not found: ${path}`);
     const outDir = values.out ? resolve(values.out) : ctx.artifacts.dir('media', `${slug(basename(path).replace(/\.[^.]+$/, ''))}-${stamp()}`);
     const result = await extractVideoFrames(ctx.encoder(), {
       input: path,
@@ -52,12 +52,12 @@ Use para gravações de tela que o usuário enviar (referências, bugs, protóti
     return {
       data: { manifest, ...result },
       text: [
-        ok(`${result.frames.length} frames de ${basename(path)} (${fmtTime(i.durationSec)} · ${i.width}x${i.height} · ${i.fps} fps${i.hasAudio ? ' · com áudio' : ''})`),
-        kv('modo', result.mode === 'cenas' ? 'mudança de cena' : `a cada ${result.everySec}s`),
-        ...result.sheets.map((s) => kv('folha', s)),
-        kv('tempos', result.frames.slice(0, 12).map((f) => `#${f.index + 1} ${fmtTime(f.timeSec)}`).join(' · ') + (result.frames.length > 12 ? ' …' : '')),
+        ok(`${result.frames.length} frames from ${basename(path)} (${fmtTime(i.durationSec)} · ${i.width}x${i.height} · ${i.fps} fps${i.hasAudio ? ' · with audio' : ''})`),
+        kv('mode', result.mode === 'scenes' ? 'scene change' : `every ${result.everySec}s`),
+        ...result.sheets.map((s) => kv('sheet', s)),
+        kv('times', result.frames.slice(0, 12).map((f) => `#${f.index + 1} ${fmtTime(f.timeSec)}`).join(' · ') + (result.frames.length > 12 ? ' …' : '')),
         kv('manifest', manifest),
-        next('leia as folhas de contato (números = frames; tempos no manifest) e depois frames individuais se precisar de detalhe'),
+        next('read the contact sheets (numbers = frames; times in the manifest), then single frames if you need detail'),
       ].join('\n'),
     };
   },
@@ -65,24 +65,24 @@ Use para gravações de tela que o usuário enviar (referências, bugs, protóti
 
 export const diff: Command = {
   name: 'web-diff',
-  group: 'mídia',
-  summary: 'Compara duas imagens (antes × depois, build × referência): SSIM, PSNR, mapa de diferença e lado a lado.',
-  usage: `web-diff <a.png> <b.png> [--out pasta]
-  A segunda imagem é redimensionada para o tamanho da primeira se preciso.`,
+  group: 'media',
+  summary: 'Compares two images (before × after, build × reference): SSIM, PSNR, a difference map and side by side.',
+  usage: `web-diff <a.png> <b.png> [--out folder]
+  The second image is resized to the size of the first one when needed.`,
   async execute(argv, ctx) {
     const { values, positionals } = parse(argv, { out: { type: 'string' } }, this.usage);
     const [a, b] = positionals.map((p) => resolve(p));
-    if (!a || !b) throw new ParedeError('BAD_ARG', 'Informe duas imagens.', this.usage);
-    for (const f of [a, b]) if (!existsSync(f)) throw new ParedeError('NOT_FOUND', `Arquivo não encontrado: ${f}`);
+    if (!a || !b) throw new ParedeError('BAD_ARG', 'Provide two images.', this.usage);
+    for (const f of [a, b]) if (!existsSync(f)) throw new ParedeError('NOT_FOUND', `File not found: ${f}`);
     const outDir = values.out ? resolve(values.out) : ctx.artifacts.dir('diff', stamp());
     const r = await compareImages(ctx.encoder(), a, b, outDir);
     return {
       data: r,
       text: [
-        ok(`${r.verdict} — SSIM ${r.ssim.toFixed(4)} · PSNR ${r.psnr === null ? '—' : r.psnr === Infinity ? '∞' : `${r.psnr.toFixed(1)} dB`}${r.resized ? ' (b redimensionada)' : ''}`),
-        kv('diferença', r.diff),
-        kv('lado a lado', r.sideBySide),
-        next('leia o lado a lado (a | b | diferença ampliada 4×) para localizar o que mudou'),
+        ok(`${r.verdict} — SSIM ${r.ssim.toFixed(4)} · PSNR ${r.psnr === null ? '—' : r.psnr === Infinity ? '∞' : `${r.psnr.toFixed(1)} dB`}${r.resized ? ' (b resized)' : ''}`),
+        kv('difference', r.diff),
+        kv('side by side', r.sideBySide),
+        next('read the side by side (a | b | difference magnified 4×) to find what changed'),
       ].join('\n'),
     };
   },

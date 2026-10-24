@@ -14,8 +14,8 @@ type Check = { name: string; status: 'ok' | 'warn' | 'fail'; detail: string; fix
 
 export const doctor: Command = {
   name: 'doctor',
-  group: 'operação',
-  summary: 'Diagnostica Node, Playwright/Chromium, FFmpeg, PATH, sessão e registro nos agentes.',
+  group: 'operations',
+  summary: 'Checks Node, Playwright/Chromium, FFmpeg, PATH, the session and the agent registration.',
   usage: 'parede doctor',
   async execute() {
     const checks: Check[] = [];
@@ -24,7 +24,7 @@ export const doctor: Command = {
     const [major, minor] = process.versions.node.split('.').map(Number);
     add(major > 18 || (major === 18 && minor >= 17)
       ? { name: 'node', status: 'ok', detail: `v${process.versions.node}` }
-      : { name: 'node', status: 'fail', detail: `v${process.versions.node}`, fix: 'Instale Node.js 18.17+ (recomendado 20 ou 22 LTS).' });
+      : { name: 'node', status: 'fail', detail: `v${process.versions.node}`, fix: 'Install Node.js 18.17+ (20 or 22 LTS recommended).' });
 
     try {
       const require = createRequire(import.meta.url);
@@ -34,32 +34,32 @@ export const doctor: Command = {
       add({ name: 'playwright', status: 'ok', detail: `v${pkg.version}` });
       add(existsSync(exe)
         ? { name: 'chromium', status: 'ok', detail: exe }
-        : { name: 'chromium', status: 'fail', detail: 'binário ausente', fix: 'npx playwright install chromium   (Linux: npx playwright install --with-deps chromium)' });
+        : { name: 'chromium', status: 'fail', detail: 'binary missing', fix: 'npx playwright install chromium   (Linux: npx playwright install --with-deps chromium)' });
     } catch {
-      add({ name: 'playwright', status: 'fail', detail: 'pacote não instalado', fix: 'cd toolkit && npm install' });
+      add({ name: 'playwright', status: 'fail', detail: 'package not installed', fix: 'cd toolkit && npm install' });
     }
 
     const ffmpeg = resolveFfmpeg();
     add(ffmpeg
       ? { name: 'ffmpeg', status: 'ok', detail: `${ffmpeg.source} → ${ffmpeg.path}` }
-      : { name: 'ffmpeg', status: 'warn', detail: 'não encontrado (frames funcionam, spritesheet/MP4 não)', fix: 'brew install ffmpeg | sudo apt install ffmpeg | winget install Gyan.FFmpeg — ou npm i ffmpeg-static' });
+      : { name: 'ffmpeg', status: 'warn', detail: 'not found (frames work, spritesheet/MP4 do not)', fix: 'brew install ffmpeg | sudo apt install ffmpeg | winget install Gyan.FFmpeg — or npm i ffmpeg-static' });
 
     try {
       ensureDir(PAREDE_HOME);
       accessSync(PAREDE_HOME, constants.W_OK);
-      add({ name: 'estado', status: 'ok', detail: PAREDE_HOME });
+      add({ name: 'state', status: 'ok', detail: PAREDE_HOME });
     } catch {
-      add({ name: 'estado', status: 'fail', detail: `sem escrita em ${PAREDE_HOME}`, fix: 'Defina PAREDE_HOME para uma pasta gravável.' });
+      add({ name: 'state', status: 'fail', detail: `cannot write to ${PAREDE_HOME}`, fix: 'Set PAREDE_HOME to a writable folder.' });
     }
 
     const which = spawnSync(process.platform === 'win32' ? 'where' : 'which', ['web-scrap'], { encoding: 'utf8', windowsHide: true });
     add(which.status === 0
       ? { name: 'PATH', status: 'ok', detail: which.stdout.trim().split(/\r?\n/)[0] }
-      : { name: 'PATH', status: 'warn', detail: 'comandos web-* não estão no PATH', fix: `cd "${join(REPO_ROOT, 'toolkit')}" && npm link   (ou use: node "${join(REPO_ROOT, 'toolkit', 'bin', 'parede.js')}" <comando>)` });
+      : { name: 'PATH', status: 'warn', detail: 'web-* commands are not on the PATH', fix: `cd "${join(REPO_ROOT, 'toolkit')}" && npm link   (or use: node "${join(REPO_ROOT, 'toolkit', 'bin', 'parede.js')}" <command>)` });
 
     add(existsSync(join(REPO_ROOT, 'prompts', 'router.md'))
       ? { name: 'router', status: 'ok', detail: join(REPO_ROOT, 'prompts', 'router.md') }
-      : { name: 'router', status: 'warn', detail: 'prompts/router.md não encontrado no clone', fix: 'Clone o repositório completo (não só a toolkit).' });
+      : { name: 'router', status: 'warn', detail: 'prompts/router.md not found in the clone', fix: 'Clone the whole repository (not only the toolkit).' });
 
     const home = homedir();
     const registered = [
@@ -74,11 +74,11 @@ export const doctor: Command = {
       .map(([agent]) => agent);
     const agents = [...new Set(registered)];
     add(agents.length
-      ? { name: 'agentes', status: 'ok', detail: agents.join(', ') }
-      : { name: 'agentes', status: 'warn', detail: 'router não registrado em nenhum agente', fix: 'parede setup --agent auto' });
+      ? { name: 'agents', status: 'ok', detail: agents.join(', ') }
+      : { name: 'agents', status: 'warn', detail: 'router not registered in any agent', fix: 'parede setup --agent auto' });
 
     const session = readSession();
-    add({ name: 'sessão', status: 'ok', detail: session && (await isAlive(session)) ? `ativa (pid ${session.pid})` : 'nenhuma ativa' });
+    add({ name: 'session', status: 'ok', detail: session && (await isAlive(session)) ? `active (pid ${session.pid})` : 'none active' });
 
     const icon = { ok: '✔', warn: '⚠', fail: '✖' } as const;
     const lines = [`parede-da-ia ${VERSION} — doctor`, ...checks.map((c) => `${icon[c.status]} ${c.name.padEnd(10)} ${c.detail}${c.fix ? `\n    → ${c.fix}` : ''}`)];

@@ -1,7 +1,7 @@
 /**
- * COMPOSITION ROOT da CLI e do servidor MCP.
- * Único lugar que conhece as implementações concretas das portas:
- * Infrastructure (RPC, FFmpeg, disco) → Application (portas/casos de uso) → Presentation (CLI/MCP).
+ * COMPOSITION ROOT of the CLI and the MCP server.
+ * The only place that knows the ports' concrete implementations:
+ * Infrastructure (RPC, FFmpeg, disk) → Application (ports/use cases) → Presentation (CLI/MCP).
  */
 import type { AppContext, MediaEncoder } from './application/ports.js';
 import { createFfmpegEncoder } from './infrastructure/ffmpeg/ffmpeg.js';
@@ -18,12 +18,12 @@ const context: AppContext = {
   artifacts: fileArtifacts,
 };
 
-/** Entrada dos binários web-* e `parede <comando>`. */
+/** Entry of the web-* binaries and `parede <command>`. */
 export function main(command: string | null, argv: string[]): Promise<void> {
   return runCli(command, argv, context, VERSION);
 }
 
-/** Entrada do binário parede-mcp (stdio). */
+/** Entry of the parede-mcp binary (stdio). */
 export function mcp(): Promise<void> {
   return serveMcp(context, VERSION);
 }

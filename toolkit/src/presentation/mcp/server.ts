@@ -5,8 +5,8 @@ import { toParedeError } from '../../domain/errors.js';
 import { execute } from '../cli/registry.js';
 
 /**
- * Servidor MCP mínimo (JSON-RPC 2.0 sobre stdio, uma mensagem por linha).
- * Cada ferramenta é um adaptador fino sobre o mesmo comando da CLI.
+ * Minimal MCP server (JSON-RPC 2.0 over stdio, one message per line).
+ * Each tool is a thin adapter over the same CLI command.
  */
 type Json = Record<string, unknown>;
 
@@ -18,7 +18,7 @@ interface Tool {
   required?: string[];
   positional?: string[];
   toArgv?: (input: Json) => string[];
-  /** Devolve a imagem gerada no resultado (quando o cliente aceita imagens). */
+  /** Returns the generated image in the result (when the client accepts images). */
   image?: (data: Record<string, unknown>) => string | null | undefined;
 }
 
@@ -44,13 +44,13 @@ const TOOLS: Tool[] = [
   {
     name: 'web_url_fetch',
     command: 'web-url-fetch',
-    description: 'Abre uma URL num Chromium persistente (Playwright) e injeta hooks (canvas, shaders, WAAPI, vitals). Sempre o primeiro passo.',
+    description: 'Opens a URL in a persistent Chromium (Playwright) and injects hooks (canvas, shaders, WAAPI, vitals). Always the first step.',
     properties: {
-      url: str('URL completa, localhost:PORTA ou caminho de arquivo HTML'),
-      viewport: str('LARGURAxALTURA, ex.: 1440x900'),
-      dpr: num('deviceScaleFactor (padrão 2)'),
-      mobile: bool('emula smartphone'),
-      headful: bool('janela visível'),
+      url: str('full URL, localhost:PORT or a path to an HTML file'),
+      viewport: str('WIDTHxHEIGHT, e.g. 1440x900'),
+      dpr: num('deviceScaleFactor (default 2)'),
+      mobile: bool('emulate a smartphone'),
+      headful: bool('visible window'),
       color_scheme: str('light | dark'),
       reduced_motion: bool('prefers-reduced-motion: reduce'),
       wait_until: str('commit | domcontentloaded | load | networkidle'),
@@ -58,38 +58,38 @@ const TOOLS: Tool[] = [
     required: ['url'],
     positional: ['url'],
   },
-  { name: 'web_wait_page_load', command: 'web-wait-page-load', description: 'Espera load + networkidle + fontes + 2 frames. Avisa se detectar pre-loader.', properties: { timeout: num('segundos (padrão 30)') } },
+  { name: 'web_wait_page_load', command: 'web-wait-page-load', description: 'Waits for load + networkidle + fonts + 2 frames. Warns if it detects a preloader.', properties: { timeout: num('seconds (default 30)') } },
   {
     name: 'web_wait',
     command: 'web-wait',
-    description: 'Pausa N segundos (fallback para pre-loaders em canvas/WebGL) ou espera um seletor sumir/aparecer.',
-    properties: { seconds: num('segundos'), until_hidden: str('seletor que deve sumir'), until_visible: str('seletor que deve aparecer') },
+    description: 'Pauses N seconds (fallback for canvas/WebGL preloaders) or waits for a selector to disappear/appear.',
+    properties: { seconds: num('seconds'), until_hidden: str('selector that must disappear'), until_visible: str('selector that must appear') },
     positional: ['seconds'],
   },
   {
     name: 'web_control',
     command: 'web-control',
     description:
-      'Eventos reais. `actions` aceita ações separadas por ";": scroll-down [px|Nvh] --steps N · scroll-up · scroll-to <top|bottom|Y|seletor> · click <seletor|x,y> · hover <seletor|x,y> --hold 400ms · mousemove <x,y> [x,y...] · drag <seletor|x,y> <x,y|+dx,+dy> · keypress <tecla> · type <texto> · wait <s> · inventory',
-    properties: { actions: str('ex.: "scroll-to #pricing; wait 0.5; hover a.cta --hold 600ms"'), screenshot: bool('captura a viewport depois') },
+      'Real events. `actions` accepts actions separated by ";": scroll-down [px|Nvh] --steps N · scroll-up · scroll-to <top|bottom|Y|selector> · click <selector|x,y> · hover <selector|x,y> --hold 400ms · mousemove <x,y> [x,y...] · drag <selector|x,y> <x,y|+dx,+dy> · keypress <key> · type <text> · wait <s> · inventory',
+    properties: { actions: str('e.g. "scroll-to #pricing; wait 0.5; hover a.cta --hold 600ms"'), screenshot: bool('capture the viewport afterwards') },
     required: ['actions'],
     toArgv: (input) => ['sequence', String(input.actions), ...(input.screenshot ? ['--screenshot'] : [])],
   },
   {
     name: 'web_screenshot',
     command: 'web-screenshot',
-    description: 'Screenshot em alta definição: viewport, página inteira, elemento ou vários viewports (presets desktop,tablet,mobile).',
+    description: 'High-definition screenshot: viewport, full page, an element or several viewports (presets desktop,tablet,mobile).',
     properties: {
-      full_page: bool('página inteira'),
-      selector: str('captura só este elemento'),
-      dpr: num('deviceScaleFactor desta captura'),
-      viewport: str('viewport temporária, ex.: 390x844'),
-      viewports: str('lista: desktop,tablet,mobile ou LxA'),
-      scroll_through: bool('rola antes para disparar lazy-load'),
-      hide_banners: bool('oculta banners de cookie (só visual)'),
-      hide: { type: 'array', items: { type: 'string' }, description: 'seletores a ocultar' },
-      out: str('arquivo de saída'),
-      inline: bool('devolve a imagem no resultado (≤ 4 MB)'),
+      full_page: bool('full page'),
+      selector: str('capture only this element'),
+      dpr: num('deviceScaleFactor for this capture'),
+      viewport: str('temporary viewport, e.g. 390x844'),
+      viewports: str('list: desktop,tablet,mobile or WxH'),
+      scroll_through: bool('scroll first to trigger lazy-loading'),
+      hide_banners: bool('hide cookie banners (visual only)'),
+      hide: { type: 'array', items: { type: 'string' }, description: 'selectors to hide' },
+      out: str('output file'),
+      inline: bool('return the image in the result (≤ 4 MB)'),
     },
     toArgv: (input) => toArgv(without(input, 'inline'), []),
     image: (d) => (typeof d.path === 'string' ? d.path : null),
@@ -97,62 +97,62 @@ const TOOLS: Tool[] = [
   {
     name: 'web_record_frames',
     command: 'web-record-frames',
-    description: 'Grava frames (padrão 0.5s/frame) → spritesheet + MP4 + jank. `while` executa ações durante a gravação; `selector` recorta num componente.',
+    description: 'Records frames (default 0.5s/frame) → spritesheet + MP4 + jank. `while` runs actions during the recording; `selector` crops to a component.',
     properties: {
-      interval: str('segundos por frame, ex.: 0.5 ou 250ms'),
-      duration: str('duração total, ex.: 6'),
-      while: str('ações durante a gravação, ex.: "scroll-down 4000 --steps 80"'),
-      selector: str('recorta no elemento (microinterações)'),
-      tail: str('segundos extras após as ações'),
-      viewport: str('viewport temporária'),
+      interval: str('seconds per frame, e.g. 0.5 or 250ms'),
+      duration: str('total duration, e.g. 6'),
+      while: str('actions during the recording, e.g. "scroll-down 4000 --steps 80"'),
+      selector: str('crop to the element (microinteractions)'),
+      tail: str('extra seconds after the actions'),
+      viewport: str('temporary viewport'),
       format: str('jpeg | png'),
-      max_frames: num('limite de segurança (padrão 600)'),
-      gif: bool('gera GIF'),
-      no_video: bool('pula o MP4'),
-      detach: bool('grava em background'),
-      stop: bool('encerra a gravação em background'),
+      max_frames: num('safety limit (default 600)'),
+      gif: bool('also produce a GIF'),
+      no_video: bool('skip the MP4'),
+      detach: bool('record in the background'),
+      stop: bool('stop the background recording'),
     },
   },
   {
     name: 'web_scrap',
     command: 'web-scrap',
-    description: 'Wappalyzer de front-end: estética provável (com playbook), stack, fontes, paleta exata, contraste WCAG, gradientes, blur, mídia, shaders, vitals e rede.',
-    properties: { max_elements: num('limite de elementos varridos (padrão 4000)'), out: str('arquivo JSON'), full: bool('devolve o JSON completo em vez do resumo') },
+    description: 'A front-end Wappalyzer: likely aesthetic (with its playbook), stack, fonts, exact palette, WCAG contrast, gradients, blur, media, shaders, vitals and network.',
+    properties: { max_elements: num('limit of scanned elements (default 4000)'), out: str('JSON file'), full: bool('return the full JSON instead of the summary') },
     toArgv: (input) => toArgv(without(input, 'full'), []),
   },
   {
     name: 'web_motion',
     command: 'web-motion',
-    description: 'Disseca movimento: transições e curvas mais usadas, @keyframes, GSAP/ScrollTrigger, Lenis, o que anima durante ações (observe) e fps/jank. Sugere tokens de movimento.',
-    properties: { observe: str('segundos de observação, ex.: 3'), while: str('ações durante a observação'), out: str('arquivo JSON') },
+    description: 'Dissects motion: most used transitions and easings, @keyframes, GSAP/ScrollTrigger, Lenis, what animates during actions (observe) and fps/jank. Suggests motion tokens.',
+    properties: { observe: str('seconds of observation, e.g. 3'), while: str('actions during the observation'), out: str('JSON file') },
   },
   {
     name: 'web_interactions',
     command: 'web-interactions',
-    description: 'Testa microinterações de cada interativo: hover, :active, foco visível e efeito magnético, com folha antes/hover/foco.',
-    properties: { limit: num('quantos elementos (padrão 12)'), selector: str('testa só este'), hold: str('espera p/ transições, ex.: 500ms'), no_shots: bool('sem recortes') },
+    description: 'Tests the microinteractions of every interactive element: hover, :active, visible focus and magnetic effect, with a before/hover/focus sheet.',
+    properties: { limit: num('how many elements (default 12)'), selector: str('test only this one'), hold: str('wait for transitions, e.g. 500ms'), no_shots: bool('no crops') },
     image: (d) => (typeof d.sheet === 'string' ? d.sheet : null),
   },
   {
     name: 'web_audit',
     command: 'web-audit',
-    description: 'QA automático em vários viewports: overflow, alvos de toque, contraste, foco, alt, títulos, metas, vitals, peso, console e reduced-motion → nota 0–100 e veredito.',
-    properties: { viewports: str('desktop,tablet,mobile ou LxA'), full_page: bool('capturas de página inteira'), focus_steps: num('Tabs para checar foco (padrão 12)') },
+    description: 'Automatic QA on several viewports: overflow, touch targets, contrast, focus, alt, headings, metas, vitals, weight, console and reduced-motion → a 0–100 score and a verdict.',
+    properties: { viewports: str('desktop,tablet,mobile or WxH'), full_page: bool('full-page captures'), focus_steps: num('Tabs to check focus (default 12)') },
   },
-  { name: 'web_tokens', command: 'web-tokens', description: 'Exporta design tokens da página (cor, fonte, escala, espaço, raio, sombra, movimento) em CSS e JSON.', properties: { out: str('pasta de saída'), no_motion: bool('sem tokens de movimento') } },
+  { name: 'web_tokens', command: 'web-tokens', description: 'Exports the page design tokens (color, font, scale, space, radius, shadow, motion) as CSS and JSON.', properties: { out: str('output folder'), no_motion: bool('no motion tokens') } },
   {
     name: 'web_eval',
     command: 'web-eval',
-    description: 'Avalia uma expressão JavaScript na página e devolve JSON (inspeção/depuração).',
-    properties: { expression: str('ex.: "getComputedStyle(document.body).fontFamily"') },
+    description: 'Evaluates a JavaScript expression in the page and returns JSON (inspection/debugging).',
+    properties: { expression: str('e.g. "getComputedStyle(document.body).fontFamily"') },
     required: ['expression'],
     toArgv: (input) => [String(input.expression)],
   },
   {
     name: 'media_frames',
     command: 'media-frames',
-    description: 'Deixa o agente "assistir" um vídeo local (ex.: gravação de tela enviada pelo usuário): frames com timestamp + folhas de contato numeradas.',
-    properties: { file: str('caminho do vídeo'), every: str('segundos entre frames'), scenes: num('limiar de mudança de cena 0–1'), from: str('início (s)'), to: str('fim (s)'), max: num('limite de frames') },
+    description: 'Lets the agent "watch" a local video (e.g. a screen recording sent by the user): timestamped frames + numbered contact sheets.',
+    properties: { file: str('path to the video'), every: str('seconds between frames'), scenes: num('scene-change threshold 0–1'), from: str('start (s)'), to: str('end (s)'), max: num('frame limit') },
     required: ['file'],
     positional: ['file'],
     image: (d) => (Array.isArray(d.sheets) && typeof d.sheets[0] === 'string' ? d.sheets[0] : null),
@@ -160,19 +160,19 @@ const TOOLS: Tool[] = [
   {
     name: 'web_diff',
     command: 'web-diff',
-    description: 'Compara duas imagens (antes × depois, build × referência): SSIM, PSNR, mapa de diferença e lado a lado.',
-    properties: { a: str('imagem A'), b: str('imagem B'), out: str('pasta') },
+    description: 'Compares two images (before × after, build × reference): SSIM, PSNR, a difference map and side by side.',
+    properties: { a: str('image A'), b: str('image B'), out: str('folder') },
     required: ['a', 'b'],
     positional: ['a', 'b'],
     image: (d) => (typeof d.sideBySide === 'string' ? d.sideBySide : null),
   },
-  { name: 'web_close', command: 'web-close', description: 'Encerra o navegador e o daemon da sessão.', properties: {} },
-  { name: 'parede_doctor', command: 'doctor', description: 'Diagnóstico de instalação (Node, Chromium, FFmpeg, PATH, agentes).', properties: {} },
+  { name: 'web_close', command: 'web-close', description: 'Closes the browser and the session daemon.', properties: {} },
+  { name: 'parede_doctor', command: 'doctor', description: 'Installation check (Node, Chromium, FFmpeg, PATH, agents).', properties: {} },
 ];
 
 async function callTool(ctx: AppContext, name: string, input: Json) {
   const tool = TOOLS.find((t) => t.name === name);
-  if (!tool) return { content: [{ type: 'text', text: `Ferramenta desconhecida: ${name}` }], isError: true };
+  if (!tool) return { content: [{ type: 'text', text: `Unknown tool: ${name}` }], isError: true };
   try {
     const argv = tool.toArgv ? tool.toArgv(input) : toArgv(input, tool.positional ?? []);
     const result = await execute(tool.command, argv, ctx);
@@ -190,7 +190,7 @@ async function callTool(ctx: AppContext, name: string, input: Json) {
 }
 
 export async function serveMcp(ctx: AppContext, version: string): Promise<void> {
-  // stdout é exclusivo do protocolo.
+  // stdout is reserved for the protocol.
   console.log = (...args: unknown[]) => console.error(...args);
   const write = (msg: Json) => process.stdout.write(`${JSON.stringify(msg)}\n`);
   const rl = createInterface({ input: process.stdin });
@@ -205,7 +205,7 @@ export async function serveMcp(ctx: AppContext, version: string): Promise<void> 
       return;
     }
     const { id, method, params = {} } = msg;
-    if (id === undefined) return; // notificação
+    if (id === undefined) return; // notification
     const reply = (result: unknown) => write({ jsonrpc: '2.0', id, result });
     switch (method) {
       case 'initialize':
@@ -214,7 +214,7 @@ export async function serveMcp(ctx: AppContext, version: string): Promise<void> 
           capabilities: { tools: { listChanged: false } },
           serverInfo: { name: 'parede-da-ia', version },
           instructions:
-            'Fluxo: web_url_fetch → web_wait_page_load → web_scrap / web_motion / web_interactions / web_screenshot / web_record_frames → web_audit antes de entregar. media_frames lê vídeos enviados pelo usuário. Feche com web_close.',
+            'Flow: web_url_fetch → web_wait_page_load → web_scrap / web_motion / web_interactions / web_screenshot / web_record_frames → web_audit before delivering. media_frames reads videos sent by the user. Close with web_close.',
         });
       case 'ping':
         return reply({});
@@ -225,7 +225,7 @@ export async function serveMcp(ctx: AppContext, version: string): Promise<void> 
       case 'tools/call':
         return reply(await callTool(ctx, String(params.name), (params.arguments as Json) ?? {}));
       default:
-        write({ jsonrpc: '2.0', id, error: { code: -32601, message: `Método não suportado: ${method}` } });
+        write({ jsonrpc: '2.0', id, error: { code: -32601, message: `Method not supported: ${method}` } });
     }
   });
   await new Promise<void>((resolve) => rl.on('close', resolve));

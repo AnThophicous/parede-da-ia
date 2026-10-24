@@ -2,18 +2,18 @@ import { chroma, distinctHues, isVivid, isWarmPaper, luminance, parseHex, type R
 import type { AestheticGuess, ScrapReport } from './reports.js';
 
 /**
- * Famílias estéticas do parede-da-ia. Cada id corresponde a um playbook em
- * prompts/aesthetics/<id>.md. A classificação é heurística e explicável: devolve
- * os sinais que pesaram, para o agente confirmar com os próprios olhos.
+ * parede-da-ia's aesthetic families. Each id maps to a playbook in
+ * prompts/aesthetics/<id>.md. The classification is heuristic and explainable: it returns
+ * the signals that weighed in, so the agent can confirm them with its own eyes.
  */
 export const AESTHETICS = {
-  'corporativo-modernista': 'Modernismo suíço econômico: grid rígido, poucas cores, tipografia sóbria, movimento contido.',
-  'corporativo-marca': 'Marca protagonista: uma cor de marca forte, tipografia display marcante, fotografia e formas orgânicas.',
-  'produto-saas': 'Produto/SaaS: clareza funcional, cards, sombras suaves, um acento, ícones de sistema.',
-  'imersivo-webgl': 'Experiência imersiva 3D/WebGL: cena viva, física, cursor e scroll coreografados.',
-  'gradiente-atmosferico': 'Atmosfera de gradientes e blur: campos de cor desfocados, vidro, grão, escuridão quente.',
-  'editorial-brutalista': 'Editorial brutalista: contraste tipográfico extremo, monocromia, linhas finas, layout assimétrico.',
-  'canvas-ludico': 'Canvas lúdico de portfólio: prancheta com grid, elementos arrastáveis, stickers e cursores coloridos.',
+  'corporate-modernist': 'Economical Swiss modernism: rigid grid, few colors, sober type, restrained motion.',
+  'corporate-brand': 'The brand leads: one strong brand color, striking display type, photography and organic shapes.',
+  'product-saas': 'Product/SaaS: functional clarity, cards, soft shadows, one accent, system icons.',
+  'immersive-webgl': 'Immersive 3D/WebGL experience: a living scene, physics, choreographed cursor and scroll.',
+  'atmospheric-gradient': 'Gradient and blur atmosphere: blurred color fields, glass, grain, warm darkness.',
+  'editorial-brutalist': 'Brutalist editorial: extreme typographic contrast, monochrome, hairlines, asymmetric layout.',
+  'playful-canvas': 'A playful portfolio canvas: a drafting board with a grid, draggable elements, stickers and colored cursors.',
 } as const;
 
 export type AestheticId = keyof typeof AESTHETICS;
@@ -61,68 +61,68 @@ export function classifyAesthetic(s: ScrapReport): AestheticGuess {
   const noiseShader = s.media.shaders.some((sh) => sh.type === 'fragment' && /noise|fbm|simplex|perlin|curl|warp/i.test(sh.source));
   const assets3d = s.network.assets3d.length;
 
-  /** [peso, acertou?, motivo] — pesos negativos são penalidades aplicadas quando acertam. */
+  /** [weight, matched?, reason] — negative weights are penalties applied when they match. */
   type Signal = [number, boolean, string];
   const signals: Record<AestheticId, Signal[]> = {
-    'corporativo-modernista': [
-      [1, lightBg, 'fundo claro dominante'],
-      [1, vivid.length <= 2, 'no máximo 2 cores vívidas'],
-      [1, !motionLib && !webglFull, 'movimento contido (sem GSAP/WebGL)'],
-      [1, grid4 >= 70, `espaçamento disciplinado (${grid4}% no grid de 4px)`],
-      [0.6, !hasSerif && !hasMono, 'tipografia sans sóbria'],
-      [0.7, scaleRatio < 4.5, `escala tipográfica moderada (${scaleRatio.toFixed(1)}×)`],
-      [-0.8, e.customCursor || webglFull, 'cursor customizado/WebGL (penaliza)'],
+    'corporate-modernist': [
+      [1, lightBg, 'dominant light background'],
+      [1, vivid.length <= 2, 'at most 2 vivid colors'],
+      [1, !motionLib && !webglFull, 'restrained motion (no GSAP/WebGL)'],
+      [1, grid4 >= 70, `disciplined spacing (${grid4}% on the 4px grid)`],
+      [0.6, !hasSerif && !hasMono, 'sober sans typography'],
+      [0.7, scaleRatio < 4.5, `moderate type scale (${scaleRatio.toFixed(1)}×)`],
+      [-0.8, e.customCursor || webglFull, 'custom cursor/WebGL (penalty)'],
     ],
-    'corporativo-marca': [
-      [1.2, brandBg, 'cor de marca vívida ocupando área relevante'],
-      [1, heavyDisplay, 'display pesado (≥48px, ≥700)'],
-      [0.6, images >= 3, 'fotografia presente'],
-      [0.5, bigRadius, 'raios generosos / pills'],
-      [0.5, vivid.length >= 1 && vivid.length <= 4, 'paleta curta e assertiva'],
-      [-0.8, webglFull, 'WebGL fullscreen (penaliza)'],
+    'corporate-brand': [
+      [1.2, brandBg, 'a vivid brand color covering a relevant area'],
+      [1, heavyDisplay, 'heavy display (≥48px, ≥700)'],
+      [0.6, images >= 3, 'photography present'],
+      [0.5, bigRadius, 'generous radii / pills'],
+      [0.5, vivid.length >= 1 && vivid.length <= 4, 'a short, assertive palette'],
+      [-0.8, webglFull, 'fullscreen WebGL (penalty)'],
     ],
-    'produto-saas': [
-      [0.8, lightBg, 'fundo claro'],
-      [0.8, shadows >= 3, `sombras de elevação (${shadows})`],
-      [0.8, icons, `biblioteca de ícones (${s.icons.libraries.join(', ') || '—'})`],
-      [0.4, bigRadius, 'cards arredondados'],
-      [0.5, e.grid + e.flex > 80, 'muitos componentes em grid/flex'],
-      [0.5, scaleRatio < 4, 'tipografia funcional'],
-      [-0.8, webglFull || e.customCursor, 'efeitos imersivos (penaliza)'],
+    'product-saas': [
+      [0.8, lightBg, 'light background'],
+      [0.8, shadows >= 3, `elevation shadows (${shadows})`],
+      [0.8, icons, `icon library (${s.icons.libraries.join(', ') || '—'})`],
+      [0.4, bigRadius, 'rounded cards'],
+      [0.5, e.grid + e.flex > 80, 'many grid/flex components'],
+      [0.5, scaleRatio < 4, 'functional typography'],
+      [-0.8, webglFull || e.customCursor, 'immersive effects (penalty)'],
     ],
-    'imersivo-webgl': [
-      [1.5, webglFull, 'canvas WebGL em tela cheia'],
-      [1, s.media.shaders.length >= 6, `${s.media.shaders.length} shaders GLSL`],
-      [0.8, threeLike, 'motor 3D (Three/Babylon/Pixi/Spline)'],
-      [0.8, assets3d > 0, `${assets3d} asset(s) 3D (glb/hdr/ktx2…)`],
-      [0.4, e.customCursor, 'cursor customizado'],
-      [0.4, motionLib, 'biblioteca de movimento'],
-      [0.4, e.rafPerSecond > 30, `loop de render (~${e.rafPerSecond} rAF/s)`],
+    'immersive-webgl': [
+      [1.5, webglFull, 'fullscreen WebGL canvas'],
+      [1, s.media.shaders.length >= 6, `${s.media.shaders.length} GLSL shaders`],
+      [0.8, threeLike, '3D engine (Three/Babylon/Pixi/Spline)'],
+      [0.8, assets3d > 0, `${assets3d} 3D asset(s) (glb/hdr/ktx2…)`],
+      [0.4, e.customCursor, 'custom cursor'],
+      [0.4, motionLib, 'motion library'],
+      [0.4, e.rafPerSecond > 30, `render loop (~${e.rafPerSecond} rAF/s)`],
     ],
-    'gradiente-atmosferico': [
-      [1.2, e.largeBlurs >= 1, `blur grande em ${e.largeBlurs} elemento(s)`],
-      [0.8, radialish >= 2 || gradientCount >= 6, `gradientes radiais/cônicos (${radialish})`],
-      [1, webglFull && noiseShader, 'campo de cor procedural (shader com noise) em tela cheia'],
-      [0.6, e.grainOverlays >= 1, 'grão/noise'],
-      [0.5, e.backdropBlurs >= 1, 'vidro (backdrop-filter: blur)'],
-      [0.5, darkBg, 'fundo escuro'],
-      [0.4, hues >= 2, `${hues} matizes de acento`],
+    'atmospheric-gradient': [
+      [1.2, e.largeBlurs >= 1, `large blur on ${e.largeBlurs} element(s)`],
+      [0.8, radialish >= 2 || gradientCount >= 6, `radial/conic gradients (${radialish})`],
+      [1, webglFull && noiseShader, 'fullscreen procedural color field (noise shader)'],
+      [0.6, e.grainOverlays >= 1, 'grain/noise'],
+      [0.5, e.backdropBlurs >= 1, 'glass (backdrop-filter: blur)'],
+      [0.5, darkBg, 'dark background'],
+      [0.4, hues >= 2, `${hues} accent hues`],
     ],
-    'editorial-brutalista': [
-      [1.2, s.colors.isMonochrome || vivid.length <= 1, s.colors.isMonochrome ? 'paleta 100% acromática' : 'quase monocromática'],
-      [1, scaleRatio >= 6, `contraste de escala extremo (${scaleRatio.toFixed(1)}×)`],
-      [0.6, hasSerif && families.length >= 2, 'serifa editorial em par com sans'],
-      [0.4, hasMono, 'monoespaçada como voz secundária'],
-      [0.5, sharp, 'cantos retos'],
+    'editorial-brutalist': [
+      [1.2, s.colors.isMonochrome || vivid.length <= 1, s.colors.isMonochrome ? '100% achromatic palette' : 'nearly monochrome'],
+      [1, scaleRatio >= 6, `extreme scale contrast (${scaleRatio.toFixed(1)}×)`],
+      [0.6, hasSerif && families.length >= 2, 'an editorial serif paired with a sans'],
+      [0.4, hasMono, 'monospace as a secondary voice'],
+      [0.5, sharp, 'square corners'],
       [0.4, e.mixBlendMode >= 1, 'mix-blend-mode'],
     ],
-    'canvas-ludico': [
-      [1, paperBg, 'fundo papel/creme'],
-      [1, e.rotated >= 3, `${e.rotated} elementos inclinados (cards/stickers)`],
-      [1, e.draggable >= 2, `${e.draggable} elementos arrastáveis`],
-      [0.8, hues >= 4, `${hues} famílias de matiz (stickers/tags)`],
-      [0.4, heavyDisplay, 'wordmark display pesado'],
-      [0.3, s.gradients.some((g) => /repeating|linear/.test(g.type)) && e.blurFilters === 0, 'padrão de grid/linhas no fundo'],
+    'playful-canvas': [
+      [1, paperBg, 'paper/cream background'],
+      [1, e.rotated >= 3, `${e.rotated} tilted elements (cards/stickers)`],
+      [1, e.draggable >= 2, `${e.draggable} draggable elements`],
+      [0.8, hues >= 4, `${hues} hue families (stickers/tags)`],
+      [0.4, heavyDisplay, 'heavy display wordmark'],
+      [0.3, s.gradients.some((g) => /repeating|linear/.test(g.type)) && e.blurFilters === 0, 'a grid/line pattern in the background'],
     ],
   };
 
@@ -148,5 +148,5 @@ export function classifyAesthetic(s: ScrapReport): AestheticGuess {
   };
 }
 
-/** Exposto para outras regras: a cor parece neutra (cinza/papel)? */
+/** Exposed for other rules: does the color look neutral (gray/paper)? */
 export const isNeutral = (c: Rgb) => chroma(c) <= 12;

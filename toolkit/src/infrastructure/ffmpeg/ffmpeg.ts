@@ -10,7 +10,7 @@ export interface FfmpegBinary {
   source: 'env' | 'system' | 'ffmpeg-static';
 }
 
-/** Ordem: PAREDE_FFMPEG/FFMPEG_PATH → ffmpeg no PATH → pacote opcional ffmpeg-static. */
+/** Order: PAREDE_FFMPEG/FFMPEG_PATH → ffmpeg on the PATH → the optional ffmpeg-static package. */
 export function resolveFfmpeg(): FfmpegBinary | null {
   const fromEnv = process.env.PAREDE_FFMPEG ?? process.env.FFMPEG_PATH;
   if (fromEnv && existsSync(fromEnv)) return { path: fromEnv, source: 'env' };
@@ -22,12 +22,12 @@ export function resolveFfmpeg(): FfmpegBinary | null {
     const bundled = createRequire(import.meta.url)('ffmpeg-static') as string | null;
     if (bundled && existsSync(bundled)) return { path: bundled, source: 'ffmpeg-static' };
   } catch {
-    // pacote opcional ausente
+    // optional package missing
   }
   return null;
 }
 
-/** Executa o FFmpeg e devolve o stderr (onde ficam showinfo, ssim e psnr). */
+/** Runs FFmpeg and returns stderr (where showinfo, ssim and psnr end up). */
 function run(bin: string, args: string[], okCodes = [0]): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn(bin, args, { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] });
@@ -37,7 +37,7 @@ function run(bin: string, args: string[], okCodes = [0]): Promise<string> {
     child.on('close', (code) =>
       okCodes.includes(code ?? -1)
         ? resolve(stderr)
-        : reject(new ParedeError('FFMPEG', `FFmpeg falhou (código ${code}).`, stderr.trim().split('\n').slice(-4).join('\n'))),
+        : reject(new ParedeError('FFMPEG', `FFmpeg failed (code ${code}).`, stderr.trim().split('\n').slice(-4).join('\n'))),
     );
   });
 }
@@ -46,7 +46,7 @@ const framePattern = (dir: string, ext: 'png' | 'jpeg') => join(dir, `frame_%05d
 const cropFilter = (crop?: SpritesheetJob['crop']) =>
   crop ? `crop=${Math.round(crop.width)}:${Math.round(crop.height)}:${Math.round(crop.x)}:${Math.round(crop.y)},` : '';
 
-/** Fonte de sistema para rotular frames (drawtext). Sem fonte, os rótulos são omitidos. */
+/** A system font to label frames (drawtext). Without a font, labels are omitted. */
 function labelFont(): string | null {
   const candidates =
     process.platform === 'win32'
@@ -78,12 +78,12 @@ export class FfmpegEncoder implements MediaEncoder {
   }
 
   async probe(file: string): Promise<MediaInfo> {
-    if (!existsSync(file) && !/^https?:/.test(file)) throw new ParedeError('NOT_FOUND', `Arquivo não encontrado: ${file}`);
-    // Sem saída definida o FFmpeg sai com código 1, mas o stderr traz os metadados.
+    if (!existsSync(file) && !/^https?:/.test(file)) throw new ParedeError('NOT_FOUND', `File not found: ${file}`);
+    // Without an output FFmpeg exits with code 1, but stderr carries the metadata.
     return parseProbe(await run(this.bin.path, ['-hide_banner', '-i', file], [0, 1]));
   }
 
-  /** Spritesheets com o filtro `tile` (máx. 8×8 por folha → spritesheet-01.png, -02.png...). */
+  /** Spritesheets with the `tile` filter (max 8×8 per sheet → spritesheet-01.png, -02.png...). */
   async spritesheets(job: SpritesheetJob): Promise<string[]> {
     const cols = Math.min(8, job.columns ?? Math.ceil(Math.sqrt(job.frameCount)));
     const rows = Math.min(8, Math.ceil(job.frameCount / cols));
@@ -122,8 +122,8 @@ export class FfmpegEncoder implements MediaEncoder {
   }
 
   /**
-   * Extrai frames de um vídeo (gravações de tela de referências, por exemplo).
-   * Modo uniforme (um frame a cada N s) ou por mudança de cena; timestamps reais via showinfo.
+   * Extracts frames from a video (screen recordings of references, for example).
+   * Uniform mode (one frame every N s) or by scene change; real timestamps through showinfo.
    */
   async extractFrames(job: ExtractJob): Promise<ExtractedFrame[]> {
     const from = job.fromSec ?? 0;
@@ -145,15 +145,15 @@ export class FfmpegEncoder implements MediaEncoder {
     return files.map((f, i) => ({ index: i, file: join(job.outDir, f), timeSec: Math.round((times[i] ?? from + i * (job.everySec ?? 1)) * 100) / 100 }));
   }
 
-  /** Folha de contato rotulada com índice e timestamp de cada frame. */
+  /** A contact sheet labeled with each frame's index and timestamp. */
   async contactSheet(frames: ExtractedFrame[], out: string, columns: number, tileWidth: number): Promise<string> {
-    if (!frames.length) throw new ParedeError('NO_FRAMES', 'Nenhum frame para montar a folha de contato.');
+    if (!frames.length) throw new ParedeError('NO_FRAMES', 'No frames to build the contact sheet.');
     const dir = frames[0].file.replace(/[\\/][^\\/]+$/, '');
     const start = Number(/frame_(\d+)\.jpg$/.exec(frames[0].file)?.[1] ?? 1);
     const cols = Math.min(columns, frames.length);
     const rows = Math.ceil(frames.length / cols);
     const font = labelFont();
-    // Rótulo = número do frame (1-based, contínuo entre folhas); o manifesto mapeia número → timestamp.
+    // Label = frame number (1-based, continuous across sheets); the manifest maps number → timestamp.
     const label = font
       ? `,drawtext=fontfile='${escapeFilterPath(font)}':text='%{eif\\:n+${start}\\:d}':x=10:y=10:fontsize=${Math.round(tileWidth / 14)}:fontcolor=white:box=1:boxcolor=black@0.7:boxborderw=6`
       : '';
@@ -168,10 +168,10 @@ export class FfmpegEncoder implements MediaEncoder {
     return out;
   }
 
-  /** Diferença visual entre duas imagens: SSIM, PSNR, mapa de diferença e lado a lado. */
+  /** Visual difference between two images: SSIM, PSNR, a difference map and side by side. */
   async compare(job: CompareJob): Promise<CompareResult> {
     const [a, b] = await Promise.all([this.probe(job.a), this.probe(job.b)]);
-    if (!a.width || !b.width) throw new ParedeError('BAD_IMAGE', 'Não foi possível ler as dimensões das imagens.');
+    if (!a.width || !b.width) throw new ParedeError('BAD_IMAGE', 'Could not read the image dimensions.');
     const { width: W, height: H } = a;
     const resized = a.width !== b.width || a.height !== b.height;
     const scaleB = `scale=${W}:${H}:flags=bicubic`;

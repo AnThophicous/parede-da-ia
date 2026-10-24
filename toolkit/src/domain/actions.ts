@@ -17,29 +17,29 @@ export type Action =
   | { type: 'inventory'; limit: number }
   | { type: 'drag'; from: Target; to: Point; relative: boolean; steps: number; holdMs: number };
 
-export const ACTION_HELP = `Ações:
-  scroll-down [px|Nvh] [--steps 10] [--interval 60ms]   rolagem real via wheel (GSAP/Lenis/ScrollTrigger)
+export const ACTION_HELP = `Actions:
+  scroll-down [px|Nvh] [--steps 10] [--interval 60ms]   real wheel scrolling (GSAP/Lenis/ScrollTrigger)
   scroll-up   [px|Nvh] [--steps 10] [--interval 60ms]
-  scroll-to   <top|bottom|Y|seletor> [--instant]          rola progressivamente até o alvo
-  click       <seletor|x,y> [--button left] [--count 1] [--force]
-  hover       <seletor|x,y> [--hold 400ms]                 mantém o hover para transições terminarem
-  mousemove   <x,y> [x,y ...] [--steps 20]                 trajetória real do cursor (efeitos magnéticos)
-  keypress    <tecla> [--repeat 1] [--delay 80ms]          ex.: Enter, Escape, ArrowDown, Control+K
-  type        <texto> [--delay 40ms]
-  wait        <duração>                                    ex.: 0.5, 500ms, 2s
-  drag        <seletor|x,y> <x,y|+dx,+dy> [--steps 25]     arrasta com mouse real (canvas, sliders, cards soltos)
-  inventory   [--limit 120]                                lista elementos interativos e seletores
-  sequence    "<ação>; <ação>; ..."                       encadeia ações na mesma chamada`;
+  scroll-to   <top|bottom|Y|selector> [--instant]         scrolls progressively to the target
+  click       <selector|x,y> [--button left] [--count 1] [--force]
+  hover       <selector|x,y> [--hold 400ms]                holds the hover so transitions can finish
+  mousemove   <x,y> [x,y ...] [--steps 20]                 a real cursor path (magnetic effects)
+  keypress    <key> [--repeat 1] [--delay 80ms]            e.g. Enter, Escape, ArrowDown, Control+K
+  type        <text> [--delay 40ms]
+  wait        <duration>                                   e.g. 0.5, 500ms, 2s
+  drag        <selector|x,y> <x,y|+dx,+dy> [--steps 25]    drags with a real mouse (canvas, sliders, loose cards)
+  inventory   [--limit 120]                                lists interactive elements and selectors
+  sequence    "<action>; <action>; ..."                    chains actions in the same call`;
 
 const toTarget = (raw: string | undefined, action: string): Target => {
-  if (!raw) throw new ParedeError('BAD_ARG', `"${action}" precisa de um alvo (seletor CSS ou x,y).`);
+  if (!raw) throw new ParedeError('BAD_ARG', `"${action}" needs a target (a CSS selector or x,y).`);
   return parsePoint(raw) ?? { selector: raw };
 };
 
-/** Converte tokens de linha de comando (ex.: ["click", "#cta"]) em uma Action tipada. */
+/** Turns command-line tokens (e.g. ["click", "#cta"]) into a typed Action. */
 export function parseAction(tokens: string[]): Action {
   const [name, ...rest] = tokens;
-  if (!name) throw new ParedeError('BAD_ARG', 'Nenhuma ação informada.', ACTION_HELP);
+  if (!name) throw new ParedeError('BAD_ARG', 'No action given.', ACTION_HELP);
 
   const parse = <T extends NonNullable<ParseArgsConfig['options']>>(options: T) => {
     try {
@@ -71,7 +71,7 @@ export function parseAction(tokens: string[]): Action {
         interval: { type: 'string' },
         instant: { type: 'boolean' },
       });
-      if (!positionals[0]) throw new ParedeError('BAD_ARG', 'scroll-to precisa de um alvo: top, bottom, Y ou seletor.');
+      if (!positionals[0]) throw new ParedeError('BAD_ARG', 'scroll-to needs a target: top, bottom, Y or a selector.');
       return {
         type: 'scroll-to',
         target: positionals[0],
@@ -87,7 +87,7 @@ export function parseAction(tokens: string[]): Action {
         force: { type: 'boolean' },
       });
       const button = (values.button ?? 'left') as 'left' | 'right' | 'middle';
-      if (!['left', 'right', 'middle'].includes(button)) throw new ParedeError('BAD_ARG', `--button inválido: ${button}`);
+      if (!['left', 'right', 'middle'].includes(button)) throw new ParedeError('BAD_ARG', `Invalid --button: ${button}`);
       return {
         type: 'click',
         target: toTarget(positionals.join(' ') || undefined, name),
@@ -108,15 +108,15 @@ export function parseAction(tokens: string[]): Action {
       const { values, positionals } = parse({ steps: { type: 'string' } });
       const path = positionals.map((p) => {
         const point = parsePoint(p);
-        if (!point) throw new ParedeError('BAD_ARG', `mousemove espera pontos "x,y" (recebido "${p}").`);
+        if (!point) throw new ParedeError('BAD_ARG', `mousemove expects "x,y" points (got "${p}").`);
         return point;
       });
-      if (!path.length) throw new ParedeError('BAD_ARG', 'mousemove precisa de pelo menos um ponto x,y.');
+      if (!path.length) throw new ParedeError('BAD_ARG', 'mousemove needs at least one x,y point.');
       return { type: 'mousemove', path, steps: Math.max(1, parseNumber(values.steps, 'steps', 20)) };
     }
     case 'keypress': {
       const { values, positionals } = parse({ repeat: { type: 'string' }, delay: { type: 'string' } });
-      if (!positionals[0]) throw new ParedeError('BAD_ARG', 'keypress precisa de uma tecla (ex.: Enter, Escape, Control+K).');
+      if (!positionals[0]) throw new ParedeError('BAD_ARG', 'keypress needs a key (e.g. Enter, Escape, Control+K).');
       return {
         type: 'keypress',
         key: positionals[0],
@@ -139,10 +139,10 @@ export function parseAction(tokens: string[]): Action {
     case 'drag': {
       const { values, positionals } = parse({ steps: { type: 'string' }, hold: { type: 'string' } });
       const [fromRaw, toRaw] = positionals;
-      if (!fromRaw || !toRaw) throw new ParedeError('BAD_ARG', 'drag precisa de origem e destino: drag <seletor|x,y> <x,y|+dx,+dy>.');
+      if (!fromRaw || !toRaw) throw new ParedeError('BAD_ARG', 'drag needs a source and a destination: drag <selector|x,y> <x,y|+dx,+dy>.');
       const relative = /^[+-]/.test(toRaw);
       const to = parsePoint(toRaw.replace(/^\+/, '').replace(/,\+/, ','));
-      if (!to) throw new ParedeError('BAD_ARG', `Destino inválido para drag: "${toRaw}" (use 400,300 ou +120,-40).`);
+      if (!to) throw new ParedeError('BAD_ARG', `Invalid drag destination: "${toRaw}" (use 400,300 or +120,-40).`);
       return {
         type: 'drag',
         from: toTarget(fromRaw, name),
@@ -153,7 +153,7 @@ export function parseAction(tokens: string[]): Action {
       };
     }
     default:
-      throw new ParedeError('BAD_ARG', `Ação desconhecida: "${name}".`, ACTION_HELP);
+      throw new ParedeError('BAD_ARG', `Unknown action: "${name}".`, ACTION_HELP);
   }
 }
 
@@ -165,7 +165,7 @@ export function parseSequence(source: string): Action[] {
 export function describeAction(action: Action): string {
   switch (action.type) {
     case 'scroll':
-      return `scroll-${action.direction} ${action.distance ?? 'auto'} (${action.steps} passos)`;
+      return `scroll-${action.direction} ${action.distance ?? 'auto'} (${action.steps} steps)`;
     case 'scroll-to':
       return `scroll-to ${action.target}`;
     case 'click':

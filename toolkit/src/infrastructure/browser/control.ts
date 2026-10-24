@@ -14,7 +14,7 @@ const readScroll = (page: Page) =>
     vw: window.innerWidth,
   }));
 
-/** O wheel só rola o elemento sob o cursor: garante um cursor posicionado sobre a página. */
+/** The wheel only scrolls the element under the cursor: makes sure the cursor sits over the page. */
 async function ensurePointer(m: BrowserManager, page: Page) {
   if (m.mouse.known) return;
   const vp = page.viewportSize() ?? { width: 1280, height: 800 };
@@ -31,7 +31,7 @@ function resolveDistance(raw: string | undefined, vh: number): number {
   const vhMatch = /^(\d+(?:\.\d+)?)vh$/i.exec(raw);
   if (vhMatch) return Math.round((Number(vhMatch[1]) / 100) * vh);
   const px = Number(raw.replace(/px$/i, ''));
-  if (!Number.isFinite(px)) throw new ParedeError('BAD_ARG', `Distância inválida: "${raw}".`, 'Use pixels (1200) ou viewport (150vh).');
+  if (!Number.isFinite(px)) throw new ParedeError('BAD_ARG', `Invalid distance: "${raw}".`, 'Use pixels (1200) or viewport (150vh).');
   return px;
 }
 
@@ -40,11 +40,11 @@ async function targetPoint(page: Page, target: Target) {
   const locator = page.locator(target.selector).first();
   await locator.scrollIntoViewIfNeeded({ timeout: 10_000 });
   const box = await locator.boundingBox();
-  if (!box) throw new ParedeError('SELECTOR', `"${target.selector}" não está visível.`, 'Rode `web-control inventory` para listar alvos visíveis.');
+  if (!box) throw new ParedeError('SELECTOR', `"${target.selector}" is not visible.`, 'Run `web-control inventory` to list visible targets.');
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
 }
 
-/** Executa uma ação com eventos reais de mouse/teclado/wheel. */
+/** Runs an action with real mouse/keyboard/wheel events. */
 export async function runAction(m: BrowserManager, action: Action): Promise<Record<string, unknown>> {
   const page = m.requirePage();
   switch (action.type) {
@@ -60,7 +60,7 @@ export async function runAction(m: BrowserManager, action: Action): Promise<Reco
       await sleep(120);
       const after = await readScroll(page);
       const scrolledBy = Math.round(after.y - before.y);
-      // Documento do tamanho da viewport + wheel aceito = scroll virtual (WebGL/transform): use frames para ver o efeito.
+      // A viewport-sized document + an accepted wheel = virtual scroll (WebGL/transform): use frames to see the effect.
       const virtualScroll = after.max <= 2 && scrolledBy === 0;
       return { scrolledBy, requested: Math.round(total), atBottom: !virtualScroll && after.y >= after.max - 2, ...(virtualScroll ? { virtualScroll: true } : {}) };
     }
@@ -155,7 +155,7 @@ export async function runAction(m: BrowserManager, action: Action): Promise<Reco
   }
 }
 
-/** Executa uma sequência e devolve o estado final + erros de console novos. */
+/** Runs a sequence and returns the final state + new console errors. */
 export async function runActions(m: BrowserManager, actions: Action[]) {
   const since = m.sinceOpen();
   const results: { action: string; result: Record<string, unknown> }[] = [];
