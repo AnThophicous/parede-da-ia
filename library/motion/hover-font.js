@@ -31,7 +31,9 @@ export function hoverFont(el, options = {}) {
 
   const settings = (w) => `'${axis}' ${Math.round(w)}${extraAxes ? `, ${extraAxes}` : ''}`;
   const original = el.innerHTML;
-  el.setAttribute('aria-label', (el.textContent ?? '').replace(/\s+/g, ' ').trim());
+  // innerText respeita o layout: linhas em blocos (<span class="block">) viram palavras separadas,
+  // onde textContent colaria "Parede" + "da IA" em "Parededa IA".
+  el.setAttribute('aria-label', (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim());
 
   /** @type {{ span: HTMLSpanElement, cx: number, cy: number, current: number, rest: number, heavy: number }[]} */
   const letters = [];
