@@ -115,6 +115,16 @@ function sampleWord(word, width, height, font, count) {
 }
 
 /** Nuvem inicial: nebulosa densa no centro com braços espirais suaves. */
+/** Partículas soltas pela tela inteira, bem separadas: o começo de uma revelação. */
+function sampleScatter(width, height, count) {
+  const out = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    out[i * 3] = (Math.random() - 0.5) * width * 1.1;
+    out[i * 3 + 1] = (Math.random() - 0.5) * height * 1.1;
+  }
+  return out;
+}
+
 function sampleCloud(width, height, count) {
   const out = new Float32Array(count * 3);
   const radius = Math.min(width, height) * 0.24;
@@ -134,10 +144,11 @@ function sampleCloud(width, height, count) {
  * @param {typeof import('three')} THREE
  * @param {HTMLElement} container
  * @param {{ words: string[], count?: number, font?: { family: string, weight: number },
- *           colors?: [string, string, string], pointSize?: number, maxDpr?: number }} options
+ *           colors?: [string, string, string], pointSize?: number, maxDpr?: number,
+ *           cloud?: 'nebula' | 'scatter' }} options
  */
 export async function createTextMorph(THREE, container, options) {
-  const { words, count = 7000, font = { family: 'sans-serif', weight: 700 }, colors = ['#3a5bff', '#ff6a1a', '#ffb36b'], pointSize = 2.4, maxDpr = 1.5 } = options;
+  const { words, count = 7000, font = { family: 'sans-serif', weight: 700 }, colors = ['#3a5bff', '#ff6a1a', '#ffb36b'], pointSize = 2.4, maxDpr = 1.5, cloud = 'nebula' } = options;
   await document.fonts?.load(`${font.weight} 100px ${font.family}`).catch(() => undefined);
 
   const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
@@ -183,7 +194,7 @@ export async function createTextMorph(THREE, container, options) {
     const id = ++buildId;
     const w = container.clientWidth || 1;
     const h = container.clientHeight || 1;
-    const next = [sampleCloud(w, h, count)];
+    const next = [cloud === 'scatter' ? sampleScatter(w, h, count) : sampleCloud(w, h, count)];
     for (const word of words) {
       await nextFrame();
       if (id !== buildId) return false;
@@ -202,7 +213,7 @@ export async function createTextMorph(THREE, container, options) {
   const useSegment = (k) => {
     if (k === segment) return;
     segment = k;
-    uniforms.uSwirl.value = k === 0 ? 1 : 0;
+    uniforms.uSwirl.value = k === 0 && cloud === 'nebula' ? 1 : 0;
     geometry.setAttribute('position', new THREE.BufferAttribute(shapes[k], 3));
     geometry.setAttribute('aTarget', new THREE.BufferAttribute(shapes[Math.min(k + 1, shapes.length - 1)], 3));
   };
