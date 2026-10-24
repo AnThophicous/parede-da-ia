@@ -60,6 +60,11 @@ try {
   assert(scroll.results[0].result.scrolledBy > 0, 'web-control scroll-down via wheel');
   const shot = run('web-screenshot', '--full-page', '--dpr', '2');
   assert(existsSync(shot.path) && shot.pixels.width === 2560, 'web-screenshot full-page @2x');
+  // regressão: --dpr diferente do contexto sai em clip × dpr e devolve a rolagem (smooth-scroll reagia ao resize)
+  const scrollBefore = JSON.parse(run('web-eval', 'scrollY').value);
+  const cssShot = run('web-screenshot', '--dpr', '1');
+  const scrollAfter = JSON.parse(run('web-eval', 'scrollY').value);
+  assert(cssShot.pixels.width === 1280 && scrollBefore > 0 && scrollAfter === scrollBefore, 'web-screenshot --dpr 1 em pixels CSS, sem mexer na rolagem');
   const multi = run('web-screenshot', '--viewports', 'desktop,mobile');
   assert(Array.isArray(multi) && multi.length === 2 && multi[1].viewport.width === 390, 'web-screenshot --viewports');
   const rec = run('web-record-frames', '--interval', '0.2', '--while', 'scroll-up 600 --steps 6', '--tile-width', '160');

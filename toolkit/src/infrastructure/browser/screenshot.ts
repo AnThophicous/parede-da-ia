@@ -64,6 +64,7 @@ export async function takeScreenshot(m: BrowserManager, p: ScreenshotParams) {
   const warnings: string[] = [];
   const injected: { evaluate: (fn: (el: Element) => void) => Promise<void> }[] = [];
   let cdp: Awaited<ReturnType<NonNullable<typeof m.context>['newCDPSession']>> | null = null;
+  let scroll: { x: number; y: number } | null = null;
 
   try {
     if (p.viewport) {
@@ -100,11 +101,16 @@ export async function takeScreenshot(m: BrowserManager, p: ScreenshotParams) {
     mkdirSync(dirname(p.path), { recursive: true });
     const type = /\.jpe?g$/i.test(p.path) ? 'jpeg' : 'png';
     const options = { path: p.path, type, quality: type === 'jpeg' ? (p.quality ?? 92) : undefined, animations: 'allow', caret: 'hide', scale: 'device' } as const;
+    // Captura que sai da viewport redimensiona a página por um instante; smooth-scroll (Lenis,
+    // ScrollTrigger) reage e muda a rolagem. A posição é devolvida depois da captura.
+    scroll = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
     let buffer: Buffer;
     if (dpr !== contextDpr && m.context) {
       // DPR diferente do contexto: Page.captureScreenshot com clip.scale re-rasteriza o conteúdo
       // na escala pedida (nitidez real, não bitmap esticado) sem recriar o contexto.
+      // A imagem sai com clip × scale pixels: o DSF do contexto não entra na conta.
       cdp = await m.context.newCDPSession(page);
+      const view = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY, width: window.innerWidth, height: window.innerHeight }));
       const clip = p.selector
         ? await page.locator(p.selector).first().evaluate((el) => {
             const r = el.getBoundingClientRect();
@@ -112,12 +118,13 @@ export async function takeScreenshot(m: BrowserManager, p: ScreenshotParams) {
           })
         : p.fullPage
           ? { x: 0, y: 0, width: docSize.width, height: docSize.height }
-          : await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY, width: window.innerWidth, height: window.innerHeight }));
+          : view;
+      const inside = clip.x >= view.x && clip.y >= view.y && clip.x + clip.width <= view.x + view.width && clip.y + clip.height <= view.y + view.height;
       const shot = (await cdp.send('Page.captureScreenshot', {
         format: type,
         quality: options.quality,
-        captureBeyondViewport: true,
-        clip: { ...clip, scale: dpr / contextDpr },
+        captureBeyondViewport: !inside,
+        clip: { ...clip, scale: dpr },
       })) as { data: string };
       buffer = Buffer.from(shot.data, 'base64');
       writeFileSync(p.path, buffer);
@@ -143,5 +150,12 @@ export async function takeScreenshot(m: BrowserManager, p: ScreenshotParams) {
     for (const handle of injected) await handle.evaluate((el) => el.remove()).catch(() => undefined);
     if (cdp) await cdp.detach().catch(() => undefined);
     if (previousViewport && p.viewport) await page.setViewportSize(previousViewport).catch(() => undefined);
+    if (scroll) {
+      await page
+        .evaluate(({ x, y }) => {
+          if (Math.abs(window.scrollX - x) > 1 || Math.abs(window.scrollY - y) > 1) window.scrollTo(x, y);
+        }, scroll)
+        .catch(() => undefined);
+    }
   }
 }
