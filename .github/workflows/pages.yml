@@ -1,7 +1,7 @@
 name: pages
 
-# Landing (site/) publicada no GitHub Pages a cada push na main que toque o site ou a library
-# (a landing importa as receitas de library/ diretamente).
+# The landing (site/) is published to GitHub Pages on every push to main that touches the site or the library
+# (the landing imports the recipes from library/ directly).
 on:
   push:
     branches: [main]

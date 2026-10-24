@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 
-// GitHub Pages publica em /parede-da-ia/; a library/ do repositório é importada diretamente
-// (a landing usa as mesmas receitas que os agentes recebem).
+// GitHub Pages serves from /parede-da-ia/; the repository library/ is imported directly
+// (the landing uses the same recipes the agents receive).
 export default defineConfig({
   base: '/parede-da-ia/',
   plugins: [react(), tailwindcss()],

@@ -1,4 +1,4 @@
-/** Copia texto com fallback para navegadores/contextos sem a Clipboard API. */
+/** Copies text, with a fallback for browsers/contexts without the Clipboard API. */
 export async function copyText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);

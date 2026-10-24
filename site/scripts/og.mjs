@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Gera public/og.jpg (1200×630) a partir de og.html, capturado pela própria toolkit (dogfooding).
-// Uso: node scripts/og.mjs [--frame 17000] [--out arquivo.jpg]   (frame = quadro do campo de cor, em ms)
+// Builds public/og.jpg (1200×630) from og.html, captured by the toolkit itself (dogfooding).
+// Usage: node scripts/og.mjs [--frame 17000] [--out file.jpg]   (frame = animation time, in ms)
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,13 +14,13 @@ const arg = (name, fallback) => {
 };
 const frame = arg('--frame', '17000');
 const out = resolve(arg('--out', fileURLToPath(new URL('../public/og.jpg', import.meta.url))));
-// Sessão própria: não navega a sessão em que o agente está trabalhando.
+// Its own session: never navigates the session the agent is working in.
 const env = { ...process.env, PAREDE_SESSION: 'og' };
-// Assíncrono de propósito: o servidor do Vite roda neste processo e precisa do event loop livre.
+// Async on purpose: the Vite server runs in this process and needs a free event loop.
 const run = (...args) =>
   new Promise((ok, fail) => {
     const child = spawn(process.execPath, [parede, ...args], { env, stdio: 'inherit' });
-    child.on('exit', (code) => (code === 0 ? ok() : fail(new Error(`${args[0]} saiu com código ${code}`))));
+    child.on('exit', (code) => (code === 0 ? ok() : fail(new Error(`${args[0]} exited with code ${code}`))));
   });
 
 const server = await createServer({ root: site, logLevel: 'error', server: { port: 5179, strictPort: true } });

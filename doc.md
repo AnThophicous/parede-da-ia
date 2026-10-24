@@ -1,29 +1,29 @@
-# parede-da-ia · instalador universal para agentes
+# parede-da-ia · universal installer for agents
 
-> **Para o agente que está lendo isto:** o usuário pediu para você instalar o `parede-da-ia`.
-> Execute as etapas **em ordem**, rodando cada comando no terminal do usuário e verificando a
-> saída antes de seguir. Se uma verificação falhar, aplique a correção indicada; se não houver
-> correção possível, pare e explique ao usuário o que falta. Não pule etapas.
-> Ao final, mostre o resultado de `parede doctor` e onde o router foi registrado.
+> **To the agent reading this:** the user asked you to install `parede-da-ia`.
+> Run the steps **in order**, running each command in the user's terminal and checking the
+> output before moving on. If a check fails, apply the given fix; if no fix is possible, stop
+> and tell the user what is missing. Don't skip steps.
+> At the end, show the output of `parede doctor` and where the router was registered.
 
-Repositório: https://github.com/AnThophicous/parede-da-ia
-Destino padrão: `~/.parede-da-ia` (Windows: `%USERPROFILE%\.parede-da-ia`).
+Repository: https://github.com/AnThophicous/parede-da-ia
+Default destination: `~/.parede-da-ia` (Windows: `%USERPROFILE%\.parede-da-ia`).
 
 ---
 
-## Etapa 1 — Pré-requisitos
+## Step 1 — Prerequisites
 
 ```bash
-node --version    # precisa ser >= 18.17 (recomendado 20 ou 22 LTS)
+node --version    # must be >= 18.17 (20 or 22 LTS recommended)
 git --version
 ```
 
-- Node ausente ou antigo → instale a LTS: macOS `brew install node` · Ubuntu/Debian via
-  NodeSource ou `nvm install --lts` · Windows `winget install OpenJS.NodeJS.LTS`.
-  Depois de instalar, abra um terminal novo.
-- Git ausente → macOS `xcode-select --install` · Linux `sudo apt install git` · Windows `winget install Git.Git`.
+- Node missing or old → install the LTS: macOS `brew install node` · Ubuntu/Debian via
+  NodeSource or `nvm install --lts` · Windows `winget install OpenJS.NodeJS.LTS`.
+  After installing, open a new terminal.
+- Git missing → macOS `xcode-select --install` · Linux `sudo apt install git` · Windows `winget install Git.Git`.
 
-## Etapa 2 — Clonar (ou atualizar)
+## Step 2 — Clone (or update)
 
 ```bash
 # macOS / Linux / Git Bash
@@ -36,68 +36,68 @@ $dest = "$env:USERPROFILE\.parede-da-ia"
 if (Test-Path "$dest\.git") { git -C $dest pull --ff-only } else { git clone --depth 1 https://github.com/AnThophicous/parede-da-ia.git $dest }
 ```
 
-**Verificação:** o arquivo `~/.parede-da-ia/prompts/router.md` existe.
+**Check:** the file `~/.parede-da-ia/prompts/router.md` exists.
 
-## Etapa 3 — Instalar a toolkit (Playwright + build TypeScript)
+## Step 3 — Install the toolkit (Playwright + TypeScript build)
 
 ```bash
 cd ~/.parede-da-ia/toolkit
-npm install            # instala dependências e compila (script "prepare")
+npm install            # installs dependencies and builds ("prepare" script)
 npx playwright install chromium
 ```
 
-- Linux sem bibliotecas de sistema → `npx playwright install --with-deps chromium` (pede sudo).
-- npm ≥ 11 pode avisar que o script de instalação do `ffmpeg-static` não foi aprovado. Se a
-  Etapa 4 indicar FFmpeg ausente, rode `npm install-scripts approve ffmpeg-static && npm rebuild ffmpeg-static`
-  ou instale o FFmpeg do sistema.
+- Linux without system libraries → `npx playwright install --with-deps chromium` (asks for sudo).
+- npm ≥ 11 may warn that the `ffmpeg-static` install script was not approved. If
+  Step 4 reports FFmpeg missing, run `npm install-scripts approve ffmpeg-static && npm rebuild ffmpeg-static`
+  or install the system FFmpeg.
 
-**Verificação:** existe `~/.parede-da-ia/toolkit/dist/cli.js`.
+**Check:** `~/.parede-da-ia/toolkit/dist/cli.js` exists.
 
-## Etapa 4 — FFmpeg (gravação de frames → spritesheet/MP4)
+## Step 4 — FFmpeg (frame recording → spritesheet/MP4)
 
 ```bash
 ffmpeg -version
 ```
 
-A toolkit procura, nesta ordem: `PAREDE_FFMPEG` → `ffmpeg` no PATH → pacote `ffmpeg-static`
-(já instalado como dependência opcional). Se nenhum funcionar:
+The toolkit looks, in this order: `PAREDE_FFMPEG` → `ffmpeg` on the PATH → the `ffmpeg-static`
+package (already installed as an optional dependency). If none works:
 
 - macOS `brew install ffmpeg` · Ubuntu/Debian `sudo apt install -y ffmpeg` · Windows `winget install Gyan.FFmpeg`
 
-Sem FFmpeg tudo funciona, exceto a montagem de spritesheet/MP4 (os frames continuam sendo salvos).
+Without FFmpeg everything works except assembling the spritesheet/MP4 (frames are still saved).
 
-## Etapa 5 — Comandos no PATH
+## Step 5 — Commands on the PATH
 
 ```bash
 cd ~/.parede-da-ia/toolkit
 npm link
-web-scrap --help       # deve imprimir o uso do comando
+web-scrap --help       # must print the command usage
 ```
 
-Se `npm link` falhar por permissão, **não use sudo às cegas**: use o fallback universal
-`node ~/.parede-da-ia/toolkit/bin/parede.js <comando>` (ex.: `... parede.js web-scrap`).
+If `npm link` fails on permissions, **don't reach for sudo blindly**: use the universal fallback
+`node ~/.parede-da-ia/toolkit/bin/parede.js <command>` (e.g. `... parede.js web-scrap`).
 
-## Etapa 6 — Registrar o router nos agentes
+## Step 6 — Register the router in the agents
 
 ```bash
 node ~/.parede-da-ia/toolkit/bin/parede.js setup --agent auto
 ```
 
-O comando é **idempotente** (blocos delimitados por `<!-- parede-da-ia:start/end -->`) e registra
-o router nas instruções globais dos agentes cujas pastas existem:
+The command is **idempotent** (blocks delimited by `<!-- parede-da-ia:start/end -->`) and registers
+the router in the global instructions of every agent whose folder exists:
 
-| Agente | Onde |
-|--------|------|
-| Claude Code | `~/.claude/skills/parede-da-ia/SKILL.md` + bloco em `~/.claude/CLAUDE.md` |
+| Agent | Where |
+|-------|-------|
+| Claude Code | `~/.claude/skills/parede-da-ia/SKILL.md` + a block in `~/.claude/CLAUDE.md` |
 | Codex CLI | `~/.codex/AGENTS.md` |
 | OpenCode | `~/.config/opencode/AGENTS.md` |
 | Gemini CLI | `~/.gemini/GEMINI.md` |
 | Windsurf | `~/.codeium/windsurf/memories/global_rules.md` |
-| Cursor / outros | `parede setup --project` → `./AGENTS.md` + `.cursor/rules/parede-da-ia.mdc` |
+| Cursor / others | `parede setup --project` → `./AGENTS.md` + `.cursor/rules/parede-da-ia.mdc` |
 
-Para forçar um agente específico: `--agent claude` (repetível). Para simular: `--dry-run`.
+To force a specific agent: `--agent claude` (repeatable). To simulate: `--dry-run`.
 
-### Opcional — servidor MCP
+### Optional — MCP server
 
 ```bash
 # Claude Code
@@ -108,44 +108,44 @@ claude mcp add parede-da-ia -- node ~/.parede-da-ia/toolkit/bin/parede-mcp.js
 # Codex: ~/.codex/config.toml
 [mcp_servers.parede-da-ia]
 command = "node"
-args = ["/CAMINHO/ABSOLUTO/.parede-da-ia/toolkit/bin/parede-mcp.js"]
+args = ["/ABSOLUTE/PATH/.parede-da-ia/toolkit/bin/parede-mcp.js"]
 ```
 
 ```json
 // OpenCode: opencode.json
-{ "mcp": { "parede-da-ia": { "type": "local", "command": ["node", "/CAMINHO/ABSOLUTO/.parede-da-ia/toolkit/bin/parede-mcp.js"] } } }
+{ "mcp": { "parede-da-ia": { "type": "local", "command": ["node", "/ABSOLUTE/PATH/.parede-da-ia/toolkit/bin/parede-mcp.js"] } } }
 ```
 
-## Etapa 7 — Diagnóstico e teste de fumaça
+## Step 7 — Diagnostics and smoke test
 
 ```bash
-parede doctor          # ou: node ~/.parede-da-ia/toolkit/bin/parede.js doctor
+parede doctor          # or: node ~/.parede-da-ia/toolkit/bin/parede.js doctor
 cd ~/.parede-da-ia/toolkit && npm run smoke
 ```
 
-Esperado: `✔` em node, playwright, chromium e agentes; `✔` ou `⚠` (aceitável) em ffmpeg e PATH;
-o smoke test termina com 24 linhas `✔`.
+Expected: `✔` for node, playwright, chromium and agents; `✔` or `⚠` (acceptable) for ffmpeg and PATH;
+the smoke test ends with 24 `✔` lines.
 
-## Etapa 8 — Relatório ao usuário
+## Step 8 — Report to the user
 
-Responda com:
-1. versão instalada e caminho (`~/.parede-da-ia`);
-2. saída resumida do `parede doctor`;
-3. agentes onde o router foi registrado;
-4. como começar: _"peça: crie uma landing para X"_ — o router identifica o arquétipo do projeto
-   (corporativo pede briefing e estética; portfólio ganha direção criativa; experiência ganha um
-   ápice) e aplica o workflow `frontend-master`: perguntas primeiro, depois construção com QA
-   visual automático (`web-audit`, `web-interactions`, `web-motion`).
+Reply with:
+1. the installed version and path (`~/.parede-da-ia`);
+2. a short summary of `parede doctor`;
+3. the agents where the router was registered;
+4. how to start: _"ask: build a landing page for X"_ — the router identifies the project archetype
+   (corporate asks for a brief and an aesthetic; a portfolio gets a creative direction; an experience
+   gets an apex) and applies the `frontend-master` workflow: questions first, then building with
+   automatic visual QA (`web-audit`, `web-interactions`, `web-motion`).
 
-Lembre o usuário de **reiniciar a sessão do agente** para que as novas instruções globais sejam carregadas.
+Remind the user to **restart the agent session** so the new global instructions are loaded.
 
 ---
 
-### Atualizar / desinstalar
+### Update / uninstall
 
 ```bash
 git -C ~/.parede-da-ia pull --ff-only && (cd ~/.parede-da-ia/toolkit && npm install && npm link)
-parede setup --agent auto   # atualiza o bloco do router (lista de ferramentas) nos agentes
-# desinstalar: npm unlink -g parede-da-ia; remova ~/.parede-da-ia e ~/.parede,
-# e apague os blocos <!-- parede-da-ia:start --> … <!-- parede-da-ia:end --> dos arquivos da Etapa 6.
+parede setup --agent auto   # refreshes the router block (tool list) in the agents
+# uninstall: npm unlink -g parede-da-ia; remove ~/.parede-da-ia and ~/.parede,
+# and delete the <!-- parede-da-ia:start --> … <!-- parede-da-ia:end --> blocks from the Step 6 files.
 ```

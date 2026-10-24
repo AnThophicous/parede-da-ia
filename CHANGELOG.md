@@ -1,51 +1,79 @@
 # Changelog
 
-Formato inspirado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/); versões seguem
-[SemVer](https://semver.org/lang/pt-BR/).
+Format inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
+[SemVer](https://semver.org/).
+
+## [0.3.0] — 2026-10-24
+
+### Everything in English
+- **Breaking:** prompts, library, toolkit output, docs and the landing are now in English
+  (knowledge-base modules 01 and 02 are still being revised and will follow).
+- **Breaking:** aesthetic playbooks and templates renamed to English ids:
+  `corporate-modernist`, `corporate-brand`, `product-saas`, `playful-canvas`, `editorial-brutalist`,
+  `atmospheric-gradient`, `immersive-webgl`, `blur-library`; templates `corporate-brief`,
+  `creative-direction`, `delivery-report` (`motion-spec` unchanged). `web-scrap` reports the new ids.
+- **Breaking:** the toolkit's JSON identifiers are English: audit severities `error` / `warning` /
+  `info`, verdicts `approved` / `rejected`, categories `accessibility`, `responsive`, `performance`,
+  `console`, `content`, `seo`, `motion`, media modes `uniform` / `scenes`, and the generated files
+  `interactions.png` and `contact-NN.png`. Scripts that parse `--json` output must update.
+- Router v0.3 with new notes: single-letter hover, opt-in sound, switch patterns, the cost of
+  extra WebGL contexts and `compileAsync`, and the `atan` seam in polar noise.
+
+### Library
+- `text-morph` can start from loose particles (`cloud: 'scatter'`) instead of a nebula.
+
+### Site
+- A new black-and-white landing built as a slow, self-running journey: the name written by a
+  single thread, a heavy breaker lever that starts a generative score (Web Audio, 56 BPM, bass-heavy,
+  no voices), stars launched on every beat — each a distilled book that turns into its cover on
+  click — a black hole with its real distance on hover, an event horizon that pulses with the beat,
+  spaghettification, particles that spell "Parade da IA" and solidify into "Parede da IA", eyes
+  that watch the cursor and blink, and a white install card over a reactive grid.
+- Paper Shaders, GSAP and Lenis removed; three.js split into its own chunk.
 
 ## [0.2.0] — 2026-10-24
 
 ### Toolkit
-- **Quebra:** reorganizada em Clean Architecture (domínio, aplicação com portas, infraestrutura,
-  apresentação). Os binários agora passam por `bin/_launch.js` e o daemon sai de `dist/daemon.js`.
-  Ao atualizar: `web-close` (encerra um daemon antigo), `npm install && npm link` e `parede setup`.
-- Novos comandos: `web-motion` (o que anima, curvas, fps, jank — inclusive GSAP empacotado),
-  `web-interactions` (hover, foco e `:active` com folha antes/depois), `web-audit` (nota 0–100 por
-  viewport), `web-tokens` (CSS + JSON), `web-diff` (SSIM/PSNR), `media-frames` (frames de vídeos de
-  referência) e `web-eval`.
-- `web-control drag`, `web-screenshot --viewports` e `--hide-banners`, `web-record-frames --selector`
-  com fps e jank no manifesto; `web-scrap` classifica a família estética provável.
-- Correções: `web-screenshot --dpr` diferente do contexto saía com metade da resolução e mudava a
-  rolagem de páginas com smooth-scroll; `web-audit` media o CLS depois de trocar de viewport (o
-  próprio resize inflava o número), acusava falta de foco no meio de transições `transition-all` e
-  media texto de SVG em unidades do viewBox; `web-interactions` deixava texto selecionado entre os
-  recortes. Teste de regressão no smoke (24 verificações).
+- **Breaking:** reorganized into Clean Architecture (domain, application with ports, infrastructure,
+  presentation). The binaries now go through `bin/_launch.js` and the daemon runs from `dist/daemon.js`.
+  When updating: `web-close` (stops an old daemon), `npm install && npm link` and `parede setup`.
+- New commands: `web-motion` (what animates, easings, fps, jank — even bundled GSAP),
+  `web-interactions` (hover, focus and `:active` with a before/after sheet), `web-audit` (a 0–100
+  score per viewport), `web-tokens` (CSS + JSON), `web-diff` (SSIM/PSNR), `media-frames` (frames from
+  reference videos) and `web-eval`.
+- `web-control drag`, `web-screenshot --viewports` and `--hide-banners`, `web-record-frames --selector`
+  with fps and jank in the manifest; `web-scrap` classifies the likely aesthetic family.
+- Fixes: `web-screenshot --dpr` different from the context came out at half the resolution and moved
+  the scroll of smooth-scroll pages; `web-audit` measured CLS after switching viewports (the resize
+  itself inflated the number), flagged missing focus in the middle of `transition-all` transitions and
+  measured SVG text in viewBox units; `web-interactions` left text selected between crops.
+  A regression test in the smoke test (24 checks).
 
 ### Prompts
-- Router v0.2: detecção de arquétipo (corporativo, pessoal, ambicioso) com exemplos; projeto
-  corporativo pede briefing, estética e perguntas extras.
-- Base de **23 livros** (13 novos: microinterações, animação, tipografia, grid, cor, shaders,
-  design de objetos, marca, leis de UX, atomic design, componentes inclusivos, StoryBrand) e
-  módulos reescritos no formato XML com axiomas, guardas e checklists.
-- **7 estéticas** com playbooks medidos em referências reais + biblioteca de blurs.
-- Workflows `corporate-briefing`, `creative-direction`, `motion-teardown`; templates de briefing,
-  direção criativa, motion spec e relatório de entrega.
+- Router v0.2: archetype detection (corporate, personal, ambitious) with examples; a corporate
+  project asks for a brief, an aesthetic and extra questions.
+- A base of **23 books** (13 new: microinteractions, animation, typography, grid, color, shaders,
+  design of everyday things, brand, laws of UX, atomic design, inclusive components, StoryBrand) and
+  modules rewritten in an XML format with axioms, guards and checklists.
+- **7 aesthetics** with playbooks measured on real references + a blur library.
+- Workflows `corporate-briefing`, `creative-direction`, `motion-teardown`; templates for the brief,
+  creative direction, motion spec and delivery report.
 
 ### Library
-- Receitas: Hover Font (sem layout shift), text morph de partículas (three.js injetado; criação
-  em fatias e shader compilado em paralelo), magnético, rastro de pixels, canvas arrastável,
-  pilha de cartões, selo de scroll, preloader "olá" e campo de gradiente em GLSL.
+- Recipes: Hover Font (no layout shift), particle text morph (injected three.js; sliced creation
+  and a shader compiled in parallel), magnetic, pixel trail, draggable canvas, card stack, scroll
+  badge, "hello" preloader and a GLSL gradient field.
 
 ### Site
-- Landing 2.0 em React + Vite + Tailwind + shadcn + Paper Shaders + three.js, só para converter:
-  hero com campo de cor e lente, problema, morph "olhos → mãos → repertório" e instalação com o
-  prompt visível e copiável. `web-audit` 99/100 em desktop, tablet e mobile.
-- Publicação via GitHub Actions (`site/` → Pages); a landing v0.1 em `docs/` foi removida.
-- Prévia social (`og.jpg`) gerada pela própria toolkit a partir de `site/og.html`.
+- Landing 2.0 in React + Vite + Tailwind + shadcn + Paper Shaders + three.js, built only to convert:
+  a hero with a color field and lens, the problem, an "eyes → hands → taste" morph and an install
+  section with the prompt visible and copyable. `web-audit` 99/100 on desktop, tablet and mobile.
+- Published through GitHub Actions (`site/` → Pages); the v0.1 landing in `docs/` was removed.
+- Social preview (`og.jpg`) generated by the toolkit itself from `site/og.html`.
 
 ## [0.1.0] — 2026-10-23
 
-- Toolkit Playwright + FFmpeg: `web-url-fetch`, `web-wait-page-load`, `web-wait`, `web-control`,
-  `web-record-frames`, `web-screenshot`, `web-scrap`, `web-serve`, `parede doctor/setup` e MCP.
-- Router de prompts com base de 10 livros, workflows `frontend-master` e `reference-teardown`.
-- Instalador universal (`doc.md`) e landing monocromática no GitHub Pages.
+- Playwright + FFmpeg toolkit: `web-url-fetch`, `web-wait-page-load`, `web-wait`, `web-control`,
+  `web-record-frames`, `web-screenshot`, `web-scrap`, `web-serve`, `parede doctor/setup` and MCP.
+- A prompt router with a 10-book base, workflows `frontend-master` and `reference-teardown`.
+- A universal installer (`doc.md`) and a monochrome landing on GitHub Pages.

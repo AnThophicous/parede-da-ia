@@ -1,38 +1,38 @@
 ---
 name: parede-da-ia
-description: Direção de arte e engenharia front-end nível Awwwards com olhos e mãos reais (Playwright + FFmpeg). Use ao criar, redesenhar ou auditar landing pages, sites, portfólios, componentes e UI; ao pedir briefing de um site corporativo; ao dissecar referências (Awwwards, monopo, Lusion) e suas animações; ao revisar código, arquitetura, commits ou prompts com base em 23 livros clássicos e 7 estéticas; e sempre que precisar abrir uma página, rolar, clicar, gravar frames, medir contraste, movimento e microinterações, ou extrair fontes, paleta e stack de um site.
+description: Awwwards-level art direction and front-end engineering with real eyes and hands (Playwright + FFmpeg). Use when creating, redesigning or auditing landing pages, sites, portfolios, components and UI; when briefing a corporate site; when dissecting references (Awwwards, monopo, Lusion) and their animations; when reviewing code, architecture, commits or prompts against 23 classic books and 7 aesthetics; and whenever you need to open a page, scroll, click, record frames, measure contrast, motion and microinteractions, or extract a site's fonts, palette and stack.
 ---
 
 # parede-da-ia
 
-Leia o router e siga-o: ele classifica a tarefa e o arquétipo do projeto (corporativo, pessoal ou
-ambicioso) e diz quais módulos, estética e workflow carregar sob demanda.
+Read the router and follow it: it classifies the task and the project archetype (corporate, personal
+or ambitious) and tells you which modules, aesthetic and workflow to load on demand.
 
 - Router: `{{PAREDE_REPO}}/prompts/router.md`
-- Fallback remoto: https://raw.githubusercontent.com/AnThophicous/parede-da-ia/main/prompts/router.md
-- Receitas de efeitos (Hover Font, text morph, magnético, rastro de pixels…): `{{PAREDE_REPO}}/library/`
+- Remote fallback: https://raw.githubusercontent.com/AnThophicous/parede-da-ia/main/prompts/router.md
+- Effect recipes (Hover Font, text morph, magnetic, pixel trail…): `{{PAREDE_REPO}}/library/`
 
-## Ferramentas
+## Tools
 
-No PATH (após `npm link`) ou via `node "{{PAREDE_REPO}}/toolkit/bin/parede.js" <comando>`:
+On the PATH (after `npm link`) or through `node "{{PAREDE_REPO}}/toolkit/bin/parede.js" <command>`:
 
-| Comando | Para quê |
+| Command | What for |
 |---------|----------|
-| `web-url-fetch <url>` | abre num Chromium persistente e injeta hooks |
-| `web-wait-page-load` | espera load + networkidle + fontes (padrão) |
-| `web-wait <s>` | fallback para pre-loaders em canvas/WebGL |
-| `web-control <ação>` | scroll, click, hover, mousemove, drag, keypress, inventory, sequence |
-| `web-eval "<js>"` | lê estado da página (inspeção, não para alterar a UI) |
-| `web-screenshot` | alta definição, viewport/página/elemento, `--viewports desktop,tablet,mobile` |
-| `web-record-frames` | frames a cada 0.5s → spritesheet + MP4; `--selector` recorta um elemento |
-| `web-scrap` | stack, fontes, ícones, paleta, contraste, mídia, shaders, rede, estética |
-| `web-motion` | o que anima, curvas, durações, fps e jank (inclui GSAP empacotado) |
-| `web-interactions` | hover, foco e :active de cada interativo, com folha antes/depois |
-| `web-audit` | nota 0–100 por viewport: acessibilidade, responsivo, performance, SEO |
-| `web-tokens` | exporta cores, tipos, espaços e movimento como CSS + JSON |
-| `web-diff` · `media-frames` | compara capturas (SSIM) · extrai frames de vídeos de referência |
-| `web-serve <pasta> --detach` | servidor estático local |
-| `web-close` | encerra a sessão |
+| `web-url-fetch <url>` | opens it in a persistent Chromium and injects hooks |
+| `web-wait-page-load` | waits for load + networkidle + fonts (the default) |
+| `web-wait <s>` | fallback for canvas/WebGL preloaders |
+| `web-control <action>` | scroll, click, hover, mousemove, drag, keypress, inventory, sequence |
+| `web-eval "<js>"` | reads page state (inspection, not for changing the UI) |
+| `web-screenshot` | high definition, viewport/page/element, `--viewports desktop,tablet,mobile` |
+| `web-record-frames` | frames every 0.5s → spritesheet + MP4; `--selector` crops one element |
+| `web-scrap` | stack, fonts, icons, palette, contrast, media, shaders, network, aesthetic |
+| `web-motion` | what animates, easings, durations, fps and jank (including bundled GSAP) |
+| `web-interactions` | hover, focus and :active of every interactive element, with a before/after sheet |
+| `web-audit` | a 0–100 score per viewport: accessibility, responsive, performance, SEO |
+| `web-tokens` | exports colors, type, spacing and motion as CSS + JSON |
+| `web-diff` · `media-frames` | compares captures (SSIM) · extracts frames from reference videos |
+| `web-serve <folder> --detach` | a local static server |
+| `web-close` | ends the session |
 
-Regra inegociável: **nunca declare uma interface pronta sem abri-la com `web-url-fetch`, ler os
-screenshots e passar no `web-audit`.**
+Non-negotiable rule: **never declare an interface done without opening it with `web-url-fetch`,
+reading the screenshots and passing `web-audit`.**
