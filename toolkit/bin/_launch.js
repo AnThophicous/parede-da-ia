@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const toolkitRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-export async function launch(entry, command) {
+export async function launch(entry, command, fn = 'main') {
   const file = join(toolkitRoot, 'dist', entry);
   if (!existsSync(file)) {
     console.error(`✖ toolkit não compilado (faltando dist/${entry}).`);
@@ -13,5 +13,5 @@ export async function launch(entry, command) {
     process.exit(1);
   }
   const mod = await import(pathToFileURL(file).href);
-  await mod.main(command, process.argv.slice(2));
+  await mod[fn](command, process.argv.slice(2));
 }

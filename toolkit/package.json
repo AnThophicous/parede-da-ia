@@ -1,7 +1,7 @@
 {
   "name": "parede-da-ia",
-  "version": "0.1.0",
-  "description": "Rootkit de inspeção web + motor de direção de arte para agentes de IA. Playwright + FFmpeg.",
+  "version": "0.2.0",
+  "description": "Olhos, mãos e repertório para agentes de IA: inspeção web, movimento, microinterações, QA e mídia. Playwright + FFmpeg.",
   "type": "module",
   "license": "MIT",
   "author": "Brenno Leon (https://github.com/AnThophicous)",
@@ -19,7 +19,11 @@
     "frontend-design",
     "web-scraping",
     "design-engineering",
-    "mcp"
+    "mcp",
+    "motion-design",
+    "microinteractions",
+    "accessibility",
+    "visual-regression"
   ],
   "engines": {
     "node": ">=18.17"
@@ -31,10 +35,17 @@
     "web-wait-page-load": "bin/web-wait-page-load.js",
     "web-wait": "bin/web-wait.js",
     "web-control": "bin/web-control.js",
-    "web-record-frames": "bin/web-record-frames.js",
     "web-screenshot": "bin/web-screenshot.js",
-    "web-scrap": "bin/web-scrap.js",
+    "web-eval": "bin/web-eval.js",
     "web-close": "bin/web-close.js",
+    "web-scrap": "bin/web-scrap.js",
+    "web-motion": "bin/web-motion.js",
+    "web-interactions": "bin/web-interactions.js",
+    "web-audit": "bin/web-audit.js",
+    "web-tokens": "bin/web-tokens.js",
+    "web-record-frames": "bin/web-record-frames.js",
+    "media-frames": "bin/media-frames.js",
+    "web-diff": "bin/web-diff.js",
     "web-serve": "bin/web-serve.js"
   },
   "files": [

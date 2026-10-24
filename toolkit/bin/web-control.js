@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 import { launch } from './_launch.js';
 
-await launch('cli.js', 'web-control');
+await launch('main.js', 'web-control');

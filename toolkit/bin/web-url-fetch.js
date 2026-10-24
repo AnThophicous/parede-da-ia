@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 import { launch } from './_launch.js';
 
-await launch('cli.js', 'web-url-fetch');
+await launch('main.js', 'web-url-fetch');
