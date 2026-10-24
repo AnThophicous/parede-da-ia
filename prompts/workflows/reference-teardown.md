@@ -1,72 +1,81 @@
-# Workflow · reference-teardown
+# Workflow · reference-teardown (v0.2)
 
-> Disseca uma referência (ex.: um Site of the Day do Awwwards) e a transforma num
-> **briefing de direção de arte** acionável. Não é para copiar: é para entender *por que funciona*.
-> Módulos de apoio: `05-refactoring-ui` · `04-100-things-designers`.
+<module_meta>
+  <role>Disseca uma referência (URL, vídeo ou print) e a converte em DNA visual acionável. Entender por que funciona — nunca copiar.</role>
+  <enforcement_level>STRICT quanto a direitos: extraia princípios, sistemas e medidas; nunca assets de terceiros sem licença.</enforcement_level>
+  <pairs_with>knowledge-base/05 · 12 · 16 · 17 · aesthetics/*.md · workflows/motion-teardown.md</pairs_with>
+</module_meta>
 
-## Ética e direitos
+---
 
-- Extraia **princípios, sistemas e medidas** (escala, ritmo, easing, paleta), não assets.
-- Imagens, vídeos, fontes pagas, modelos 3D e textos da referência pertencem aos autores.
-  Só reutilize com licença explícita ou autorização do usuário para material dele.
-
+<capture>
 ## 1. Capturar
 
+### URL
 ```bash
 web-url-fetch <url>
-web-wait-page-load                       # avisou de pre-loader? → web-wait 8 --until-hidden "<seletor>"
-web-scrap                                # stack, fontes, paleta, efeitos, shaders, rede
-web-screenshot                           # primeira dobra (o que se vê em 5s)
-web-screenshot --full-page --scroll-through
+web-wait-page-load                     # pre-loader? → web-wait 8 --until-hidden "<seletor>"
+web-scrap                              # estética provável, stack, paleta, tipo, gradientes, vitals
+web-motion --observe 4 --while "scroll-down 3000 --steps 60"
+web-screenshot --hide-banners          # primeira dobra (o que se vê em 5 s)
+web-screenshot --viewports desktop,mobile --full-page --scroll-through --hide-banners
 web-record-frames --while "scroll-down 8000 --steps 160 --interval 50ms" --interval 0.25
-web-control inventory --limit 40
-web-control hover "<CTA principal>" --hold 700ms --screenshot
+web-interactions --limit 8
 web-record-frames --while "mousemove 100,450 1340,450 720,120 720,800 --steps 40" --interval 0.15
-web-screenshot --viewport 390x844 --full-page
 web-close
 ```
+`scrolledBy: 0` com `virtualScroll: true` no `web-control` = scroll virtual (WebGL/transform): confie nas spritesheets.
 
-Se `web-control scroll-down` responder `virtualScroll: true`, o site usa scroll virtual
-(WebGL/transform): a página inteira vive na viewport — confie nas spritesheets, não no full-page.
-
-## 2. Analisar (leia o JSON do scrap + todas as imagens)
-
-Preencha esta ficha:
-
-```yaml
-referencia: <url>
-stack: [framework, animação, scroll, 3D]          # de stack[]
-hospedagem: <hosting[]>
-tipografia:
-  display: <família, pesos, tamanho máximo, tracking>
-  texto: <família, tamanho, line-height>
-  escala: <lista de tamanhos de fonts.scale>
-  contraste_de_escala: <maior / menor tamanho>    # ex.: 144/12 = 12×
-paleta:
-  fundo: <colors.background>
-  texto: <colors.text>
-  acento: <colors.accent>
-  monocromatica: <colors.isMonochrome>
-grid_e_ritmo:
-  espacamentos_dominantes: <layout.spacingScale>
-  aderencia_4px: <layout.spacingOn4pxGrid>%
-  raios: <layout.radii>
-movimento:
-  bibliotecas: <GSAP/Lenis/...>
-  padroes_vistos_nos_frames: [reveal por linha, parallax, pin, scrub, troca de cor por seção, ...]
-  cursor: <effects.customCursor>
-  webgl: <media.canvases + número de shaders>
-apice: <o momento mais memorável e em que seção>
-convencoes_mantidas: [navegação, CTA, ...]      # o que é seguro e convencional
-ousadias: [...]                                 # o que é surpreendente
-riscos: [peso de rede, contraste, acessibilidade, mobile]
+### Vídeo (gravação de tela enviada pelo usuário)
+```bash
+media-frames <arquivo.mp4>                 # ~24 frames + folha de contato numerada
+media-frames <arquivo.mp4> --scenes 0.25   # um frame por corte/transição
+media-frames <arquivo.mp4> --from 12 --to 18 --every 0.2   # microinteração de perto
 ```
 
-## 3. Sintetizar
+### Print
+Leia a imagem; descreva composição, tipo, cor, textura e o que parece interativo.
+</capture>
 
-Entregue ao usuário (ou à Fase 1 do `frontend-master`):
+---
 
-1. **Três ideias transferíveis** — princípios que funcionariam no projeto dele, com o porquê.
-2. **O que evitar** — problemas medidos (ex.: 21 MB de rede, falhas de contraste, scroll-jacking).
-3. **Tokens sugeridos** — escala tipográfica, espaçamentos, easing e durações inferidos dos frames.
-4. **Evidência** — caminhos das imagens, spritesheets e JSON.
+<dna_sheet>
+## 2. Ficha de DNA (preencha a partir do JSON e das imagens)
+
+```yaml
+referencia: <url | arquivo>
+estetica: <aesthetic.primary> (+ <aesthetic.secondary>) — confirmada? sim/não, por quê
+stack: [framework, movimento, scroll, 3D/shaders]
+tipografia:
+  display: <família, peso, tamanho máximo, tracking, eixos variáveis>
+  texto: <família, tamanho, line-height>
+  assinatura: <ex.: letras em itálico no meio da palavra, peso que reage ao cursor>
+  escala: <fonts.scale>  # razão maior/menor
+cor:
+  fundo: <colors.background>
+  texto: <colors.text>
+  acentos: <colors.accent>
+  campo: <gradientes CSS ou shader: tipo da biblioteca de blurs mais próximo>
+movimento:
+  duracoes: <web-motion transitions.durations>
+  curvas: <web-motion transitions.easings>
+  coreografia: [reveal em máscara, parallax, pin, scrub, card stack, morph…]
+  microinteracoes: <web-interactions: hover/foco/magnético>
+  scroll: <Lenis/Locomotive/nativo · opções>
+apice: <momento mais memorável, seção, como entra e sai>
+convencoes: [o que é seguro e convencional]
+ousadias: [o que surpreende]
+custos: [peso, LCP, jank (pageFrames), contraste, acessibilidade]
+```
+</dna_sheet>
+
+---
+
+<synthesis>
+## 3. Sintetizar para o usuário
+
+1. **Três princípios transferíveis**, com o porquê e onde aplicar no projeto dele.
+2. **O que evitar**, com números da toolkit (peso, LCP, falhas de contraste, ausência de reduced-motion).
+3. **Tokens sugeridos** (`web-tokens` como ponto de partida, depois adaptados à marca dele).
+4. **Evidências**: caminhos das imagens, spritesheets, folhas de contato e JSONs.
+</synthesis>

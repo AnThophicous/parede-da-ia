@@ -1,130 +1,112 @@
-# Workflow · frontend-master
+# Workflow · frontend-master (v0.2)
 
-> Protocolo obrigatório para construir ou redesenhar qualquer interface.
-> Duas fases, sem atalhos: **elicitar → construir → verificar com os próprios olhos**.
-> Módulos de apoio: `05-refactoring-ui` · `03-dont-make-me-think` · `04-100-things-designers`
-> (implementação: `01-clean-code` · `02-clean-architecture`).
-
----
-
-## Fase 1 — Planejamento e elicitação obrigatória
-
-### Regra de ouro
-
-**É proibido escrever código de interface antes de concluir esta fase.** Nem "um esqueleto rápido".
-Decisões de direção de arte tomadas por suposição custam mais caro que três perguntas.
-
-### 1.1 Leia o terreno (sem perguntar o que dá para descobrir)
-
-- Existe projeto? Leia `package.json`, framework, sistema de estilos, tokens/tema existentes.
-- Existe marca? Procure logo, fontes, cores em uso (`web-scrap` no site atual, se houver URL).
-- Existe conteúdo? Textos reais, imagens, dados. Conteúdo real muda o design.
-
-### 1.2 Pergunte — em uma única mensagem, numerada, com opções
-
-Faça **todas** estas perguntas de uma vez (ofereça respostas sugeridas para acelerar):
-
-1. **Objetivo central e público.** O que esta página precisa fazer o visitante *fazer*? Quem é ele?
-   _ex.: "baixar o app", "agendar demo", "entender o produto em 10s"._
-2. **Ápice visual.** Qual é o momento "uau" esperado? Onde ele acontece (hero, transição, seção de produto)?
-   _ex.: tipografia cinética gigante · cena WebGL interativa · scroll horizontal pinado · cursor magnético · vídeo full-bleed._
-3. **Assets e imagens.** Como serão gerenciados?
-   - (a) **Gerados por código** — SVG, canvas, shaders/WebGL, gradientes, tipografia como imagem;
-   - (b) **Fornecidos pelo usuário** — peça os arquivos ou a pasta;
-   - (c) **Extraídos de uma URL de referência** — só com autorização e respeitando direitos de uso;
-   - (d) **Placeholders** marcados para troca posterior.
-4. **Referências.** O usuário já tem referências de mercado (URLs, prints)?
-   Ou prefere que você **pesquise ativamente no Awwwards** (SOTD/Honorable Mentions) e proponha
-   **2 a 3 direções criativas** compatíveis?
-5. **Restrições.** Stack obrigatória, paleta/marca fixa, prazo, performance-alvo, acessibilidade,
-   idiomas, SEO, onde será hospedado.
-
-### 1.3 Se pediram pesquisa de referências
-
-1. Busque no Awwwards (categoria/estilo compatível) e selecione 4–6 candidatos.
-2. Para cada candidato forte: `workflows/reference-teardown.md` (scrap + screenshots + spritesheet de scroll).
-3. Proponha **2–3 direções**, cada uma com:
-   - nome e conceito em uma frase;
-   - referências que a sustentam (URLs + o que extrair de cada uma);
-   - tokens iniciais: famílias tipográficas, escala, paleta, raio, sombra, easing/duração;
-   - estrutura de seções e onde mora o ápice;
-   - risco/custo (ex.: "WebGL pesado em mobile → fallback em vídeo").
-4. **Espere a escolha do usuário.** Não implemente as três.
-
-### 1.4 Plano aprovado
-
-Feche a fase com um plano curto: seções, tokens, stack, assets, critérios de aceite (o que será
-verificado na Fase 2). Peça confirmação explícita.
+<module_meta>
+  <role>Protocolo obrigatório para construir, redesenhar ou auditar qualquer interface.</role>
+  <enforcement_level>STRICT — fases em ordem; nenhuma linha de código de UI antes do fim da Fase 1.</enforcement_level>
+  <chain>Fase 0 Classificar → Fase 1 Elicitar → Fase 2 Construir → Fase 3 Verificar com os próprios olhos → Fase 4 Entregar</chain>
+  <pairs_with>router.md §3 · aesthetics/README.md · templates/*</pairs_with>
+</module_meta>
 
 ---
 
-## Fase 2 — Construção + loop autônomo de QA visual
+<phase_0_classify>
+## Fase 0 — Classificar (1 mensagem, sem perguntas ainda)
 
-### 2.1 Construa em fatias (tracer bullet)
+1. Leia o terreno sem perguntar o que dá para descobrir: `package.json`, framework, sistema de estilos, tokens existentes, conteúdo real, marca (logo, fontes, cores).
+2. Determine o **arquétipo** (router §3): corporativo · pessoal/portfólio · ambicioso.
+3. Se houver referência:
+   - URL → `web-url-fetch` + `web-wait-page-load` + `web-scrap` (+ `web-motion --observe 3`).
+   - Vídeo → `media-frames <arquivo>` e leia as folhas de contato.
+   - Print → leia a imagem e descreva o DNA visual em 5 linhas.
+4. Anuncie o bloco de contrato (router §8) e siga para o ramo da Fase 1.
+</phase_0_classify>
 
-1. Tokens (CSS custom properties) → layout bruto em escala de cinza → conteúdo real.
-2. Hierarquia e espaçamento (`05`) antes de qualquer efeito.
-3. Movimento e WebGL por último, sempre com `prefers-reduced-motion` e fallback.
+---
 
-### 2.2 Suba o servidor e abra o próprio trabalho
+<phase_1_elicit>
+## Fase 1 — Elicitação (ramificada por arquétipo)
+
+### 1.A Corporativo → `workflows/corporate-briefing.md`
+Briefing completo, escolha de estética entre as famílias corporativas e perguntas extras de negócio, conteúdo, conversão, compliance e operação. **Mais perguntas, menos suposições.**
+
+### 1.B Pessoal / portfólio → `workflows/creative-direction.md` (modo curto)
+Foco em personalidade: quem é a pessoa, 3 adjetivos, o projeto que mais a orgulha, nível de ousadia, o que o visitante deve sentir.
+
+### 1.C Ambicioso → `workflows/creative-direction.md` (modo completo)
+Perguntas-núcleo, sempre feitas em UMA mensagem numerada e com opções sugeridas:
+
+1. **Objetivo central e ápice visual.** O que o visitante precisa fazer? Qual é o momento "uau" e onde ele acontece?
+2. **Assets.** (a) gerados por código (SVG, canvas, shaders, Three.js, Paper Shaders); (b) fornecidos pelo usuário; (c) extraídos de uma referência (só com autorização e respeitando direitos); (d) gerados por IA de imagem (use `knowledge-base/09` §prompts de imagem); (e) placeholders marcados.
+3. **Referências.** O usuário tem URLs/vídeos ou prefere que você pesquise no Awwwards e proponha **2 a 3 direções**?
+4. **Restrições.** Stack obrigatória, marca, prazo, orçamento de performance (dispositivo-alvo!), acessibilidade, idiomas, SEO, hospedagem.
+
+### Regra de saída da Fase 1
+Feche com um **plano aprovado**: seções, tokens iniciais, stack, estratégia de assets, ápice visual, critérios de aceite. Peça um "ok" explícito.
+</phase_1_elicit>
+
+---
+
+<phase_2_build>
+## Fase 2 — Construir em fatias (tracer bullet)
+
+1. **Tokens primeiro** (CSS custom properties ou `@theme` do Tailwind): cor, tipo, espaço, raio, sombra, **movimento** (durações e curvas nomeadas).
+2. **Layout bruto em escala de cinza** com conteúdo real → hierarquia `[05]`, grid `[15]`, tipografia `[14]`.
+3. **Cor e textura** `[16]` → depois **movimento** `[12][13]` → depois **microinterações** `[11][18]`.
+4. **WebGL/shaders por último** `[17]`, sempre com fallback estático e `prefers-reduced-motion`.
+5. Reaproveite receitas de `library/` (gradientes, hover font, magnético, text morph, pixel trail, card stack) em vez de reinventar.
+
+Proibido:
+- animar antes de a página funcionar estaticamente;
+- efeito sem propósito (cada movimento responde: orienta, confirma, dá continuidade ou encanta no ápice?);
+- bloquear o conteúdo atrás de pre-loader por mais de 2,5s.
+</phase_2_build>
+
+---
+
+<phase_3_verify>
+## Fase 3 — Loop autônomo de QA visual (repita até passar nos portões do router §7)
 
 ```bash
-# projeto com dev server (vite/next/astro): rode-o em background e use a porta dele
-# site estático:
-web-serve ./dist --detach --port 4173
-web-url-fetch http://localhost:4173
-web-wait-page-load        # se avisar de pre-loader: web-wait 3  ou  web-wait 8 --until-hidden "#loader"
-```
+# 0. servir e abrir o próprio trabalho
+web-serve ./dist --detach --port 4173        # ou o dev server do projeto
+web-url-fetch http://localhost:4173 && web-wait-page-load   # pre-loader? web-wait 6 --until-hidden "#loader"
 
-### 2.3 O loop (repita até zerar a lista de problemas)
+# 1. evidência estática em 3 viewports
+web-screenshot --viewports desktop,tablet,mobile --full-page --scroll-through
 
-```bash
-# 1. Evidência estática em 3 viewports
-web-screenshot --full-page --scroll-through
-web-screenshot --viewport 1024x768 --full-page
-web-screenshot --viewport 390x844 --full-page
+# 2. auditoria computada (nota 0–100 e veredito)
+web-audit --viewports desktop,tablet,mobile
 
-# 2. Auditoria computada
-web-scrap                  # contraste WCAG, escala tipográfica, grid de 4px, erros de console, paleta
+# 3. microinterações de TODOS os interativos relevantes
+web-interactions --limit 15
 
-# 3. Interações reais — TODOS os botões e links
-web-control inventory      # lista cada interativo com seletor
-web-control hover "<seletor>" --hold 500ms --screenshot     # estado hover de cada CTA
-web-control click "<seletor>" --screenshot                  # modais, menus, accordions, cópia
-web-control keypress Tab --repeat 8 --screenshot             # foco visível e ordem de tabulação
-web-control keypress Escape                                   # fecha modais?
-
-# 4. Movimento
+# 4. movimento: coreografia de scroll + vocabulário de curvas + jank
 web-record-frames --while "scroll-down 6000 --steps 120 --interval 50ms" --interval 0.25
-web-record-frames --while "mousemove 200,300 1200,300 700,600 --steps 30" --interval 0.2  # efeitos magnéticos/cursor
+web-motion --observe 3 --while "scroll-down 2000 --steps 40"
+
+# 5. regressão visual entre iterações
+web-diff antes.png depois.png
 ```
 
-**Leia cada imagem e spritesheet gerada.** Para cada uma, procure:
+Para cada imagem/spritesheet lida, procure:
 
-| Categoria | O que procurar |
-|-----------|----------------|
-| Alinhamento | bordas que não alinham ao grid, ícones desalinhados do texto, baseline torta |
-| Espaçamento | valores fora da escala, grupos com espaço interno ≥ externo, seções coladas |
-| Tipografia | linhas > 75 caracteres, viúvas em títulos, hifenização ruim, fonte fallback aparecendo |
-| Responsivo | overflow horizontal, texto cortado, CTA abaixo da dobra no mobile, alvos < 44px |
-| Contraste | falhas do `web-scrap` (ignore só as marcadas `incerto` após checar a imagem) |
-| Estados | hover/focus/active ausentes ou sem feedback; foco invisível |
-| Movimento | saltos entre frames, elementos aparecendo antes do reveal, layout shift, jank |
-| Console | qualquer erro → corrigir, não ignorar |
+| Categoria | Sinais |
+|-----------|--------|
+| Alinhamento | bordas fora do grid, ícone desalinhado da linha de base |
+| Espaçamento | valores fora da escala, grupos com espaço interno ≥ externo |
+| Tipografia | > 75 caracteres por linha, viúvas, fonte fallback aparecendo, hover font "pulando" layout |
+| Cor | contraste do `web-audit`, acento usado em excesso (> 10% da tela no corporativo) |
+| Responsivo | overflow horizontal, CTA abaixo da dobra no mobile, alvos < 24px |
+| Movimento | saltos entre frames, layout shift, jank (`pageFrames.longFrames`), reveal antes do scroll |
+| Estados | hover/foco/active ausentes ou sem transição |
 
-### 2.4 Corrija e prove
+Limite: 5 iterações. Persistiu? Reporte com evidência e hipótese.
+</phase_3_verify>
 
-- Corrija em lote os problemas encontrados, reabra (`web-url-fetch` recarrega) e **repita o loop**.
-- Limite: 5 iterações. Se algo persistir, reporte ao usuário com evidência e hipótese.
-- Critério de saída: **zero** erros de console, **zero** falhas de contraste confirmadas,
-  nenhum overflow em 390px, todos os interativos com hover/focus verificados.
+---
 
-### 2.5 Entrega
+<phase_4_deliver>
+## Fase 4 — Entrega
 
-Mostre ao usuário:
-1. O que foi construído (seções, decisões de direção de arte e os módulos que as embasaram).
-2. **Evidência visual:** caminhos dos screenshots finais (desktop/tablet/mobile) e da spritesheet de scroll.
-3. O que o loop de QA encontrou e corrigiu (antes → depois).
-4. Limitações conhecidas e próximos passos.
-
-Feche a sessão do navegador com `web-close` (e `web-serve --stop --port <porta>`).
+Use `templates/relatorio-entrega.md`: o que foi feito, decisões de direção de arte com os módulos que as embasaram, evidências (caminhos das capturas finais e da spritesheet), nota do `web-audit`, o que o loop corrigiu (antes → depois) e limitações conhecidas. Encerre com `web-close` e `web-serve --stop --port <porta>`.
+</phase_4_deliver>

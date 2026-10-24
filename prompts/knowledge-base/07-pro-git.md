@@ -1,74 +1,84 @@
-# 07 · Pro Git — histórico como documentação
+# 07 · Pro Git — Histórico Atômico, Semântico e Seguro
 
-> Fonte: *Pro Git* (2ª ed.), Scott Chacon & Ben Straub. Destilação autoral para agentes.
-> **Carregue quando:** for commitar, criar branch, escrever PR, reescrever histórico ou resolver conflitos.
+<module_meta>
+  <source>Pro Git (2ª ed.) — Scott Chacon & Ben Straub (destilação autoral)</source>
+  <router_trigger>Carregar ao commitar, criar branch, escrever PR, reescrever histórico ou resolver conflitos.</router_trigger>
+  <enforcement_level>STRICT — operações destrutivas exigem confirmação explícita do usuário.</enforcement_level>
+  <pairs_with>06 (automação) · 08 (reprodutibilidade)</pairs_with>
+</module_meta>
 
-## Princípios
+---
 
-1. **Um commit = uma mudança lógica.** Ele compila, passa nos testes e pode ser revertido sozinho.
+<core_axioms>
+## 1. Axiomas
+
+1. **Um commit = uma mudança lógica** que compila, passa nos testes e pode ser revertida sozinha.
 2. **A mensagem explica o porquê.** O diff já mostra o quê.
-3. **Prepare o commit, não o diretório.** Use a staging area para separar mudanças misturadas (`git add -p`).
-4. **Histórico local é rascunho; histórico publicado é contrato.** Reescreva à vontade antes do push; nunca depois sem combinar.
-5. **Branches são baratas.** Uma branch por tarefa; integre cedo e com frequência.
-6. **Revise antes de enviar:** `git diff --staged` é o último code review que você faz sozinho.
+3. **Prepare o commit, não o diretório:** separe mudanças misturadas com `git add -p`.
+4. **Histórico local é rascunho; publicado é contrato.** Reescreva à vontade antes do push; nunca depois sem combinar.
+5. **Branches são baratas.** Uma por tarefa; integre cedo.
+6. **`git diff --staged` é o último code review** que você faz sozinho.
+7. **Respeite as regras do usuário sobre autoria** (ex.: não adicionar coautoria automática se ele pediu).
+</core_axioms>
 
-## Formato de mensagem (Conventional Commits)
+---
+
+<message_format>
+## 2. Conventional Commits
 
 ```
-<tipo>(<escopo opcional>): <resumo no imperativo, ≤ 72 caracteres>
+<tipo>(<escopo>): <resumo no imperativo, ≤ 72 caracteres, no idioma do projeto>
 
-<corpo: por que a mudança existe, que problema resolve, trade-offs.
-Quebre linhas em ~72 colunas. Liste efeitos colaterais.>
+<corpo: por que a mudança existe, que problema resolve, trade-offs. ~72 colunas.>
 
-<rodapé: BREAKING CHANGE: ..., Refs #123>
+<rodapé: BREAKING CHANGE: … · Refs #123>
 ```
 
 | Tipo | Quando |
 |------|--------|
-| `feat` | nova funcionalidade para o usuário |
-| `fix` | correção de bug |
-| `refactor` | mudança interna sem alterar comportamento |
-| `perf` | melhoria de desempenho |
-| `style` | formatação, sem mudança de lógica |
-| `docs` | documentação |
-| `test` | testes |
-| `build` / `ci` | build, dependências, pipelines |
-| `chore` | manutenção que não cabe acima |
+| feat | funcionalidade nova para o usuário |
+| fix | correção de bug |
+| refactor | mudança interna sem alterar comportamento |
+| perf | desempenho |
+| style | formatação |
+| docs | documentação |
+| test | testes |
+| build / ci | build, dependências, pipelines |
+| chore | manutenção |
+</message_format>
 
-Resumo no **imperativo** e no idioma do projeto: "adiciona seção de preços", não "adicionado" nem "adicionando".
+---
 
-## Checklist antes de commitar
+<agent_traps>
+## 3. Trava de segurança (proibido sem confirmação)
 
-- [ ] `git status` e `git diff --staged` revisados — nada acidental (logs, `.env`, builds, `node_modules`)?
-- [ ] O commit faz **uma** coisa? Se o resumo precisa de "e", divida.
-- [ ] O projeto compila/testa neste ponto do histórico?
-- [ ] A mensagem explica a motivação para quem ler daqui a um ano?
-- [ ] Segredos nunca entram no histórico (se entrarem, rotacione a chave — apagar o commit não basta).
+- `git push --force` em branch compartilhada (prefira `--force-with-lease`).
+- `git reset --hard`, `git clean -fd`, `git checkout -- .` (descartam trabalho).
+- Reescrever histórico publicado; pular hooks com `--no-verify`.
+- Commitar `.env`, chaves, `node_modules`, `dist/` — se um segredo entrar, **rotacione a chave** (apagar o commit não basta).
+- Commitar arquivos que o usuário está editando e pediu para não incluir.
+</agent_traps>
 
-## Fluxo recomendado para agentes
+---
+
+<workflow>
+## 4. Fluxo para agentes
 
 ```bash
-git switch -c feat/hero-webgl          # nunca trabalhe direto na main
-# ... mudanças ...
-git add -p                              # escolha pedaço por pedaço
-git diff --staged                       # revise
-git commit                              # mensagem com corpo
-git fetch origin && git rebase origin/main   # atualize antes do PR (histórico local)
-git push -u origin feat/hero-webgl
+git switch -c feat/hero-shader
+git add -p && git diff --staged     # revise pedaço a pedaço
+git commit                          # mensagem com corpo
+git fetch origin && git rebase origin/main
+git push -u origin feat/hero-shader
 ```
+</workflow>
 
-## Operações perigosas (confirme com o usuário antes)
+---
 
-- `git push --force` em branch compartilhada → prefira `--force-with-lease`.
-- `git reset --hard`, `git clean -fd`, `git checkout -- .` → descartam trabalho.
-- Reescrever histórico já publicado (`rebase`, `commit --amend` após push).
-- Hooks falhando: investigue a causa; não use `--no-verify` sem pedido explícito.
-
-## Sinais de alerta
-
-| Sinal | Correção |
-|-------|----------|
-| "wip", "fix", "ajustes", "final final" | mensagens descritivas; `--fixup` + `rebase --autosquash` antes do push |
-| Commit de 4.000 linhas misturando feature e formatação | separar `style:` de `feat:` |
-| Merge commits de "sync com main" a cada hora | rebase local antes do PR |
-| Arquivo gerado (dist, lockfile alheio) versionado sem querer | `.gitignore` + remover do índice |
+<review_checklist>
+## 5. Rubrica
+- [ ] O resumo precisa de "e"? Divida o commit.
+- [ ] O projeto compila neste ponto do histórico.
+- [ ] Nada acidental no stage (logs, builds, segredos).
+- [ ] O corpo explica motivação para quem ler daqui a um ano.
+</review_checklist>

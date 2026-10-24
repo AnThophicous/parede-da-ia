@@ -1,56 +1,81 @@
-# 04 · 100 Things Every Designer Needs to Know About People — psicologia aplicada
+# 04 · 100 Things Every Designer Needs to Know About People — Percepção, Atenção e Motivação
 
-> Fonte: *100 Things Every Designer Needs to Know About People*, Susan Weinschenk.
-> Destilação autoral para agentes. **Carregue quando:** decidir foco visual, persuasão,
-> microcopy, onboarding, conversão ou densidade de informação.
+<module_meta>
+  <source>100 Things Every Designer Needs to Know About People — Susan Weinschenk (destilação autoral)</source>
+  <router_trigger>Carregar ao decidir foco visual, ápice emocional, persuasão, microcopy, onboarding, densidade de informação e conversão.</router_trigger>
+  <enforcement_level>GUIDED — use como lente de decisão; cite a regra quando ela mudar uma escolha.</enforcement_level>
+  <pairs_with>05 (hierarquia) · 12 (animação) · 20 (leis de UX) · 23 (mensagem)</pairs_with>
+</module_meta>
 
-## Como as pessoas veem
+---
 
-1. **A visão periférica define o "clima"; a central lê o detalhe.** O fundo e a composição geral são percebidos antes do texto.
-2. **Rostos e olhares capturam atenção** — e a direção do olhar de um rosto conduz o olhar do visitante.
-3. **Padrões são reconhecidos antes de serem lidos.** Agrupamento (proximidade, semelhança, região comum) cria estrutura sem esforço.
-4. **Movimento na periferia é irresistível.** Use animação para guiar, nunca para competir com a tarefa.
-5. **Leitura em F/Z em páginas densas;** em layouts editoriais, o olhar segue a maior massa tipográfica.
-6. **Contraste e tamanho vencem cor** para hierarquia — ~8% dos homens têm alguma deficiência de visão de cores.
+<core_axioms>
+## 1. Axiomas
 
-## Como as pessoas pensam e lembram
+### Como as pessoas veem
+1. **A periferia define o clima; o centro lê o detalhe.** Fundo, campo de cor e composição são percebidos antes do texto — por isso o gradiente do hero é emoção, e o título é informação.
+2. **Rostos e olhares capturam atenção** e conduzem o olhar para onde o rosto olha.
+3. **Padrões são reconhecidos antes de serem lidos.** Proximidade, semelhança e região comum criam estrutura sem esforço.
+4. **Movimento na periferia é irresistível.** Use para orientar, nunca para competir com a tarefa.
+5. **Contraste e tamanho vencem cor** para hierarquia (≈ 8% dos homens têm alguma deficiência de visão de cores).
 
-7. **Memória de trabalho é pequena** (≈3–4 blocos). Divida informação em grupos e mostre progressivamente.
-8. **Reconhecer é mais fácil que lembrar.** Mostre opções; não peça que digitem do zero.
-9. **Modelos mentais** vêm de experiências anteriores: alinhe a interface com o que o usuário já conhece.
-10. **Carga cognitiva > carga motora.** Um passo a mais é melhor que uma decisão difícil.
-11. **Histórias e exemplos concretos** são processados e lembrados melhor que abstrações.
+### Como pensam e lembram
+6. **Memória de trabalho é pequena** (≈ 3–4 blocos). Agrupe e revele progressivamente.
+7. **Reconhecer é mais fácil que lembrar.** Mostre opções; não peça que digitem do zero.
+8. **Modelos mentais vêm de experiências anteriores.** Alinhe a interface ao que o público já conhece.
+9. **Histórias e exemplos concretos** são processados e lembrados melhor que abstrações.
 
-## O que motiva
+### O que motiva
+10. **Progresso visível aumenta o engajamento** (gradiente de objetivo).
+11. **Surpresa e recompensa variável** prendem atenção — é por isso que microinterações deliciosas funcionam.
+12. **Prova social reduz incerteza.** Escassez e exclusividade aumentam valor percebido — use com honestidade.
+13. **Escolhas demais paralisam.** Destaque a opção recomendada.
+14. **Pessoas decidem pela intuição e justificam depois:** a primeira impressão estética vira credibilidade.
+15. **Pico e fim** são o que se lembra de uma experiência.
+</core_axioms>
 
-12. **Progresso visível aumenta o engajamento** (efeito do gradiente de objetivo): barras de passos, checklists.
-13. **Recompensas variáveis e surpresa** prendem atenção — micro-interações deliciosas funcionam por isso.
-14. **Prova social** (contagem de usuários, logos, depoimentos) reduz a incerteza.
-15. **Escassez e exclusividade** aumentam o valor percebido — use com honestidade.
-16. **Pessoas querem autonomia:** mostrar o controle (desfazer, pular, personalizar) aumenta a confiança.
-17. **Escolhas demais paralisam.** Reduza o cardápio; destaque a opção recomendada.
-18. **Decisões são majoritariamente intuitivas** e depois justificadas: a primeira impressão estética conta como credibilidade.
+---
 
-## Checklist de revisão
+<agent_traps>
+## 2. Trava anti-manipulação e anti-ruído
 
-- [ ] Existe um ponto focal claro por seção (o que o olho vê primeiro)?
-- [ ] Informação está agrupada em blocos de 3–5 itens?
-- [ ] Movimento serve para orientar (onde olhar, o que mudou), não para decorar a tarefa?
-- [ ] O progresso do usuário é visível em fluxos de várias etapas?
-- [ ] Há prova social perto do CTA de conversão?
-- [ ] A opção recomendada é destacada quando há escolhas (planos, variações)?
-- [ ] A estética transmite a credibilidade compatível com o preço/valor do produto?
+- **Proibido** escassez falsa ("só hoje!"), contadores de urgência inventados, prova social fabricada.
+- **Proibido** movimento contínuo na periferia enquanto o usuário lê ou preenche um formulário.
+- **Proibido** encher a dobra de estímulos concorrentes: **um** ponto focal por seção.
+- Personalidade ≠ ruído: o ápice emocional acontece **uma vez** por página.
+</agent_traps>
 
-## Aplicação em direção de arte
+---
 
-- **Ápice visual:** cada página deve ter um momento de pico emocional (um hero WebGL, uma
-  transição, uma tipografia gigante). Picos e o final são o que se lembra da experiência.
-- **Ritmo:** alterne seções densas e respiros. Monotonia faz o cérebro desligar a atenção.
-- **Microcopy:** escreva como conversa; verbos no imperativo nos botões ("Instalar a skill").
-- **Cursor e hover** são feedback imediato — confirme que algo é interativo antes do clique.
+<design_engineering>
+## 3. Aplicação
 
-## Perguntas de autoavaliação
+| Decisão | Regra | Implementação |
+|---------|-------|---------------|
+| Onde mora o "uau" | pico-fim (15) | um ápice (shader, morph de partículas, transição) + um final forte (rodapé/CTA) |
+| Ritmo da página | atenção (4) e memória (6) | alterne seções densas e respiros; blocos de 3–5 itens |
+| Microcopy de botões | modelo mental (8) | verbo + resultado: "Instalar a skill", "Ver os 23 livros" |
+| Cursor e hover | feedback (11) | confirmar interatividade antes do clique |
+| Fluxos longos | progresso (10) | passos numerados e barra de progresso |
+| Planos/opções | escolha (13) | 3 opções, recomendada destacada |
+</design_engineering>
 
-1. Para onde o olho vai primeiro em cada seção — e é para onde eu queria?
-2. Quantas decisões a pessoa precisa tomar antes de converter?
-3. Qual é o momento que ela vai lembrar amanhã?
+---
+
+<review_checklist>
+## 4. Rubrica
+
+- [ ] Cada seção tem um único ponto focal (confira na captura: para onde o olho vai primeiro?).
+- [ ] Informação agrupada em blocos de 3–5 itens.
+- [ ] Movimento orienta (o que mudou, onde olhar) e não compete com leitura.
+- [ ] Existe prova social real perto do CTA de conversão.
+- [ ] Ápice e final memoráveis identificáveis na spritesheet de scroll.
+</review_checklist>
+
+---
+
+<few_shot>
+## 5. Exemplo
+**Ruim:** quatro cards animando em loop ao lado do formulário de contato.
+**Bom:** formulário estático, um depoimento real ao lado, e a animação reservada para a confirmação de envio (recompensa no fim).
+</few_shot>

@@ -1,52 +1,61 @@
-# 06 · The Pragmatic Programmer — ofício e resiliência
+# 06 · The Pragmatic Programmer — Ofício, Ortogonalidade e Reversibilidade
 
-> Fonte: *The Pragmatic Programmer* (20th Anniversary), Andrew Hunt & David Thomas.
-> Destilação autoral para agentes. **Carregue quando:** planejar uma implementação, avaliar
-> duplicação/acoplamento, escolher abordagem incremental ou lidar com incerteza.
+<module_meta>
+  <source>The Pragmatic Programmer (20th Anniversary) — Andrew Hunt & David Thomas (destilação autoral)</source>
+  <router_trigger>Carregar ao planejar implementação, avaliar duplicação e acoplamento, decidir abordagem incremental ou lidar com incerteza técnica.</router_trigger>
+  <enforcement_level>STRICT para DRY de conhecimento e ortogonalidade; GUIDED para o resto.</enforcement_level>
+  <pairs_with>01 · 02 · 07 · 08</pairs_with>
+</module_meta>
 
-## Princípios
+---
+
+<core_axioms>
+## 1. Axiomas
 
 1. **Responsabilidade pelo resultado.** Ofereça opções, não desculpas. Se algo não dá, diga o que dá.
-2. **Não tolere janelas quebradas.** Um hack não corrigido convida dez. Corrija ou registre com clareza.
-3. **DRY é sobre conhecimento, não sobre texto.** Cada regra tem **uma** representação autoritativa.
-   Dois trechos parecidos que mudam por motivos diferentes **não** são duplicação.
-4. **Ortogonalidade:** mudar uma coisa não deve exigir mudar coisas não relacionadas.
-   Teste: "se eu trocar X, quantos módulos quebram?"
-5. **Reversibilidade:** nenhuma decisão é final. Isole fornecedores e formatos atrás de abstrações.
-6. **Tracer bullets:** construa um caminho fino ponta a ponta (UI → API → dados) cedo, depois engorde.
-7. **Protótipos são descartáveis** e servem para aprender; não vire protótipo em produção sem reescrever.
-8. **Estimativas em unidades honestas** e com faixa; refine conforme aprende.
-9. **Design by contract e asserções:** declare pré/pós-condições; falhe cedo e alto (crash early).
-10. **Não programe por coincidência.** Se funciona e você não sabe por quê, ainda não funciona.
-11. **Teste o seu software, ou seus usuários testarão.** Automatize o que for repetido.
-12. **Linguagem de domínio:** use o vocabulário do usuário no código.
+2. **Não tolere janelas quebradas.** Um hack sem registro convida dez. Corrija ou documente com prazo.
+3. **DRY é sobre conhecimento, não texto.** Cada regra tem uma representação autoritativa. Trechos parecidos que mudam por motivos diferentes **não** são duplicação.
+4. **Ortogonalidade:** mudar uma coisa não exige mudar coisas não relacionadas. Teste: "se eu trocar X, quantos módulos quebram?"
+5. **Reversibilidade:** nenhuma decisão é final. Isole fornecedores, formatos e motores (de animação, de 3D, de CMS) atrás de fronteiras.
+6. **Tracer bullets:** um caminho fino ponta a ponta cedo (UI → dados → deploy), depois engorde.
+7. **Protótipos são descartáveis** e servem para aprender.
+8. **Falhe cedo e alto:** valide entradas nas bordas com mensagens úteis.
+9. **Não programe por coincidência.** Se funciona e você não sabe por quê, ainda não funciona.
+10. **Automatize o repetido** (build, QA visual, deploy).
+</core_axioms>
 
-## Checklist de revisão
+---
 
-- [ ] Alguma regra de negócio aparece em mais de um lugar (front e back, dois componentes)?
-- [ ] Alguma mudança simples exigiria editar arquivos em camadas diferentes sem motivo?
-- [ ] Fornecedores (CMS, pagamento, analytics) estão atrás de um adaptador?
-- [ ] Há uma fatia ponta a ponta funcionando antes de polir uma camada isolada?
-- [ ] Entradas inválidas falham cedo com mensagem útil?
-- [ ] Tarefas repetitivas (build, deploy, QA visual) estão automatizadas em scripts?
-- [ ] Eu sei **por que** cada correção funciona?
+<agent_traps>
+## 2. Trava anti-desperdício (agentes)
 
-## Aplicação para agentes de IA
+- **Proibido** polir uma camada isolada por horas sem integração ponta a ponta.
+- **Proibido** "mexer em várias coisas até o bug sumir": isole a mudança que resolveu e explique o mecanismo.
+- **Proibido** copiar a mesma configuração de animação em 12 componentes: crie tokens/hooks.
+- **Proibido** acoplar SDK de analytics, CMS ou 3D direto em componentes de apresentação.
+</agent_traps>
 
-- **Tracer bullet visual:** antes de animar, suba a página com o layout bruto e abra com
-  `web-url-fetch`. Só depois adicione movimento e WebGL.
-- **Automação do QA:** transforme o loop de verificação em script (`web-url-fetch → web-wait-page-load
-  → web-screenshot --viewport ... → web-scrap`) em vez de repetir manualmente.
-- **Janelas quebradas:** ao ver um warning de console ou falha de contraste no `web-scrap`, corrija
-  na hora — não acumule.
-- **Coincidência:** se um bug some depois de "mexer em várias coisas", isole qual mudança resolveu.
+---
 
-## Sinais de alerta
+<design_engineering>
+## 3. Aplicação para agentes de design engineering
 
-| Sinal | Princípio violado | Correção |
-|-------|-------------------|----------|
-| Mesma validação no form e na API, escrita duas vezes | DRY | schema compartilhado |
-| Trocar a fonte exige editar 30 arquivos | ortogonalidade | tokens/variáveis CSS |
-| SDK de analytics chamado em todo componente | reversibilidade | `track()` próprio |
-| "Funciona na minha máquina" | coincidência | ambiente reproduzível, script de setup |
-| Semanas polindo a UI sem integração | tracer bullets | fatia ponta a ponta primeiro |
+| Princípio | Prática |
+|-----------|---------|
+| Tracer bullet visual | Suba o layout bruto e abra com `web-url-fetch` antes de animar |
+| Automação do QA | Script único: `web-serve` → `web-url-fetch` → `web-audit` → `web-interactions` → `web-record-frames` |
+| Janelas quebradas | Warning de console, falha de contraste ou jank aparecem no relatório → corrigir na mesma iteração |
+| Reversibilidade | Shaders e cenas 3D atrás de um componente com fallback estático (troca de motor = um arquivo) |
+| DRY de tokens | Uma fonte (CSS vars/@theme) alimenta CSS, JS (GSAP) e shaders (uniforms) |
+</design_engineering>
+
+---
+
+<review_checklist>
+## 4. Rubrica
+- [ ] Nenhuma regra de negócio ou token visual definido em dois lugares.
+- [ ] Trocar o provedor X muda só um adaptador.
+- [ ] Existe fatia ponta a ponta rodando antes de refinamentos.
+- [ ] Cada correção tem mecanismo explicado.
+- [ ] Tarefas repetidas viraram script.
+</review_checklist>

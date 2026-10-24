@@ -1,60 +1,61 @@
-# 10 · Designing Data-Intensive Applications — dados confiáveis
+# 10 · Designing Data-Intensive Applications — Confiabilidade, Consistência e Fluxo Assíncrono
 
-> Fonte: *Designing Data-Intensive Applications*, Martin Kleppmann. Destilação autoral para agentes.
-> **Carregue quando:** lidar com estado distribuído, cache, filas, sincronização offline,
-> realtime, consistência ou escalabilidade — no front ou no back.
+<module_meta>
+  <source>Designing Data-Intensive Applications — Martin Kleppmann (destilação autoral)</source>
+  <router_trigger>Carregar ao lidar com estado distribuído, cache, filas, offline-first, realtime, consistência ou escala — no front ou no back.</router_trigger>
+  <enforcement_level>STRICT para idempotência, timeouts e read-your-writes.</enforcement_level>
+  <pairs_with>02 · 06 · 08</pairs_with>
+</module_meta>
 
-## Os três pilares
+---
 
-1. **Confiabilidade:** o sistema continua correto diante de falhas de hardware, software e humanas.
-   Projete esperando falhas; teste injetando-as.
-2. **Escalabilidade:** descreva a carga com parâmetros concretos (req/s, razão leitura/escrita,
-   fan-out) e meça **percentis** (p95/p99), não médias.
-3. **Manutenibilidade:** operabilidade (fácil de rodar), simplicidade (sem complexidade acidental),
-   evolutividade (fácil de mudar).
+<core_axioms>
+## 1. Axiomas
 
-## Princípios
+1. **Confiabilidade:** o sistema continua correto diante de falhas de hardware, software e humanas. Projete esperando falhas.
+2. **Escalabilidade se descreve com parâmetros** (req/s, leitura/escrita, fan-out) e se mede em **percentis** (p95/p99).
+3. **Manutenibilidade:** operável, simples, evoluível.
+4. **Modelo de dados pelo padrão de acesso** (documento, relacional, grafo).
+5. **Índices aceleram leitura e custam escrita.**
+6. **Schemas evoluem com compatibilidade** para trás e para frente — clientes antigos (e caches de front) coexistem.
+7. **Replicação tem atraso:** garanta *read-your-writes* onde o usuário espera ver o que acabou de salvar.
+8. **Redes mentem:** timeouts, retries com backoff + jitter, **idempotência**.
+9. **Log de eventos como fonte da verdade;** estados derivados são recalculáveis.
+</core_axioms>
 
-- **Escolha o modelo de dados pelo padrão de acesso:** documento para agregados auto-contidos,
-  relacional para muitas relações, grafo para conexões arbitrárias.
-- **Índices aceleram leituras e custam escritas.** Não há almoço grátis.
-- **Evolução de schema:** mantenha compatibilidade para trás e para frente; clientes antigos e
-  novos coexistem (especialmente apps e caches de front-end).
-- **Replicação introduz atraso:** garanta *read-your-writes* onde o usuário espera ver o que acabou de salvar.
-- **Particionamento** exige uma chave que distribua carga sem hot spots.
-- **Transações e isolamento:** saiba qual anomalia o seu nível de isolamento permite (lost update, write skew).
-- **Sistemas distribuídos mentem:** relógios divergem, redes atrasam, nós pausam. Use timeouts,
-  retries com backoff e **idempotência**.
-- **Logs de eventos como fonte da verdade:** estado derivado (caches, índices de busca) é recalculável a partir do log.
-- **Processamento em fluxo** (streams) para reagir a mudanças; batch para recomputar com garantias.
+---
 
-## Aplicação no front-end
+<frontend_patterns>
+## 2. Padrões no front-end
 
 | Problema | Padrão |
 |----------|--------|
-| Duplo clique cria dois pedidos | chave de idempotência por intenção do usuário |
-| UI otimista diverge do servidor | reconciliação com versão/ETag; rollback visível |
-| Dados desatualizados após salvar | read-your-writes: atualize o cache local com a resposta |
-| Offline-first | fila local de operações + sincronização com resolução de conflitos (CRDT/last-writer-wins consciente) |
-| Lista infinita lenta | paginação por cursor, não por offset |
-| Realtime | eventos com ordem/versão; tolerar duplicados e fora de ordem |
-| Cache de assets entre deploys | nomes com hash de conteúdo + `Cache-Control` imutável |
+| Duplo clique cria dois pedidos | chave de idempotência por intenção |
+| UI otimista diverge | reconciliação com versão/ETag e rollback visível |
+| Dado velho após salvar | atualizar cache local com a resposta (read-your-writes) |
+| Offline-first | fila local + sync com resolução de conflito consciente |
+| Lista infinita lenta | paginação por cursor |
+| Realtime | eventos com versão; tolerar duplicados e fora de ordem |
+| Cache de assets entre deploys | nomes com hash + `Cache-Control: immutable` |
+</frontend_patterns>
 
-## Checklist de revisão
+---
 
-- [ ] Toda operação que pode ser repetida (retry, duplo clique) é idempotente?
-- [ ] Timeouts e retries com backoff + jitter em toda chamada de rede?
-- [ ] O usuário sempre vê o que acabou de escrever?
-- [ ] Mudanças de schema/API são compatíveis com clientes em cache?
-- [ ] Métricas em percentis (p95/p99) de latência?
-- [ ] Existe uma fonte da verdade clara e estados derivados recalculáveis?
-- [ ] O que acontece se a rede cair no meio da operação?
+<agent_traps>
+## 3. Trava (proibido)
+- `setTimeout` para "esperar o servidor terminar".
+- Mesmo estado guardado em três stores.
+- Média de latência como métrica de saúde.
+- Retry infinito sem backoff.
+</agent_traps>
 
-## Sinais de alerta
+---
 
-| Sinal | Risco |
-|-------|-------|
-| `setTimeout` para "esperar o servidor terminar" | condição de corrida |
-| Estado duplicado em três stores | divergência inevitável |
-| Média de latência "ok" | p99 escondendo usuários sofrendo |
-| Retry infinito sem backoff | tempestade de requisições |
+<review_checklist>
+## 4. Rubrica
+- [ ] Toda operação repetível é idempotente.
+- [ ] Timeouts e retries com backoff em toda chamada de rede.
+- [ ] O usuário sempre vê o que acabou de escrever.
+- [ ] Mudanças de API compatíveis com clientes em cache.
+- [ ] O que acontece se a rede cair no meio? (documentado e testado)
+</review_checklist>

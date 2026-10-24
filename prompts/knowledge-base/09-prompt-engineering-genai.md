@@ -1,64 +1,125 @@
-# 09 · Prompt Engineering for Generative AI — prompts como engenharia
+# 09 · Prompt Engineering for Generative AI — Cinco Princípios, Cadeias e Avaliação
 
-> Fonte: *Prompt Engineering for Generative AI*, James Phoenix & Mike Taylor.
-> Destilação autoral para agentes. **Carregue quando:** escrever system prompts, prompts de
-> geração de imagem/código, pipelines multi-etapa com LLM ou instruções para outros agentes.
+<module_meta>
+  <source>Prompt Engineering for Generative AI — James Phoenix & Mike Taylor (O'Reilly, 2024). Destilação autoral; leia o original.</source>
+  <router_trigger>Carregar ao escrever system prompts, prompts para outros agentes, pipelines multi-etapa com LLM, avaliações de prompt ou prompts de geração de imagem para assets.</router_trigger>
+  <enforcement_level>STRICT — prompt é código: versionado, testado e com formato de saída explícito.</enforcement_level>
+  <pairs_with>08 (avaliação) · router.md (que aplica estes princípios a si mesmo)</pairs_with>
+</module_meta>
 
-## Os cinco princípios (resumo operacional)
+---
 
-1. **Dê direção.** Descreva o estilo, o público, o papel e o padrão de qualidade. Referências
-   concretas ("no estilo editorial de uma revista de arquitetura") valem mais que adjetivos.
-2. **Especifique o formato.** Diga exatamente a forma da saída (JSON com schema, Markdown com
-   seções X/Y, diff unificado). Formato explícito torna a saída **determinística e parseável**.
-3. **Forneça exemplos.** Zero-shot para tarefas triviais; few-shot (2–5 exemplos variados) quando
-   o padrão é sutil. Exemplos ensinam mais que regras — e também ensinam os erros deles.
-4. **Avalie a qualidade.** Crie critérios e casos de teste; compare variações de prompt com
-   dados, não com impressão. Itere com base em falhas observadas.
-5. **Divida o trabalho.** Tarefas complexas viram cadeias: planejar → executar → revisar.
-   Cada etapa tem um prompt focado e uma saída verificável.
+<core_thesis>
+## 0. A tese do livro
 
-## Técnicas práticas
+Os autores destilaram técnicas que funcionavam em vários modelos e modalidades (texto e imagem) em **cinco princípios** que devem sobreviver à troca de modelo. A intuição: o que funciona para **gerenciar inteligência humana** (briefing claro, formato combinado, exemplos, revisão e divisão do trabalho) continua funcionando quando a inteligência é artificial.
+</core_thesis>
 
-- **Separação clara** entre instruções, contexto e dados (tags XML ou blocos delimitados).
-- **Pensar antes de responder** em tarefas de raciocínio; peça o raciocínio em seção separada da resposta final.
-- **Restrições positivas** ("use no máximo 3 cores") funcionam melhor que listas de proibições.
-- **Persona + público:** quem escreve e para quem muda vocabulário, profundidade e tom.
-- **Auto-crítica:** uma segunda passada com rubrica ("liste 3 problemas e corrija") eleva a qualidade.
-- **Contexto sob demanda (RAG):** recupere só o necessário — o mesmo princípio deste router.
-- **Temperatura:** baixa para extração/código/formatos; mais alta para ideação e variações.
+---
 
-## Checklist de revisão de um prompt
+<core_axioms>
+## 1. Os cinco princípios (com técnicas)
 
-- [ ] O objetivo e o critério de "pronto" estão explícitos?
-- [ ] O formato de saída está especificado (idealmente com exemplo ou schema)?
-- [ ] Instruções, contexto e dados estão separados por delimitadores?
-- [ ] Há exemplos quando o padrão desejado não é óbvio — e eles são diversos?
-- [ ] A tarefa cabe em uma etapa ou deveria ser decomposta?
-- [ ] Existem casos de teste para comparar versões do prompt?
-- [ ] O prompt tem uma única fonte de verdade (versionado no repositório)?
+### 1.1 Dê direção
+- Descreva o estilo desejado com **referências concretas** em vez de adjetivos ("hierarquia editorial de uma revista de arquitetura suíça", não "moderno e clean").
+- Atribua **persona e público** (quem escreve, para quem, com que objetivo).
+- Diga o **critério de pronto**.
 
-## Template de decomposição para direção de arte
+### 1.2 Especifique o formato
+- Declare a forma exata da saída: JSON com schema, YAML, Markdown com seções fixas, diff unificado.
+- Separe **instruções, contexto e dados** com delimitadores (tags XML como as deste repositório).
+- Formato explícito = saída **parseável e determinística**; para extração e código, temperatura baixa.
 
+### 1.3 Forneça exemplos
+- Zero-shot para o trivial; **few-shot (2–5 exemplos variados)** quando o padrão é sutil.
+- Exemplos ensinam mais que regras — **e também ensinam os vícios deles**. Varie tamanho, tema e caso de borda.
+- Inclua um contraexemplo rotulado quando o erro comum for previsível.
+
+### 1.4 Avalie a qualidade
+- Defina critérios e **casos de teste dourados** antes de iterar.
+- Compare variações com dados (rubrica pontuada, avaliação em pares, LLM-as-judge com critérios explícitos + amostragem humana).
+- Itere a partir de falhas observadas, não de intuição.
+
+### 1.5 Divida o trabalho
+- Tarefas complexas viram **cadeias**: planejar → executar → revisar. Cada etapa tem prompt focado e saída verificável.
+- Dê "tempo para pensar": peça raciocínio em seção separada da resposta final.
+- Decomponha do mais simples ao mais difícil (*least-to-most*) quando a tarefa tem dependências.
+</core_axioms>
+
+---
+
+<techniques>
+## 2. Técnicas recorrentes do livro (aplicáveis a agentes)
+
+| Técnica | Quando | Forma |
+|---------|--------|-------|
+| Role prompting | precisa de vocabulário e julgamento de especialista | "Você é um(a) …" + público + objetivo |
+| Texto de referência contra alucinação | fatos, APIs, dados do cliente | "Responda só com base em <docs>; se não estiver lá, diga que não sabe" |
+| Autoavaliação / crítica | qualidade acima de velocidade | 2ª passada: "liste 3 problemas segundo a rubrica e corrija" |
+| Encadeamento (chaining) | tarefas com fases distintas | saída JSON da etapa N vira entrada da N+1 |
+| Meta-prompting | gerar/refinar prompts | um modelo escreve o prompt, outro executa, um terceiro avalia |
+| Classificação antes de agir | roteamento | "classifique em {A,B,C}; depois siga o protocolo da classe" (é o que o router faz) |
+| Recuperação (RAG) | conhecimento grande | buscar só os trechos relevantes (o router carrega módulos sob demanda) |
+| Agentes com ferramentas (ReAct) | ações no mundo | pensar → agir com ferramenta → observar → repetir (a toolkit `web-*` é a "mão") |
+| Memória e resumo | conversas longas | resumir a etapa em 5 linhas antes de carregar a próxima |
+</techniques>
+
+---
+
+<image_prompts>
+## 3. Prompts de imagem para assets (quando o usuário escolher assets gerados por IA)
+
+Estrutura: **assunto · ação/composição · estilo/meio · luz · paleta · enquadramento/lente · modificadores de qualidade · formato** + negativos.
+
+```text
+assunto: bicicleta urbana encostada em parede de concreto
+composição: plano médio, terço esquerdo vazio para texto, horizonte baixo
+estilo: fotografia editorial, grão de filme 35mm
+luz: fim de tarde, contraluz quente
+paleta: azul meia-noite e laranja (#0b1638, #ff6a1a)
+formato: 16:9, alta resolução
+negativo: texto, logotipos, marcas d'água, mãos deformadas
 ```
-Etapa 1 — Análise (saída: JSON)
-  Entrada: resultado do web-scrap + screenshots da referência
-  Saída: { "tipografia": ..., "paleta": ..., "grid": ..., "movimento": ..., "ápice": ... }
+Regras: consistência de personagem/objeto entre imagens (mesma descrição-âncora); **nunca** gere logos ou pessoas reais de terceiros; registre o prompt junto do asset (versão).
+</image_prompts>
 
-Etapa 2 — Direções criativas (saída: 3 opções em Markdown)
-  Entrada: JSON da etapa 1 + objetivo do usuário
-  Saída: para cada opção → conceito em 1 frase, moodboard verbal, tokens, risco
+---
 
-Etapa 3 — Especificação (saída: tokens CSS + estrutura de seções)
-  Entrada: opção escolhida pelo usuário
+<parede_prompt_contract>
+## 4. Como o parede-da-ia aplica os princípios a si mesmo
 
-Etapa 4 — Implementação e QA (saída: código + evidência visual)
+| Princípio | Onde aparece |
+|-----------|--------------|
+| Direção | `router.md` §0 (identidade) · playbooks em `aesthetics/` com referências reais |
+| Formato | blocos XML em todos os módulos · `templates/*.md` (briefing, direção, motion spec, entrega) |
+| Exemplos | few-shot de classificação no router · "ruim → bom" em cada módulo |
+| Avaliação | rubricas `<self_evaluation>` · portões de qualidade · notas do `web-audit` |
+| Divisão | workflows em fases com verificação entre elas |
+</parede_prompt_contract>
+
+---
+
+<prompt_template>
+## 5. Template para escrever um prompt de sistema
+
+```xml
+<role>Quem o modelo é, para quem trabalha, qual o padrão de qualidade.</role>
+<context>Fatos necessários (docs, dados, restrições). Nada além disso.</context>
+<task>O que fazer, em etapas numeradas.</task>
+<rules>Restrições positivas ("use no máximo 3 cores") e proibições críticas.</rules>
+<examples>2–5 exemplos variados + 1 contraexemplo rotulado.</examples>
+<output_format>Schema/estrutura exata da resposta.</output_format>
+<evaluation>Rubrica que a resposta deve passar antes de ser entregue.</evaluation>
 ```
+</prompt_template>
 
-## Sinais de alerta
+---
 
-| Sinal | Correção |
-|-------|----------|
-| Prompt de 3 páginas com regras contraditórias | modularize e carregue sob demanda |
-| "Seja criativo e profissional" | direção concreta: referências, restrições, exemplos |
-| Saída diferente a cada execução em tarefa de formato | formato explícito + temperatura baixa + exemplo |
-| Uma única chamada para "fazer o site inteiro" | cadeia de etapas com verificação entre elas |
+<agent_traps>
+## 6. Trava anti-prompt-monolítico
+
+- **Proibido** prompt de 3 páginas com regras contraditórias: modularize e carregue sob demanda.
+- **Proibido** "seja criativo e profissional" sem referências, restrições e exemplos.
+- **Proibido** uma única chamada para "fazer o site inteiro".
+- **Proibido** iterar prompt sem casos de teste fixos (você não saberá se melhorou).
+</agent_traps>
