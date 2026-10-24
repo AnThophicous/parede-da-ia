@@ -112,6 +112,8 @@ export async function testInteractions(m: BrowserManager, p: InteractionsParams)
     const pressed = await snap();
     await page.mouse.move(rest.x, rest.y, { steps: 2 });
     await page.mouse.up();
+    // pressionar e arrastar até o repouso seleciona texto: limpa para não sujar os próximos recortes
+    await page.evaluate(() => window.getSelection()?.removeAllRanges()).catch(() => undefined);
     m.mouse = { x: rest.x, y: rest.y, known: true };
     await sleep(p.holdMs / 2);
 
