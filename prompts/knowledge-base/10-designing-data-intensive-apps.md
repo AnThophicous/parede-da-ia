@@ -1,61 +1,61 @@
-# 10 · Designing Data-Intensive Applications — Confiabilidade, Consistência e Fluxo Assíncrono
+# 10 · Designing Data-Intensive Applications — Reliability, Consistency and Asynchronous Flow
 
 <module_meta>
-  <source>Designing Data-Intensive Applications — Martin Kleppmann (destilação autoral)</source>
-  <router_trigger>Carregar ao lidar com estado distribuído, cache, filas, offline-first, realtime, consistência ou escala — no front ou no back.</router_trigger>
-  <enforcement_level>STRICT para idempotência, timeouts e read-your-writes.</enforcement_level>
+  <source>Designing Data-Intensive Applications — Martin Kleppmann (an original distillation)</source>
+  <router_trigger>Load when dealing with distributed state, caching, queues, offline-first, realtime, consistency or scale — front end or back end.</router_trigger>
+  <enforcement_level>STRICT for idempotency, timeouts and read-your-writes.</enforcement_level>
   <pairs_with>02 · 06 · 08</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Axiomas
+## 1. Axioms
 
-1. **Confiabilidade:** o sistema continua correto diante de falhas de hardware, software e humanas. Projete esperando falhas.
-2. **Escalabilidade se descreve com parâmetros** (req/s, leitura/escrita, fan-out) e se mede em **percentis** (p95/p99).
-3. **Manutenibilidade:** operável, simples, evoluível.
-4. **Modelo de dados pelo padrão de acesso** (documento, relacional, grafo).
-5. **Índices aceleram leitura e custam escrita.**
-6. **Schemas evoluem com compatibilidade** para trás e para frente — clientes antigos (e caches de front) coexistem.
-7. **Replicação tem atraso:** garanta *read-your-writes* onde o usuário espera ver o que acabou de salvar.
-8. **Redes mentem:** timeouts, retries com backoff + jitter, **idempotência**.
-9. **Log de eventos como fonte da verdade;** estados derivados são recalculáveis.
+1. **Reliability:** the system stays correct in the face of hardware, software and human faults. Design expecting failure.
+2. **Scalability is described with parameters** (req/s, read/write ratio, fan-out) and measured in **percentiles** (p95/p99).
+3. **Maintainability:** operable, simple, evolvable.
+4. **Choose the data model by the access pattern** (document, relational, graph).
+5. **Indexes speed up reads and cost writes.**
+6. **Schemas evolve with backward and forward compatibility** — old clients (and front-end caches) coexist.
+7. **Replication lags:** guarantee *read-your-writes* where the user expects to see what they just saved.
+8. **Networks lie:** timeouts, retries with backoff + jitter, **idempotency**.
+9. **An event log as the source of truth;** derived state can be recomputed.
 </core_axioms>
 
 ---
 
 <frontend_patterns>
-## 2. Padrões no front-end
+## 2. Patterns on the front end
 
-| Problema | Padrão |
-|----------|--------|
-| Duplo clique cria dois pedidos | chave de idempotência por intenção |
-| UI otimista diverge | reconciliação com versão/ETag e rollback visível |
-| Dado velho após salvar | atualizar cache local com a resposta (read-your-writes) |
-| Offline-first | fila local + sync com resolução de conflito consciente |
-| Lista infinita lenta | paginação por cursor |
-| Realtime | eventos com versão; tolerar duplicados e fora de ordem |
-| Cache de assets entre deploys | nomes com hash + `Cache-Control: immutable` |
+| Problem | Pattern |
+|---------|---------|
+| A double click creates two orders | an idempotency key per intent |
+| Optimistic UI diverges | reconcile with a version/ETag and a visible rollback |
+| Stale data after saving | update the local cache with the response (read-your-writes) |
+| Offline-first | a local queue + sync with deliberate conflict resolution |
+| A slow infinite list | cursor pagination |
+| Realtime | versioned events; tolerate duplicates and out-of-order delivery |
+| Asset caching across deploys | hashed file names + `Cache-Control: immutable` |
 </frontend_patterns>
 
 ---
 
 <agent_traps>
-## 3. Trava (proibido)
-- `setTimeout` para "esperar o servidor terminar".
-- Mesmo estado guardado em três stores.
-- Média de latência como métrica de saúde.
-- Retry infinito sem backoff.
+## 3. Guard (forbidden)
+- `setTimeout` to "wait for the server to finish".
+- The same state kept in three stores.
+- Average latency as a health metric.
+- Infinite retries without backoff.
 </agent_traps>
 
 ---
 
 <review_checklist>
-## 4. Rubrica
-- [ ] Toda operação repetível é idempotente.
-- [ ] Timeouts e retries com backoff em toda chamada de rede.
-- [ ] O usuário sempre vê o que acabou de escrever.
-- [ ] Mudanças de API compatíveis com clientes em cache.
-- [ ] O que acontece se a rede cair no meio? (documentado e testado)
+## 4. Rubric
+- [ ] Every repeatable operation is idempotent.
+- [ ] Timeouts and retries with backoff on every network call.
+- [ ] The user always sees what they just wrote.
+- [ ] API changes compatible with cached clients.
+- [ ] What happens if the network drops halfway? (documented and tested)
 </review_checklist>

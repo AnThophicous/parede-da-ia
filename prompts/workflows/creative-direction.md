@@ -1,97 +1,97 @@
 # Workflow · creative-direction
 
 <module_meta>
-  <role>Ramo pessoal/portfólio e ambicioso da Fase 1. Transforma referências e intenção em 2–3 direções criativas defensáveis.</role>
-  <enforcement_level>GUIDED — a ordem das etapas é obrigatória; o conteúdo das direções é autoral.</enforcement_level>
-  <modes>curto (pessoal/portfólio, 3–5 perguntas) · completo (ambicioso, 6–8 perguntas + pesquisa de referências)</modes>
-  <pairs_with>aesthetics/*.md · knowledge-base/04 · 12 · 16 · 17 · workflows/reference-teardown.md · templates/direcao-criativa.md</pairs_with>
+  <role>Personal/portfolio and ambitious branch of Phase 1. Turns references and intent into 2–3 defensible creative directions.</role>
+  <enforcement_level>GUIDED — the order of the steps is mandatory; the content of the directions is yours.</enforcement_level>
+  <modes>short (personal/portfolio, 3–5 questions) · full (ambitious, 6–8 questions + reference research)</modes>
+  <pairs_with>aesthetics/*.md · knowledge-base/04 · 12 · 16 · 17 · workflows/reference-teardown.md · templates/creative-direction.md</pairs_with>
 </module_meta>
 
 ---
 
 <step_1_questions>
-## 1. Perguntas (uma mensagem)
+## 1. Questions (one message)
 
-### Modo curto — pessoal / portfólio
-1. Quem é você em 3 adjetivos? (ex.: curiosa, precisa, brincalhona)
-2. Qual trabalho mais te orgulha e por quê?
-3. O que o visitante deve **fazer** (contratar, conversar, ver projetos) e **sentir**?
-4. Nível de ousadia: 1 (sóbrio) · 2 (personalidade) · 3 (experimental).
-5. Você tem referências? (URL, vídeo, print) — se sim, envie.
+### Short mode — personal / portfolio
+1. Who are you in 3 adjectives? (e.g., curious, precise, playful)
+2. Which work are you proudest of, and why?
+3. What should the visitor **do** (hire you, talk to you, see projects) and **feel**?
+4. How daring: 1 (sober) · 2 (personality) · 3 (experimental).
+5. Do you have references? (URL, video, screenshot) — if so, send them.
 
-### Modo completo — ambicioso
-As perguntas-núcleo do frontend-master §1.C **mais**:
-6. Público que precisa se impressionar (júri, clientes enterprise, comunidade criativa)?
-7. Dispositivo-alvo e orçamento de performance (ex.: "precisa rodar liso em notebook com GPU integrada").
-8. Existe áudio, 3D ou vídeo próprio? Quem produz?
+### Full mode — ambitious
+The core questions from frontend-master §1.C **plus**:
+6. Who needs to be impressed (a jury, enterprise clients, the creative community)?
+7. Target device and performance budget (e.g., "must run smoothly on a laptop with integrated graphics").
+8. Is there original audio, 3D or video? Who produces it?
 </step_1_questions>
 
 ---
 
 <step_2_research>
-## 2. Pesquisa e dissecação de referências
+## 2. Research and reference teardown
 
-Para cada referência (do usuário ou 3–5 que você selecionar no Awwwards):
+For each reference (the user's, or 3–5 you pick on Awwwards):
 
 ```bash
 web-url-fetch <url> && web-wait-page-load
-web-scrap                                   # aesthetic.primary/secondary, paleta, tipo, stack
+web-scrap                                   # aesthetic.primary/secondary, palette, type, stack
 web-motion --observe 3 --while "scroll-down 2500 --steps 50"
 web-record-frames --while "scroll-down 6000 --steps 120" --interval 0.25
 web-interactions --limit 8
 ```
 
-Vídeo enviado? `media-frames <arquivo>` (e `--scenes 0.25` para cortes). Registre o DNA de cada referência com `workflows/reference-teardown.md` §2.
+A video was sent? `media-frames <file>` (and `--scenes 0.25` for cuts). Record each reference's DNA with `workflows/reference-teardown.md` §2.
 </step_2_research>
 
 ---
 
 <step_3_directions>
-## 3. Direções (use `templates/direcao-criativa.md`)
+## 3. Directions (use `templates/creative-direction.md`)
 
-Proponha **2 ou 3 direções realmente diferentes** (nunca 3 variações da mesma ideia). Cada direção tem:
+Propose **2 or 3 truly different directions** (never 3 variations of the same idea). Each direction has:
 
-- **Nome e conceito em uma frase** (ex.: "Prancheta viva — o portfólio é o próprio processo").
-- **Família estética** (+ secundária, se houver) e o playbook que a sustenta.
-- **Referências** e o que extrair de cada uma (princípio, não asset).
-- **Tokens iniciais:** tipografia (com eixo variável, se houver efeito de fonte), paleta, raio, sombra, durações e curvas.
-- **Ápice visual:** onde acontece, como entra, como sai.
-- **Assinatura de movimento:** 2–3 microinterações e 1 transição de seção.
-- **Riscos e custo:** performance, acessibilidade, produção de assets.
+- **Name and concept in one sentence** (e.g., "Living board — the portfolio is the process itself").
+- **Aesthetic family** (+ a secondary one, if any) and the playbook behind it.
+- **References** and what to take from each (a principle, not an asset).
+- **Initial tokens:** typography (with a variable axis, if there is a font effect), palette, radius, shadow, durations and easings.
+- **Visual climax:** where it happens, how it comes in, how it leaves.
+- **Motion signature:** 2–3 microinteractions and 1 section transition.
+- **Risks and cost:** performance, accessibility, asset production.
 
-Recomende **uma** e explique por quê. Espere a escolha. Não implemente as três.
+Recommend **one** and explain why. Wait for the choice. Do not build all three.
 </step_3_directions>
 
 ---
 
 <signature_patterns>
-## 4. Padrões de assinatura disponíveis em `library/`
+## 4. Signature patterns available in `library/`
 
-| Padrão | Família típica | Arquivo |
-|--------|----------------|---------|
-| Hover Font (peso variável por proximidade do cursor) | editorial, gradiente, canvas | `library/motion/hover-font.js` |
-| Text morph (partículas → texto) | imersivo, gradiente | `library/particles/text-morph.js` |
-| Campo de gradiente líquido (mesh + grão) | gradiente-atmosferico | `library/gradients/mesh-field.glsl` · Paper Shaders |
-| Biblioteca de blurs (12 tipos) | gradiente, marca | `library/gradients/blur-library.css` |
-| Botão magnético | todas exceto modernista estrito | `library/motion/magnetic.js` |
-| Rastro de pixels no grid | canvas-ludico | `library/motion/pixel-trail.js` |
-| Canvas arrastável com física leve | canvas-ludico | `library/motion/draggable-canvas.js` |
-| Card stack (seção vira card que se afasta) | canvas, editorial | `library/motion/card-stack.css` |
-| Selo circular "role ·" girando | gradiente, editorial | `library/motion/scroll-badge.css` |
-| Pre-loader "olá" com blob desfocado | gradiente, imersivo | `library/loaders/hello-preloader.css` |
+| Pattern | Typical family | File |
+|---------|----------------|------|
+| Hover Font (variable weight by cursor proximity) | editorial, gradient, canvas | `library/motion/hover-font.js` |
+| Text morph (particles → text) | immersive, gradient | `library/particles/text-morph.js` |
+| Liquid gradient field (mesh + grain) | atmospheric-gradient | `library/gradients/mesh-field.glsl` · Paper Shaders |
+| Blur library (12 types) | gradient, brand | `library/gradients/blur-library.css` |
+| Magnetic button | all except strict modernist | `library/motion/magnetic.js` |
+| Pixel trail on a grid | playful-canvas | `library/motion/pixel-trail.js` |
+| Draggable canvas with light physics | playful-canvas | `library/motion/draggable-canvas.js` |
+| Card stack (a section becomes a card that recedes) | canvas, editorial | `library/motion/card-stack.css` |
+| Rotating circular "scroll ·" badge | gradient, editorial | `library/motion/scroll-badge.css` |
+| "Hello" preloader with a blurred blob | gradient, immersive | `library/loaders/hello-preloader.css` |
 </signature_patterns>
 
 ---
 
 <self_evaluation>
-## 5. Rubrica das direções (0–2 cada; mínimo 9/12)
+## 5. Rubric for the directions (0–2 each; minimum 9/12)
 
-| Critério | 2 = excelente |
-|----------|---------------|
-| Diferença real entre direções | conceitos, famílias e ápices distintos |
-| Aderência à pessoa/marca | cada escolha remete às respostas da etapa 1 |
-| Ápice visual | específico, com entrada e saída descritas |
-| Viabilidade | orçamento de performance e assets resolvidos |
-| Acessibilidade | fallback de movimento e contraste previstos |
-| Originalidade | princípios extraídos, nada copiado |
+| Criterion | 2 = excellent |
+|-----------|---------------|
+| Real difference between directions | distinct concepts, families and climaxes |
+| Fit with the person/brand | every choice points back to the step 1 answers |
+| Visual climax | specific, with its entrance and exit described |
+| Feasibility | performance budget and assets solved |
+| Accessibility | motion fallback and contrast planned |
+| Originality | principles extracted, nothing copied |
 </self_evaluation>

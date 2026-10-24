@@ -1,54 +1,54 @@
-# 13 · Designing Interface Animation — Movimento com Propósito, Timing e Acessibilidade
+# 13 · Designing Interface Animation — Purposeful Motion, Timing and Accessibility
 
 <module_meta>
-  <source>Designing Interface Animation — Val Head (destilação autoral)</source>
-  <router_trigger>Carregar ao decidir SE e COMO animar: transições de estado, navegação, scroll, carregamento, onboarding — e sempre que houver movimento grande na tela.</router_trigger>
-  <enforcement_level>STRICT — todo movimento tem propósito declarado e fallback de movimento reduzido.</enforcement_level>
+  <source>Designing Interface Animation — Val Head (an original distillation)</source>
+  <router_trigger>Load when deciding WHETHER and HOW to animate: state transitions, navigation, scroll, loading, onboarding — and whenever there is large motion on screen.</router_trigger>
+  <enforcement_level>STRICT — every motion has a declared purpose and a reduced-motion fallback.</enforcement_level>
   <pairs_with>11 · 12 · 20 · 22 · workflows/motion-teardown.md</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Axiomas
+## 1. Axioms
 
-1. **Animação é comunicação.** Todo movimento responde a um destes propósitos: **orientar** (de onde veio, para onde foi), **dar feedback**, **mostrar relação/continuidade**, **dar personalidade** (com moderação).
-2. **Estilo de movimento é parte da marca.** Defina adjetivos de movimento ("preciso e calmo", "elástico e brincalhão") e derive deles durações e curvas.
-3. **Continuidade espacial:** elementos que mudam de estado devem parecer o mesmo objeto (expandir o card em vez de trocar de tela).
-4. **Coreografia:** ordem e ritmo guiam o olhar; o mais importante chega primeiro ou por último, nunca no meio da confusão.
-5. **Movimento reduzido não é "sem design":** é uma versão alternativa com fades curtos e estados finais diretos.
-6. **Gatilhos de vestibular:** parallax intenso, zoom, rotação grande e scroll-jacking podem causar náusea — são os primeiros a desligar em `prefers-reduced-motion`.
-7. **Performance é parte do design:** anime `transform` e `opacity`; meça jank.
+1. **Animation is communication.** Every motion serves one of these purposes: **orient** (where it came from, where it went), **give feedback**, **show relationship/continuity**, **add personality** (sparingly).
+2. **Motion style is part of the brand.** Define motion adjectives ("precise and calm", "elastic and playful") and derive durations and easings from them.
+3. **Spatial continuity:** elements that change state should feel like the same object (expand the card instead of swapping screens).
+4. **Choreography:** order and rhythm guide the eye; the most important thing arrives first or last, never in the middle of the confusion.
+5. **Reduced motion is not "no design":** it is an alternative version with short fades and direct final states.
+6. **Vestibular triggers:** intense parallax, zoom, large rotation and scroll-jacking can cause nausea — they are the first to go under `prefers-reduced-motion`.
+7. **Performance is part of the design:** animate `transform` and `opacity`; measure jank.
 </core_axioms>
 
 ---
 
 <motion_language>
-## 2. Linguagem de movimento (escolha uma por projeto)
+## 2. Motion language (pick one per project)
 
-| Adjetivos | Curvas | Durações | Famílias |
-|-----------|--------|----------|----------|
-| preciso, calmo, confiável | ease-out-quart, ease-in-out-quart | 150 / 300 / 600ms | corporativo-modernista, produto-saas |
-| fluido, luxuoso, cinematográfico | expo-out `cubic-bezier(.16,1,.3,1)` / `(.19,1,.22,1)` | 200 / 450 / 900–1250ms | gradiente-atmosferico, imersivo-webgl |
-| elástico, brincalhão | spring (overshoot leve), back.out | 180 / 350 / 700ms | canvas-ludico, corporativo-marca |
-| seco, editorial, gráfico | steps(), power4.inOut, cortes | 120 / 300 / 800ms | editorial-brutalista |
+| Adjectives | Easings | Durations | Families |
+|------------|---------|-----------|----------|
+| precise, calm, trustworthy | ease-out-quart, ease-in-out-quart | 150 / 300 / 600ms | corporate-modernist, product-saas |
+| fluid, luxurious, cinematic | expo-out `cubic-bezier(.16,1,.3,1)` / `(.19,1,.22,1)` | 200 / 450 / 900–1250ms | atmospheric-gradient, immersive-webgl |
+| elastic, playful | spring (light overshoot), back.out | 180 / 350 / 700ms | playful-canvas, corporate-brand |
+| dry, editorial, graphic | steps(), power4.inOut, cuts | 120 / 300 / 800ms | editorial-brutalist |
 </motion_language>
 
 ---
 
 <agent_traps>
-## 3. Trava (proibido)
-- Animar porque "dá para animar".
-- Pre-loader decorativo bloqueando o conteúdo > 2,5s.
-- Parallax em texto corrido.
-- Duas animações grandes simultâneas disputando atenção.
-- Ignorar `prefers-reduced-motion` (o `web-motion` e o `web-audit` reportam).
+## 3. Guard (forbidden)
+- Animating because "it can be animated".
+- A decorative preloader blocking content > 2.5s.
+- Parallax on running text.
+- Two large animations at the same time fighting for attention.
+- Ignoring `prefers-reduced-motion` (`web-motion` and `web-audit` report it).
 </agent_traps>
 
 ---
 
 <design_engineering>
-## 4. Implementação acessível
+## 4. Accessible implementation
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -58,16 +58,16 @@
 ```js
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 if (!reduced.matches) { initLenis(); initParallax(); initParticles(); } else { renderStaticFallback(); }
-reduced.addEventListener('change', () => location.reload()); // simples e previsível
+reduced.addEventListener('change', () => location.reload()); // simple and predictable
 ```
 </design_engineering>
 
 ---
 
 <review_checklist>
-## 5. Rubrica
-- [ ] Cada animação tem propósito escrito na motion spec.
-- [ ] Linguagem de movimento única e coerente (curvas/durações de um só "dialeto" no `web-motion`).
-- [ ] Reduced-motion testado: `web-url-fetch --reduced-motion` + `web-record-frames`.
-- [ ] Sem jank: `pageFrames.longFrames` ≤ 5% na gravação de scroll.
+## 5. Rubric
+- [ ] Each animation has its purpose written in the motion spec.
+- [ ] A single, coherent motion language (easings/durations of one "dialect" in `web-motion`).
+- [ ] Reduced-motion tested: `web-url-fetch --reduced-motion` + `web-record-frames`.
+- [ ] No jank: `pageFrames.longFrames` ≤ 5% on the scroll recording.
 </review_checklist>

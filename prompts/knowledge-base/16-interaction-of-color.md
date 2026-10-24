@@ -1,69 +1,70 @@
-# 16 · Interaction of Color — Cor é Relativa: Contexto, Vibração e Gradientes
+# 16 · Interaction of Color — Color Is Relative: Context, Vibration and Gradients
 
 <module_meta>
-  <source>Interaction of Color — Josef Albers (destilação autoral)</source>
-  <router_trigger>Carregar ao construir paletas, gradientes e campos de cor (biblioteca de blurs), temas escuros, acentos de marca e ao julgar se uma cor "funciona".</router_trigger>
-  <enforcement_level>GUIDED para estética; STRICT para contraste de texto (WCAG).</enforcement_level>
-  <pairs_with>05 · 17 · aesthetics/gradiente-atmosferico.md · aesthetics/biblioteca-de-blurs.md</pairs_with>
+  <source>Interaction of Color — Josef Albers (an original distillation)</source>
+  <router_trigger>Load when building palettes, gradients and color fields (blur library), dark themes, brand accents and when judging whether a color "works".</router_trigger>
+  <enforcement_level>GUIDED for aesthetics; STRICT for text contrast (WCAG).</enforcement_level>
+  <pairs_with>05 · 17 · aesthetics/atmospheric-gradient.md · aesthetics/blur-library.md</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Axiomas
+## 1. Axioms
 
-1. **Cor nunca é vista sozinha.** A mesma cor muda de aparência conforme o vizinho: um laranja parece mais quente sobre azul-meia-noite e mais apagado sobre bege.
-2. **Uma cor pode parecer duas; duas podem parecer uma.** Teste acentos sobre todos os fundos onde aparecerão.
-3. **Complementares vibram** nas bordas (azul × laranja): ótimo para campos de cor e ápices; perigoso para texto fino.
-4. **Quantidade muda a cor:** 5% de laranja é acento; 50% é tema. Defina proporções (ex.: 70 fundo · 25 neutros · 5 acento).
-5. **Transparência e mistura são ilusões úteis:** sobreposições e blends criam profundidade sem novas cores.
-6. **Gradientes são relações, não pares de cores:** o caminho entre as cores (espaço de interpolação) importa tanto quanto as pontas.
-7. **Temperatura cria profundidade:** quentes avançam, frias recuam — laranja na frente, azul no fundo.
+1. **A color is never seen alone.** The same color changes with its neighbor: an orange looks warmer on midnight blue and duller on beige.
+2. **One color can look like two; two can look like one.** Test accents on every background where they will appear.
+3. **Complementaries vibrate** at the edges (blue × orange): great for color fields and climaxes; dangerous for thin text.
+4. **Quantity changes the color:** 5% orange is an accent; 50% is a theme. Define proportions (e.g., 70 background · 25 neutrals · 5 accent).
+5. **Transparency and mixing are useful illusions:** overlaps and blends create depth without new colors.
+6. **Gradients are relationships, not pairs of colors:** the path between the colors (the interpolation space) matters as much as the ends.
+7. **Temperature creates depth:** warm colors advance, cool ones recede — orange in front, blue behind.
+8. **Pure black and white is a palette too:** with gray as the only step between them, hierarchy depends entirely on value, scale and space — the strictest test of a composition.
 </core_axioms>
 
 ---
 
 <gradients>
-## 2. Gradientes que não ficam "lamacentos"
+## 2. Gradients that don't turn "muddy"
 
 ```css
-/* Interpole em OKLCH/OKLab: evita o cinza no meio entre azul e laranja */
+/* Interpolate in OKLCH/OKLab: avoids the gray in the middle between blue and orange */
 .field { background: linear-gradient(135deg in oklch, #0b1638, #ff6a1a); }
-/* Mais pontos de parada = curva perceptual suave */
+/* More stops = a smooth perceptual curve */
 .field-soft { background: radial-gradient(120% 90% at 70% 40% in oklab, #ff8a3d 0%, #b3471d 22%, #1b2a63 55%, #050816 100%); }
-/* Banding: ruído leve por cima (grão) quebra degraus em telas 8-bit */
+/* Banding: light noise on top (grain) breaks the steps on 8-bit screens */
 .grain::after { content: ''; position: absolute; inset: 0; background: url(noise.png); opacity: .08; mix-blend-mode: overlay; }
 ```
 
-Paleta de exemplo — **meia-noite + laranja** (landing do parede-da-ia):
+Example palette — **midnight + orange**:
 
-| Papel | Cor | Uso |
-|-------|-----|-----|
-| fundo profundo | `#050816` | 60–70% |
-| azul meia-noite | `#0b1638` / `#1b2a63` | campos, cards |
-| azul elétrico | `#3a5bff` | brilho frio no gradiente (pouco) |
-| laranja | `#ff6a1a` | acento, ápice, CTA |
-| âmbar | `#ffb36b` | luz do gradiente |
-| creme | `#f4efe6` | texto principal |
-| névoa | `#8e97bd` | texto secundário (verifique 4.5:1) |
+| Role | Color | Use |
+|------|-------|-----|
+| deep background | `#050816` | 60–70% |
+| midnight blue | `#0b1638` / `#1b2a63` | fields, cards |
+| electric blue | `#3a5bff` | a cool glow in the gradient (sparingly) |
+| orange | `#ff6a1a` | accent, climax, CTA |
+| amber | `#ffb36b` | the gradient's light |
+| cream | `#f4efe6` | main text |
+| mist | `#8e97bd` | secondary text (check 4.5:1) |
 </gradients>
 
 ---
 
 <agent_traps>
-## 3. Trava (proibido)
-- Texto sobre gradiente sem verificar contraste no **pior ponto** do gradiente.
-- Gradiente RGB direto entre complementares (meio acinzentado).
-- Acento usado em mais de ~10% da tela no corporativo.
-- Escolher cor isolada num color picker sem vê-la no contexto final.
+## 3. Guard (forbidden)
+- Text over a gradient without checking contrast at the gradient's **worst point**.
+- A straight RGB gradient between complementaries (a grayish middle).
+- An accent covering more than ~10% of the screen on corporate.
+- Picking a color in isolation in a color picker without seeing it in its final context.
 </agent_traps>
 
 ---
 
 <review_checklist>
-## 4. Rubrica
-- [ ] `web-scrap` → `colors.accent`: acento dominante ≤ 10–15% (corporativo) ou intencionalmente protagonista (marca).
-- [ ] Contraste de todos os textos em AA, inclusive sobre campos de cor (`web-audit` + conferência visual dos "incertos").
-- [ ] Gradientes interpolados em OKLCH/OKLab ou com paradas suficientes; sem banding visível (captura em @2x).
-- [ ] Proporção fundo/neutro/acento declarada nos tokens.
+## 4. Rubric
+- [ ] `web-scrap` → `colors.accent`: the dominant accent ≤ 10–15% (corporate) or intentionally leading (brand).
+- [ ] AA contrast on every text, including over color fields (`web-audit` + a visual check of the "uncertain" ones).
+- [ ] Gradients interpolated in OKLCH/OKLab or with enough stops; no visible banding (capture at @2x).
+- [ ] The background/neutral/accent proportion declared in the tokens.
 </review_checklist>

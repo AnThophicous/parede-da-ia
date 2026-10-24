@@ -1,80 +1,82 @@
-# 11 · Microinteractions — Gatilho, Regras, Feedback, Loops e Modos
+# 11 · Microinteractions — Trigger, Rules, Feedback, Loops and Modes
 
 <module_meta>
-  <source>Microinteractions: Designing with Details — Dan Saffer (destilação autoral)</source>
-  <router_trigger>Carregar ao desenhar ou revisar hover, toggles, cópia, likes, formulários, botões, cursores, toasts, estados de carregamento — qualquer interação de um único propósito.</router_trigger>
-  <enforcement_level>STRICT — toda microinteração precisa das quatro partes declaradas.</enforcement_level>
+  <source>Microinteractions: Designing with Details — Dan Saffer (an original distillation)</source>
+  <router_trigger>Load when designing or reviewing hover, toggles, copy, likes, forms, buttons, cursors, toasts, loading states — any single-purpose interaction.</router_trigger>
+  <enforcement_level>STRICT — every microinteraction needs its four parts declared.</enforcement_level>
   <pairs_with>12 · 13 · 18 · 20 · 22 · templates/motion-spec.md</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Anatomia (as quatro partes)
+## 1. Anatomy (the four parts)
 
-1. **Gatilho** — o que inicia: manual (clique, hover, tecla, arraste) ou de sistema (tempo, dado novo, posição de scroll). O gatilho manual precisa **parecer acionável** antes da ação (significante `[18]`).
-2. **Regras** — o que pode e não pode acontecer, em que ordem, com que limites. Regras são invisíveis; o usuário só vê o feedback delas.
-3. **Feedback** — tudo que comunica as regras: visual, movimento, som, háptica, texto. **Proporcional**: ação pequena, feedback pequeno; ação irreversível, feedback inequívoco.
-4. **Loops e modos** — o que acontece com o tempo (repetição, expiração, aprendizado) e estados alternativos (modo edição, modo arraste). Evite modos sempre que puder.
+1. **Trigger** — what starts it: manual (click, hover, key, drag) or system (time, new data, scroll position). A manual trigger must **look actionable** before the action (a signifier `[18]`).
+2. **Rules** — what can and cannot happen, in which order, within which limits. Rules are invisible; the user only sees their feedback.
+3. **Feedback** — everything that communicates the rules: visuals, motion, sound, haptics, text. **Proportional**: a small action, small feedback; an irreversible action, unmistakable feedback.
+4. **Loops and modes** — what happens over time (repetition, expiry, learning) and alternative states (edit mode, drag mode). Avoid modes whenever you can.
 
-### Princípios
-- **Traga os dados para a frente:** o gatilho pode mostrar estado (ex.: botão "Copiado ✓", contador no ícone).
-- **Não comece do zero:** lembre a última escolha, preencha o óbvio.
-- **Previna erro em vez de explicá-lo.**
-- **Use o que já está na tela** antes de adicionar elementos novos (o próprio botão vira o feedback).
-- **Signature moment:** uma microinteração memorável pode virar marca — mas só uma ou duas por produto.
+### Principles
+- **Bring the data forward:** the trigger can show state (e.g., a "Copied ✓" button, a count on the icon).
+- **Don't start from zero:** remember the last choice, prefill the obvious.
+- **Prevent the error instead of explaining it.**
+- **Use what is already on screen** before adding new elements (the button itself becomes the feedback).
+- **Signature moment:** one memorable microinteraction can become part of the brand — but only one or two per product.
 </core_axioms>
 
 ---
 
 <timing>
-## 2. Tempos de referência
+## 2. Reference timings
 
-| Tipo | Início | Duração | Curva |
-|------|--------|---------|-------|
-| Hover / foco | ≤ 50ms | 150–250ms | ease-out |
-| Pressionar (active) | imediato | 80–120ms | ease-out |
-| Toggle / checkbox | imediato | 150–200ms | ease-in-out |
-| Abrir menu / modal | imediato | 250–400ms entrada · 200–300ms saída | expo-out / ease-in |
-| Toast | imediato | entra 300ms · permanece 2–4s · sai 200ms | ease-out |
-| Magnético (seguir cursor) | contínuo | lerp 0.1–0.2 por frame · retorno elástico 600–1000ms | elastic.out |
+| Type | Start | Duration | Easing |
+|------|-------|----------|--------|
+| Hover / focus | ≤ 50ms | 150–250ms | ease-out |
+| Press (active) | immediate | 80–120ms | ease-out |
+| Toggle / checkbox | immediate | 150–200ms | ease-in-out |
+| Open a menu / modal | immediate | 250–400ms in · 200–300ms out | expo-out / ease-in |
+| Toast | immediate | in 300ms · stays 2–4s · out 200ms | ease-out |
+| Magnetic (follows the cursor) | continuous | lerp 0.1–0.2 per frame · elastic return 600–1000ms | elastic.out |
 
-Saída mais rápida que entrada. Feedback que demora > 400ms quebra a sensação de causa e efeito (limiar de Doherty `[20]`).
+Exits faster than entrances. Feedback that takes > 400ms breaks the feeling of cause and effect (the Doherty threshold `[20]`).
 </timing>
 
 ---
 
 <agent_traps>
-## 3. Trava anti-enfeite
+## 3. Guard against decoration
 
-- **Proibido** microinteração sem estado de foco equivalente ao hover (teclado também merece feedback).
-- **Proibido** feedback que depende só de cor.
-- **Proibido** animação em loop infinito sem função (spinner eterno, pulso eterno no CTA).
-- **Proibido** efeito magnético em links de texto corrido ou em elementos densos de navegação.
-- **Proibido** som sem controle e sem opt-in.
+- **Forbidden:** a microinteraction without a focus state equivalent to its hover (keyboard users deserve feedback too).
+- **Forbidden:** feedback that relies on color alone.
+- **Forbidden:** an infinite looping animation with no function (an eternal spinner, an eternal pulse on the CTA).
+- **Forbidden:** a magnetic effect on links in running text or on dense navigation elements.
+- **Forbidden:** sound without a control and without opt-in.
+- **Forbidden:** a custom cursor whose label or disc covers the target's own text.
 </agent_traps>
 
 ---
 
 <design_engineering>
-## 4. Receitas (gatilho → regras → feedback → loop)
+## 4. Recipes (trigger → rules → feedback → loop)
 
-| Microinteração | Gatilho | Regras | Feedback | Loop/modo |
-|----------------|---------|--------|----------|-----------|
-| Copiar prompt | clique | copia; se a API falhar, seleciona o texto | rótulo "Copiado ✓" + toast | volta ao rótulo em 2,4s |
-| Botão magnético | cursor dentro do raio | desloca até 35% do vetor; texto interno 50% disso | movimento contínuo + preenchimento no hover | retorno elástico ao sair |
-| Hover Font | cursor perto das letras | peso por distância (raio 120–200px) | engrossa letras próximas | relaxa ao se afastar; desligado em reduced-motion |
-| Like / salvar | clique | alterna estado; idempotente | ícone preenche + escala 1→1.2→1 | contador atualiza |
-| Arrastar card | pointerdown + move | limite ao container; z-index sobe | sombra maior + leve rotação | soltar com inércia curta |
+| Microinteraction | Trigger | Rules | Feedback | Loop/mode |
+|------------------|---------|-------|----------|-----------|
+| Copy prompt | click | copies; if the API fails, selects the text | a "Copied ✓" label + a message | back to the label after 2.4s |
+| Magnetic button | cursor inside the radius | moves up to 35% of the vector; inner text 50% of that | continuous motion + a fill on hover | elastic return on leave |
+| Hover Font | cursor near the letters | weight by distance (120–200px radius) | nearby letters thicken | relaxes as it moves away; off with reduced-motion |
+| Like / save | click | toggles state; idempotent | the icon fills + scales 1→1.2→1 | the counter updates |
+| Drag a card | pointerdown + move | constrained to the container; z-index rises | a larger shadow + a slight rotation | drop with short inertia |
+| Breaker switch | drag down | heavy resistance; trips past a detent | a clunk, a light comes on, haptics | stays on; keyboard pulls it too |
 </design_engineering>
 
 ---
 
 <review_checklist>
-## 5. Rubrica (verifique com `web-interactions`)
-- [ ] Todo interativo tem mudança de hover **e** foco visível.
-- [ ] Transições de feedback entre 150 e 300ms.
-- [ ] `:active` responde (sensação tátil) nos CTAs.
-- [ ] Efeitos magnéticos só em alvos grandes e isolados.
-- [ ] Cada microinteração foi descrita nas quatro partes na motion spec.
+## 5. Rubric (check it with `web-interactions`)
+- [ ] Every interactive element has a hover change **and** a visible focus.
+- [ ] Feedback transitions between 150 and 300ms.
+- [ ] `:active` responds (a tactile feel) on CTAs.
+- [ ] Magnetic effects only on large, isolated targets.
+- [ ] Each microinteraction was described in its four parts in the motion spec.
 </review_checklist>

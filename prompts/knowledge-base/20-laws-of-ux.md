@@ -1,51 +1,51 @@
-# 20 · Laws of UX — Psicologia Aplicada em Regras Verificáveis
+# 20 · Laws of UX — Applied Psychology as Verifiable Rules
 
 <module_meta>
-  <source>Laws of UX — Jon Yablonski (destilação autoral)</source>
-  <router_trigger>Carregar ao dimensionar alvos, definir número de opções, tempos de resposta, navegação, onboarding e ao justificar decisões de layout com evidência.</router_trigger>
-  <enforcement_level>STRICT para Fitts, Doherty e Jakob; GUIDED para o resto.</enforcement_level>
+  <source>Laws of UX — Jon Yablonski (an original distillation)</source>
+  <router_trigger>Load when sizing targets, deciding the number of options, response times, navigation, onboarding and when backing layout decisions with evidence.</router_trigger>
+  <enforcement_level>STRICT for Fitts, Doherty and Jakob; GUIDED for the rest.</enforcement_level>
   <pairs_with>03 · 04 · 11 · 18</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Leis e como aplicá-las
+## 1. The laws and how to apply them
 
-| Lei | Ideia | Regra prática |
-|-----|-------|---------------|
-| **Jakob** | as pessoas passam a maior parte do tempo em outros sites | siga convenções de navegação, carrinho, busca, formulários |
-| **Fitts** | tempo para atingir um alvo depende de distância e tamanho | CTAs grandes e perto do contexto; alvos ≥ 44px no mobile, ≥ 24px sempre |
-| **Hick** | mais opções = decisão mais lenta | reduza escolhas visíveis; destaque a recomendada |
-| **Miller** | memória de trabalho limitada | agrupe em blocos de 3–5 |
-| **Doherty** | produtividade dispara com resposta < 400ms | feedback imediato; skeletons; otimismo na UI |
-| **Pico-fim** | lembramos do pico e do final | um ápice memorável + final forte (CTA/rodapé) |
-| **Von Restorff** | o diferente é lembrado | um elemento destacado por grupo — não vários |
-| **Serial position** | lembramos do primeiro e do último itens | itens-chave nas pontas da navegação |
-| **Tesler** | complexidade não some, muda de lugar | absorva complexidade no sistema, não no usuário |
-| **Postel** | seja liberal no que aceita | formulários tolerantes (máscaras, colar, espaços) |
-| **Lei da região comum / proximidade / similaridade** | agrupamento perceptivo | use espaço e fundo para agrupar antes de bordas |
-| **Goal-gradient** | esforço cresce perto da meta | barras de progresso em fluxos |
-| **Zeigarnik** | tarefas inacabadas ficam na memória | mostre o que falta concluir |
-| **Estética-usabilidade** | o bonito é percebido como mais fácil | polimento visual aumenta tolerância — não substitui usabilidade |
+| Law | Idea | Practical rule |
+|-----|------|----------------|
+| **Jakob** | people spend most of their time on other sites | follow conventions for navigation, cart, search, forms |
+| **Fitts** | the time to reach a target depends on distance and size | large CTAs close to their context; targets ≥ 44px on mobile, ≥ 24px always |
+| **Hick** | more options = slower decisions | reduce visible choices; highlight the recommended one |
+| **Miller** | limited working memory | group in blocks of 3–5 |
+| **Doherty** | productivity soars with responses < 400ms | immediate feedback; skeletons; optimistic UI |
+| **Peak-end** | we remember the peak and the ending | one memorable climax + a strong ending (CTA/footer) |
+| **Von Restorff** | the different thing is remembered | one highlighted element per group — not several |
+| **Serial position** | we remember the first and last items | key items at the ends of the navigation |
+| **Tesler** | complexity doesn't disappear, it moves | absorb complexity in the system, not in the user |
+| **Postel** | be liberal in what you accept | tolerant forms (masks, paste, spaces) |
+| **Common region / proximity / similarity** | perceptual grouping | use space and background to group before borders |
+| **Goal-gradient** | effort grows near the goal | progress bars in flows |
+| **Zeigarnik** | unfinished tasks stay in memory | show what is left to finish |
+| **Aesthetic-usability** | the beautiful is perceived as easier | visual polish raises tolerance — it doesn't replace usability |
 </core_axioms>
 
 ---
 
 <agent_traps>
-## 2. Trava (proibido)
-- Usar "lei" como justificativa decorativa sem medir.
-- CTA principal menor que links secundários.
-- Menus com 9+ itens no topo sem agrupamento.
-- Feedback de ação acima de 400ms sem indicador.
+## 2. Guard (forbidden)
+- Using a "law" as a decorative justification without measuring.
+- A main CTA smaller than secondary links.
+- Top menus with 9+ items and no grouping.
+- Action feedback above 400ms with no indicator.
 </agent_traps>
 
 ---
 
 <review_checklist>
-## 3. Rubrica (toolkit)
-- [ ] Fitts: `web-audit` sem `tap-target`; CTAs ≥ 44px no mobile.
-- [ ] Doherty: `web-interactions` → transições de feedback ≤ 300ms; LCP ≤ 2,5s.
-- [ ] Hick: `web-control inventory` na dobra ≤ 7 interativos principais.
-- [ ] Pico-fim: o ápice e o final aparecem claramente na spritesheet de scroll.
+## 3. Rubric (toolkit)
+- [ ] Fitts: `web-audit` without `tap-target`; CTAs ≥ 44px on mobile.
+- [ ] Doherty: `web-interactions` → feedback transitions ≤ 300ms; LCP ≤ 2.5s.
+- [ ] Hick: `web-control inventory` on the fold ≤ 7 main interactive elements.
+- [ ] Peak-end: the climax and the ending show up clearly in the scroll spritesheet.
 </review_checklist>

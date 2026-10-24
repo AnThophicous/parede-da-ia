@@ -1,81 +1,81 @@
-# 04 · 100 Things Every Designer Needs to Know About People — Percepção, Atenção e Motivação
+# 04 · 100 Things Every Designer Needs to Know About People — Perception, Attention and Motivation
 
 <module_meta>
-  <source>100 Things Every Designer Needs to Know About People — Susan Weinschenk (destilação autoral)</source>
-  <router_trigger>Carregar ao decidir foco visual, ápice emocional, persuasão, microcopy, onboarding, densidade de informação e conversão.</router_trigger>
-  <enforcement_level>GUIDED — use como lente de decisão; cite a regra quando ela mudar uma escolha.</enforcement_level>
-  <pairs_with>05 (hierarquia) · 12 (animação) · 20 (leis de UX) · 23 (mensagem)</pairs_with>
+  <source>100 Things Every Designer Needs to Know About People — Susan Weinschenk (an original distillation)</source>
+  <router_trigger>Load when deciding visual focus, emotional climax, persuasion, microcopy, onboarding, information density and conversion.</router_trigger>
+  <enforcement_level>GUIDED — use it as a decision lens; cite the rule when it changes a choice.</enforcement_level>
+  <pairs_with>05 (hierarchy) · 12 (animation) · 20 (laws of UX) · 23 (message)</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Axiomas
+## 1. Axioms
 
-### Como as pessoas veem
-1. **A periferia define o clima; o centro lê o detalhe.** Fundo, campo de cor e composição são percebidos antes do texto — por isso o gradiente do hero é emoção, e o título é informação.
-2. **Rostos e olhares capturam atenção** e conduzem o olhar para onde o rosto olha.
-3. **Padrões são reconhecidos antes de serem lidos.** Proximidade, semelhança e região comum criam estrutura sem esforço.
-4. **Movimento na periferia é irresistível.** Use para orientar, nunca para competir com a tarefa.
-5. **Contraste e tamanho vencem cor** para hierarquia (≈ 8% dos homens têm alguma deficiência de visão de cores).
+### How people see
+1. **The periphery sets the mood; the center reads the detail.** Background, color field and composition are perceived before the text — that is why the hero's gradient is emotion and the title is information.
+2. **Faces and gazes capture attention** and lead the eye to wherever the face is looking.
+3. **Patterns are recognized before they are read.** Proximity, similarity and common region create structure effortlessly.
+4. **Motion in the periphery is irresistible.** Use it to orient, never to compete with the task.
+5. **Contrast and size beat color** for hierarchy (≈ 8% of men have some color vision deficiency).
 
-### Como pensam e lembram
-6. **Memória de trabalho é pequena** (≈ 3–4 blocos). Agrupe e revele progressivamente.
-7. **Reconhecer é mais fácil que lembrar.** Mostre opções; não peça que digitem do zero.
-8. **Modelos mentais vêm de experiências anteriores.** Alinhe a interface ao que o público já conhece.
-9. **Histórias e exemplos concretos** são processados e lembrados melhor que abstrações.
+### How they think and remember
+6. **Working memory is small** (≈ 3–4 chunks). Group things and reveal them progressively.
+7. **Recognizing is easier than recalling.** Show options; don't make people type from scratch.
+8. **Mental models come from past experience.** Align the interface with what the audience already knows.
+9. **Stories and concrete examples** are processed and remembered better than abstractions.
 
-### O que motiva
-10. **Progresso visível aumenta o engajamento** (gradiente de objetivo).
-11. **Surpresa e recompensa variável** prendem atenção — é por isso que microinterações deliciosas funcionam.
-12. **Prova social reduz incerteza.** Escassez e exclusividade aumentam valor percebido — use com honestidade.
-13. **Escolhas demais paralisam.** Destaque a opção recomendada.
-14. **Pessoas decidem pela intuição e justificam depois:** a primeira impressão estética vira credibilidade.
-15. **Pico e fim** são o que se lembra de uma experiência.
+### What motivates
+10. **Visible progress increases engagement** (the goal-gradient effect).
+11. **Surprise and variable reward** hold attention — that is why delightful microinteractions work.
+12. **Social proof reduces uncertainty.** Scarcity and exclusivity raise perceived value — use them honestly.
+13. **Too many choices paralyze.** Highlight the recommended option.
+14. **People decide by intuition and justify afterwards:** the first aesthetic impression becomes credibility.
+15. **The peak and the end** are what people remember of an experience.
 </core_axioms>
 
 ---
 
 <agent_traps>
-## 2. Trava anti-manipulação e anti-ruído
+## 2. Guard against manipulation and noise
 
-- **Proibido** escassez falsa ("só hoje!"), contadores de urgência inventados, prova social fabricada.
-- **Proibido** movimento contínuo na periferia enquanto o usuário lê ou preenche um formulário.
-- **Proibido** encher a dobra de estímulos concorrentes: **um** ponto focal por seção.
-- Personalidade ≠ ruído: o ápice emocional acontece **uma vez** por página.
+- **Forbidden:** fake scarcity ("today only!"), made-up urgency counters, fabricated social proof.
+- **Forbidden:** continuous motion in the periphery while the user reads or fills in a form.
+- **Forbidden:** filling the fold with competing stimuli: **one** focal point per section.
+- Personality ≠ noise: the emotional climax happens **once** per page.
 </agent_traps>
 
 ---
 
 <design_engineering>
-## 3. Aplicação
+## 3. Applied
 
-| Decisão | Regra | Implementação |
-|---------|-------|---------------|
-| Onde mora o "uau" | pico-fim (15) | um ápice (shader, morph de partículas, transição) + um final forte (rodapé/CTA) |
-| Ritmo da página | atenção (4) e memória (6) | alterne seções densas e respiros; blocos de 3–5 itens |
-| Microcopy de botões | modelo mental (8) | verbo + resultado: "Instalar a skill", "Ver os 23 livros" |
-| Cursor e hover | feedback (11) | confirmar interatividade antes do clique |
-| Fluxos longos | progresso (10) | passos numerados e barra de progresso |
-| Planos/opções | escolha (13) | 3 opções, recomendada destacada |
+| Decision | Rule | Implementation |
+|----------|------|----------------|
+| Where the "wow" lives | peak-end (15) | one climax (shader, particle morph, transition) + a strong ending (footer/CTA) |
+| Page rhythm | attention (4) and memory (6) | alternate dense sections and breathing room; blocks of 3–5 items |
+| Button microcopy | mental model (8) | verb + result: "Install the skill", "See the 23 books" |
+| Cursor and hover | feedback (11) | confirm interactivity before the click |
+| Long flows | progress (10) | numbered steps and a progress bar |
+| Plans/options | choice (13) | 3 options, the recommended one highlighted |
 </design_engineering>
 
 ---
 
 <review_checklist>
-## 4. Rubrica
+## 4. Rubric
 
-- [ ] Cada seção tem um único ponto focal (confira na captura: para onde o olho vai primeiro?).
-- [ ] Informação agrupada em blocos de 3–5 itens.
-- [ ] Movimento orienta (o que mudou, onde olhar) e não compete com leitura.
-- [ ] Existe prova social real perto do CTA de conversão.
-- [ ] Ápice e final memoráveis identificáveis na spritesheet de scroll.
+- [ ] Each section has a single focal point (check the capture: where does the eye go first?).
+- [ ] Information grouped in blocks of 3–5 items.
+- [ ] Motion orients (what changed, where to look) and does not compete with reading.
+- [ ] There is real social proof near the conversion CTA.
+- [ ] A memorable climax and ending can be spotted in the scroll spritesheet.
 </review_checklist>
 
 ---
 
 <few_shot>
-## 5. Exemplo
-**Ruim:** quatro cards animando em loop ao lado do formulário de contato.
-**Bom:** formulário estático, um depoimento real ao lado, e a animação reservada para a confirmação de envio (recompensa no fim).
+## 5. Example
+**Bad:** four cards animating in a loop next to the contact form.
+**Good:** a static form, one real testimonial beside it, and the animation saved for the submission confirmation (a reward at the end).
 </few_shot>

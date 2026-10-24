@@ -1,58 +1,59 @@
-# 18 · The Design of Everyday Things — Affordances, Significantes, Mapeamento e Erro
+# 18 · The Design of Everyday Things — Affordances, Signifiers, Mapping and Error
 
 <module_meta>
-  <source>The Design of Everyday Things (ed. revisada) — Don Norman (destilação autoral)</source>
-  <router_trigger>Carregar ao desenhar controles não convencionais (canvas arrastável, cursores customizados, menus experimentais, sliders, gestos), estados de erro e qualquer interface que "ninguém entende como usa".</router_trigger>
-  <enforcement_level>STRICT — interfaces expressivas precisam de significantes ainda mais claros.</enforcement_level>
+  <source>The Design of Everyday Things (revised ed.) — Don Norman (an original distillation)</source>
+  <router_trigger>Load when designing unconventional controls (draggable canvases, custom cursors, experimental menus, sliders, gestures, switches), error states and any interface "nobody understands how to use".</router_trigger>
+  <enforcement_level>STRICT — expressive interfaces need even clearer signifiers.</enforcement_level>
   <pairs_with>03 · 11 · 20 · 22</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Axiomas
+## 1. Axioms
 
-1. **Affordance** é a relação entre objeto e pessoa (o que é possível fazer); **significante** é o sinal que comunica onde e como agir. Na tela, quase tudo depende de significantes.
-2. **Mapeamento natural:** controles se relacionam espacialmente com o que controlam (o slider move na direção do efeito).
-3. **Feedback imediato e informativo** para toda ação — inclusive "nada aconteceu porque…".
-4. **Modelo conceitual:** o usuário precisa formar uma explicação simples de como o sistema funciona; a interface deve ensiná-la.
-5. **Restrições** (físicas, culturais, semânticas, lógicas) evitam erro antes de acontecer.
-6. **Os dois golfos:** execução (como faço?) e avaliação (deu certo?). Bom design encurta os dois.
-7. **Erro é do design, não da pessoa.** Distinga lapsos (deslizes) de enganos (modelo errado) e projete desfazer em vez de confirmar.
-8. **Conhecimento no mundo > conhecimento na cabeça:** mostre opções em vez de exigir memória.
+1. **An affordance** is the relationship between an object and a person (what can be done); **a signifier** is the signal that says where and how to act. On screen, almost everything depends on signifiers.
+2. **Natural mapping:** controls relate spatially to what they control (the slider moves in the direction of the effect).
+3. **Immediate, informative feedback** for every action — including "nothing happened because…".
+4. **Conceptual model:** the user needs to form a simple explanation of how the system works; the interface should teach it.
+5. **Constraints** (physical, cultural, semantic, logical) prevent errors before they happen.
+6. **The two gulfs:** execution (how do I do it?) and evaluation (did it work?). Good design shortens both.
+7. **Error belongs to the design, not the person.** Tell slips from mistakes (a wrong model) and design undo instead of confirmations.
+8. **Knowledge in the world > knowledge in the head:** show options instead of demanding memory.
 </core_axioms>
 
 ---
 
 <design_engineering>
-## 2. Aplicação em interfaces expressivas
+## 2. Applied to expressive interfaces
 
-| Interface | Significante obrigatório |
-|-----------|--------------------------|
-| Canvas com elementos arrastáveis (canvas-ludico) | `cursor: grab/grabbing`, sombra que cresce ao pegar, dica "arraste" na primeira visita, posição restaurável |
-| Cursor customizado | nunca esconder o cursor em campos de texto; rótulo contextual ("ver", "arrastar", "copiar") |
-| Menu overlay experimental | botão com a palavra "Menu"; Esc fecha; foco preso no menu aberto |
-| Scroll horizontal pinado | indicação de progresso e direção; não sequestrar o wheel sem pista visual |
-| Hover Font / efeitos de proximidade | puramente decorativos — nunca carregam informação essencial |
-| Gestos no mobile | alternativa por botão para todo gesto |
+| Interface | Mandatory signifier |
+|-----------|---------------------|
+| A canvas with draggable elements (playful-canvas) | `cursor: grab/grabbing`, a shadow that grows on pick-up, a "drag me" hint on the first visit, a restorable position |
+| A custom cursor | never hide the cursor in text fields; never cover the target's own text; labels only where the target has none |
+| An experimental overlay menu | a button with the word "Menu"; Esc closes it; focus trapped inside the open menu |
+| Pinned horizontal scroll | a progress and direction hint; don't hijack the wheel without a visual cue |
+| A physical metaphor (lever, switch, dial) | it looks grabbable, moves in the expected direction, gives a detent and a sound/light when it trips, and has a keyboard and a no-gesture alternative |
+| Hover Font / proximity effects | purely decorative — they never carry essential information |
+| Mobile gestures | a button alternative for every gesture |
 </design_engineering>
 
 ---
 
 <agent_traps>
-## 3. Trava (proibido)
-- Elementos interativos indistinguíveis de decoração.
-- Ação destrutiva sem desfazer (ou sem confirmação quando desfazer for impossível).
-- "Easter eggs" que escondem funções necessárias.
-- Mensagem de erro que culpa o usuário ou não diz como resolver.
+## 3. Guard (forbidden)
+- Interactive elements indistinguishable from decoration.
+- A destructive action without undo (or without a confirmation when undo is impossible).
+- "Easter eggs" that hide necessary functions.
+- An error message that blames the user or doesn't say how to fix it.
 </agent_traps>
 
 ---
 
 <review_checklist>
-## 4. Rubrica
-- [ ] `web-interactions`: todo interativo muda no hover/foco e tem cursor coerente.
-- [ ] `web-control inventory` não lista elementos clicáveis sem rótulo.
-- [ ] Teste do golfo de avaliação: após cada ação, a captura mostra o resultado?
-- [ ] Toda ação destrutiva tem desfazer.
+## 4. Rubric
+- [ ] `web-interactions`: every interactive element changes on hover/focus and has a coherent cursor.
+- [ ] `web-control inventory` lists no clickable element without a label.
+- [ ] The gulf-of-evaluation test: after each action, does the capture show the result?
+- [ ] Every destructive action has an undo.
 </review_checklist>

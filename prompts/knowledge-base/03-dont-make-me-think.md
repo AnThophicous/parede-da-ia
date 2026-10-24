@@ -1,84 +1,84 @@
-# 03 · Don't Make Me Think — Usabilidade Óbvia, Escaneável e Sem Atrito
+# 03 · Don't Make Me Think — Obvious, Scannable, Frictionless Usability
 
 <module_meta>
-  <source>Don't Make Me Think, Revisited — Steve Krug (destilação autoral para agentes)</source>
-  <router_trigger>Carregar ao desenhar navegação, hero, CTAs, formulários, hierarquia de página, ou ao auditar UX de qualquer interface — inclusive as experimentais.</router_trigger>
-  <enforcement_level>STRICT — experimental nunca pode significar ilegível.</enforcement_level>
-  <pairs_with>05 (hierarquia) · 18 (significantes) · 20 (leis de UX) · 22 (acessibilidade)</pairs_with>
+  <source>Don't Make Me Think, Revisited — Steve Krug (an original distillation for agents)</source>
+  <router_trigger>Load when designing navigation, a hero, CTAs, forms, page hierarchy, or when auditing the UX of any interface — experimental ones included.</router_trigger>
+  <enforcement_level>STRICT — experimental must never mean illegible.</enforcement_level>
+  <pairs_with>05 (hierarchy) · 18 (signifiers) · 20 (laws of UX) · 22 (accessibility)</pairs_with>
 </module_meta>
 
 ---
 
 <core_axioms>
-## 1. Axiomas
+## 1. Axioms
 
-1. **Óbvio vence inteligente.** Cada tela deve ser autoexplicativa; quando não puder, ao menos autoevidente em um segundo de olhar.
-2. **Pessoas escaneiam, não leem.** Elas caçam palavras que casam com a tarefa e clicam na primeira opção "boa o bastante".
-3. **Pessoas se viram, não descobrem.** A interface precisa tolerar uso "errado" sem punir.
-4. **Cliques sem dúvida valem mais que poucos cliques.** Três cliques óbvios > um clique ambíguo.
-5. **Corte palavras pela metade — e depois corte de novo.** Texto de boas-vindas e instruções raramente são lidos.
-6. **Convenções são aliadas.** Logo no topo-esquerda leva à home; lupa é busca; o item ativo da navegação é destacado.
-7. **A navegação responde sempre:** onde estou, o que tem aqui, para onde posso ir, como volto.
-8. **A home tem um trabalho:** dizer em 5 segundos o que é, para quem é e qual a próxima ação.
-9. **Teste cedo e com pouca gente.** Três pessoas por rodada revelam a maioria dos problemas graves.
-10. **Reservatório de boa vontade:** cada fricção (popup, campo desnecessário, preço escondido) drena paciência — e ela não volta.
+1. **Obvious beats clever.** Every screen should be self-explanatory; when it can't be, at least self-evident at a one-second glance.
+2. **People scan, they don't read.** They hunt for words that match their task and click the first "good enough" option.
+3. **People muddle through, they don't figure things out.** The interface must tolerate "wrong" use without punishing it.
+4. **Clicks without doubt beat fewer clicks.** Three obvious clicks > one ambiguous click.
+5. **Cut the words in half — then cut again.** Welcome text and instructions are rarely read.
+6. **Conventions are allies.** The logo at the top-left goes home; a magnifier is search; the active nav item is highlighted.
+7. **Navigation always answers:** where am I, what is here, where can I go, how do I get back.
+8. **The home page has one job:** say in 5 seconds what it is, who it is for and what the next action is.
+9. **Test early, with few people.** Three people per round reveal most of the serious problems.
+10. **The reservoir of goodwill:** every friction (a popup, an unnecessary field, a hidden price) drains patience — and it does not come back.
 </core_axioms>
 
 ---
 
 <agent_traps>
-## 2. Trava anti-"criatividade ilegível" (armadilhas de agentes)
+## 2. Guard against "illegible creativity" (agent traps)
 
-- **Proibido** hero com frase poética sem um subtítulo literal que explique o produto.
-- **Proibido** três botões de mesmo peso lado a lado. Um primário, um secundário, o resto vira link.
-- **Proibido** ícone sem rótulo para ação rara (o significado não é universal).
-- **Proibido** "Clique aqui" / "Saiba mais" repetidos: o texto do link descreve o destino.
-- **Proibido** pre-loader ou animação de entrada que segure o conteúdo por mais de 2,5s.
-- **Proibido** scroll-jacking que muda velocidade ou direção do wheel nativo sem motivo narrativo.
-- **Regra da dupla leitura:** a **primeira leitura é convencional** (navegação, CTA, texto principal); a **segunda é surpreendente** (tipo, movimento, transição). Ousadia mora na segunda.
+- **Forbidden:** a hero with a poetic line and no literal subtitle explaining the product.
+- **Forbidden:** three equal-weight buttons side by side. One primary, one secondary, the rest become links.
+- **Forbidden:** an icon without a label for a rare action (its meaning is not universal).
+- **Forbidden:** repeated "Click here" / "Learn more": the link text describes the destination.
+- **Forbidden:** a preloader or entrance animation that holds the content back for more than 2.5s (a deliberate, skippable gate — like a sound switch — is the exception, and it always offers a way straight to the goal).
+- **Forbidden:** scroll-jacking that changes the speed or direction of the native wheel without a narrative reason.
+- **The double-reading rule:** the **first reading is conventional** (navigation, CTA, main text); the **second is surprising** (type, motion, transition). Daring lives in the second.
 </agent_traps>
 
 ---
 
 <design_engineering>
-## 3. Aplicação em interfaces de alto nível
+## 3. Applied to high-end interfaces
 
-### 3.1 Hero que sobrevive ao teste dos 5 segundos
+### 3.1 A hero that survives the 5-second test
 ```
-[ marca ]                                [ navegação curta ]   [ CTA primário ]
-TÍTULO EXPRESSIVO (pode ser poético)
-Subtítulo literal: o que é · para quem · resultado
-[ CTA primário ]  [ link secundário ]
-prova curta (logos, número, citação) ─────────────── ápice visual (shader/3D) ao lado ou atrás
+[ brand ]                                [ short navigation ]   [ primary CTA ]
+EXPRESSIVE TITLE (it may be poetic)
+Literal subtitle: what it is · who it is for · the result
+[ primary CTA ]  [ secondary link ]
+short proof (logos, a number, a quote) ─────────────── visual climax (shader/3D) beside or behind
 ```
-### 3.2 Formulários
-Rótulos visíveis (nunca só placeholder) · erro inline ao sair do campo · nada obrigatório sem motivo · botão diz o que acontece ("Enviar proposta", não "Enviar").
-### 3.3 Navegação em sites experimentais
-Menu overlay é permitido, mas: o botão diz "Menu", tem foco visível, fecha com Esc e devolve o foco ao botão.
+### 3.2 Forms
+Visible labels (never only a placeholder) · inline errors when leaving the field · nothing required without a reason · the button says what happens ("Send proposal", not "Submit").
+### 3.3 Navigation on experimental sites
+An overlay menu is allowed, but: the button says "Menu", has a visible focus, closes with Esc and returns focus to the button.
 ### 3.4 Mobile
-CTA principal ao alcance do polegar e acima da dobra; alvos ≥ 44px; nada de hover como única forma de revelar informação.
+The main CTA within thumb reach and above the fold; targets ≥ 44px; never hover as the only way to reveal information.
 </design_engineering>
 
 ---
 
 <review_checklist>
-## 4. Rubrica (verifique com a toolkit)
+## 4. Rubric (check it with the toolkit)
 
-| Verificação | Como provar |
-|-------------|-------------|
-| 5 segundos: o que é, para quem, próxima ação | `web-screenshot` da dobra — leia e responda as 3 perguntas sem rolar |
-| Um CTA primário dominante por tela | `web-control inventory` + captura |
-| Links e botões parecem clicáveis sem hover | `web-interactions` → "sem feedback de hover" = falha |
-| Item ativo da navegação destacado | captura de páginas internas |
-| CTA acima da dobra no mobile | `web-screenshot --viewport 390x844` |
-| Formulário com rótulos e erros inline | `web-audit` (input-label) + teste manual com `web-control type` |
+| Check | How to prove it |
+|-------|-----------------|
+| 5 seconds: what it is, who it is for, next action | `web-screenshot` of the fold — read it and answer the 3 questions without scrolling |
+| One dominant primary CTA per screen | `web-control inventory` + a capture |
+| Links and buttons look clickable without hover | `web-interactions` → "no hover feedback" = fail |
+| Active nav item highlighted | captures of inner pages |
+| CTA above the fold on mobile | `web-screenshot --viewport 390x844` |
+| Form with labels and inline errors | `web-audit` (input-label) + a manual test with `web-control type` |
 </review_checklist>
 
 ---
 
 <few_shot>
-## 5. Exemplo
+## 5. Example
 
-**Ruim:** "Construímos o amanhã, hoje." + botões "Saiba mais", "Descubra", "Explore".
-**Bom:** "Construímos o amanhã, hoje." + subtítulo "Software de gestão para clínicas veterinárias — agenda, prontuário e cobrança em um só lugar." + CTA "Agendar demonstração" + link "Ver preços".
+**Bad:** "We build tomorrow, today." + buttons "Learn more", "Discover", "Explore".
+**Good:** "We build tomorrow, today." + the subtitle "Practice management software for veterinary clinics — scheduling, records and billing in one place." + the CTA "Book a demo" + the link "See pricing".
 </few_shot>
