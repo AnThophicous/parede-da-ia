@@ -119,10 +119,18 @@ export function hoverFont(el, options = {}) {
   io.observe(el);
 
   const ease = FALLOFF[falloff] ?? FALLOFF.gaussian;
+  // Remede os centros periodicamente: animações de entrada, sticky e transforms
+  // movem as letras sem disparar resize/scroll.
+  const REMEASURE_MS = 250;
+  let lastMeasure = performance.now();
   let raf = 0;
-  const tick = () => {
+  const tick = (now = performance.now()) => {
     raf = requestAnimationFrame(tick);
     if (!visible) return;
+    if (pointer.active && now - lastMeasure > REMEASURE_MS) {
+      measureCenters();
+      lastMeasure = now;
+    }
     for (const l of letters) {
       const d = pointer.active ? Math.hypot(pointer.x - l.cx, pointer.y - l.cy) / radius : 9;
       const goal = from + (to - from) * ease(Math.min(1, d));
